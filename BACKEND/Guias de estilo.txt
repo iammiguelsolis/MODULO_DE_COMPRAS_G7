@@ -1,0 +1,221 @@
+
+---
+
+## 🧭 1. Estructura general y formato
+
+### ✅ **Indentación**
+
+* Python **usa indentación para definir bloques** (no llaves `{}` como en C o Java).
+* **Convención:** 4 espacios por nivel (no uses tabuladores).
+
+  ```python
+  if x > 0:
+      print("Positivo")
+  else:
+      print("No positivo")
+  ```
+
+---
+
+### ✅ **Longitud de línea**
+
+* No más de **79 caracteres** por línea de código.
+* Para comentarios o docstrings, máximo **72 caracteres**.
+
+---
+
+### ✅ **Líneas en blanco**
+
+* 2 líneas en blanco entre definiciones de funciones o clases.
+* 1 línea en blanco entre métodos dentro de una clase.
+
+```python
+class Persona:
+    def hablar(self):
+        pass
+
+
+def main():
+    pass
+```
+
+---
+
+### ✅ **Espacios en expresiones y sentencias**
+
+Evita espacios innecesarios:
+
+❌ Malo:
+
+```python
+if x >  2 : print( x )
+```
+
+✅ Correcto:
+
+```python
+if x > 2:
+    print(x)
+```
+
+Otros ejemplos:
+
+```python
+# Bien:
+a = f(1, 2) + g(3, 4)
+
+# Mal:
+a=f (1 ,2)+g (3,4)
+```
+
+---
+
+## 🧱 2. Convenciones de nombres
+
+| Tipo                                 | Convención                                  | Ejemplo                             |
+| ------------------------------------ | ------------------------------------------- | ----------------------------------- |
+| **Variables / funciones**            | `snake_case` (minúsculas con guiones bajos) | `total_precio`, `obtener_usuario()` |
+| **Clases**                           | `PascalCase` o `CamelCase`                  | `Usuario`, `ClientePremium`         |
+| **Constantes**                       | `MAYÚSCULAS_CON_GUIONES`                    | `MAX_INTENTOS`, `API_KEY`           |
+| **Módulos (archivos .py)**           | `snake_case`                                | `usuarios.py`, `carro_model.py`     |
+| **Paquetes (carpetas)**              | `snake_case`                                | `models`, `blueprints`              |
+| **Métodos privados**                 | Prefijo con guion bajo `_`                  | `_procesar_datos()`                 |
+| **Atributos “fuertemente privados”** | Doble guion bajo `__`                       | `__id_interno`                      |
+
+---
+
+## 🧩 3. Comentarios y documentación
+
+### ✅ **Comentarios**
+
+* Usa `#` para comentarios simples.
+* Empieza con mayúscula y termina sin punto, salvo que sea una oración completa.
+
+```python
+# Calcula el promedio de las notas
+promedio = sum(notas) / len(notas)
+```
+
+### ✅ **Docstrings**
+
+* Se colocan entre triple comillas `"""` justo debajo de una función, clase o módulo.
+* Explican qué hace, no cómo lo hace.
+
+```python
+def calcular_area(base, altura):
+    """Calcula el área de un triángulo."""
+    return (base * altura) / 2
+```
+
+---
+
+## 🧮 4. Estilo en importaciones
+
+### ✅ **Orden recomendado:**
+
+1. Librerías estándar (`os`, `sys`, `datetime`, etc.)
+2. Librerías de terceros (`flask`, `sqlalchemy`, etc.)
+3. Módulos locales del proyecto (`from app.models import Usuario`)
+
+Ejemplo:
+
+```python
+import os
+import sys
+
+from flask import Flask
+from sqlalchemy import Column
+
+from app.models import Usuario
+```
+
+* Agrupa importaciones con una línea en blanco entre cada grupo.
+* No uses `import *` (importaciones implícitas).
+
+---
+
+## ⚙️ 5. Estilo en definiciones de funciones y clases
+
+### ✅ **Funciones**
+
+```python
+def procesar_datos(datos, limite=10):
+    """Procesa los datos según un límite dado."""
+    pass
+```
+
+### ✅ **Clases**
+
+```python
+class Usuario:
+    """Representa un usuario del sistema."""
+
+    def __init__(self, nombre, email):
+        self.nombre = nombre
+        self.email = email
+
+    def saludar(self):
+        print(f"Hola, soy {self.nombre}")
+```
+
+---
+
+## 🧠 6. Comparaciones y valores lógicos
+
+* Usa `is None` en lugar de `== None`
+* Usa `is True` o `is False` solo si es necesario.
+* Compara con `not` o directamente en booleanos:
+
+```python
+if not lista:
+    print("Lista vacía")
+```
+
+---
+
+## ⚖️ 7. Otras convenciones útiles
+
+| Situación                       | Convención                                 |
+| ------------------------------- | ------------------------------------------ |
+| Separar elementos de lista/dict | `mi_lista = [1, 2, 3]`, no `[1,2,3]`       |
+| Llamadas largas                 | usar paréntesis implícitos o `\`           |
+| Comillas                        | `'texto'` o `"texto"`, pero sé consistente |
+| Valores por defecto mutables    | **Evítalos**: usa `None` en su lugar       |
+
+```python
+# Evita esto
+def agregar(item, lista=[]): ...
+
+# Mejor:
+def agregar(item, lista=None):
+    if lista is None:
+        lista = []
+```
+
+---
+
+## 🧾 8. Herramientas que ayudan a aplicar PEP8
+
+* **`flake8`** → analiza tu código y reporta violaciones de estilo.
+* **`black`** → formateador automático de código Python.
+* **`isort`** → organiza importaciones automáticamente.
+
+---
+
+## 🧩 9. Bonus: convención de carpetas en Flask o proyectos medianos
+
+```
+/app/
+    /blueprints/
+    /models/
+    /templates/
+    /static/
+    __init__.py
+bdd.py
+run.py
+```
+
+* Cada módulo (models, blueprints, etc.) debe ser **paquete Python válido** (tener `__init__.py`).
+* Los nombres deben seguir `snake_case` (no `CamelCase` en carpetas o archivos).
+
+---

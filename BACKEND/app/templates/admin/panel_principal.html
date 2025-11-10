@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Panel Principal{% endblock %}
+
+{% block titulo2 %}Gestion Administrador{% endblock %}
+
+{% block content %}
+<h2>Bienvenido, {{ nombre_admin }}</h2>
+<p class="text-muted">Panel Principal del Administrador</p>
+
+<div class="d-grid gap-3 mt-4">
+    <a href="{{ url_for('administrador_bp.gestionar_horarios') }}" class="btn btn-outline-success">Gestionar disponibilidad de horarios terapeuta</a>
+    <a href="{{ url_for('administrador_bp.ver_citas_admin') }}" class="btn btn-outline-success">Ver citas</a>
+    <a href="{{ url_for('administrador_bp.mostrar_formulario_creacion') }}" class="btn btn-outline-success">Crear usuario</a>
+    <a href="{{ url_for('administrador_bp.vista_eliminar_usuario') }}" class="btn btn-outline-danger">Eliminar usuario</a>
+    <a href="{{ url_for('administrador_bp.gestionar_salas') }}" class="btn btn-primary mb-3">Gestionar Salas</a>
+
+</div>
+{% endblock %}

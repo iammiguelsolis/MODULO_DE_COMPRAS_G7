@@ -6,7 +6,8 @@ Este proyecto consiste en el desarrollo de un **Módulo de Compras** que incluye
 - Registro, edición y eliminación de proveedores.  
 - Comparación de ofertas y normalización de cotizaciones.  
 - Gestión de órdenes de compra con historial y cierre.  
-- Facturación de proveedores con validación y conciliación.  
+- Facturación de proveedores con validación y conciliación.
+- Análisis de Proveedor  
 
 El desarrollo se realizará con un **enfoque ágil (Scrum)**, trabajando de manera iterativa e incremental en diferentes sprints.
 
@@ -19,7 +20,8 @@ El desarrollo se realizará con un **enfoque ágil (Scrum)**, trabajando de mane
 - Roberto Giosttin Josue Pizarro Diaz  
 - Ricardo José Matamoros Laura  
 - Morales Usca Andrés Fernando  
-- Moreno Zevallos Eva Lucía  
+- Moreno Zevallos Eva Lucía
+- Karlo Toro  
 
 ---
 

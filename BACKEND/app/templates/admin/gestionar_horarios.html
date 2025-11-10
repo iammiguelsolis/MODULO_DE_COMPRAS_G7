@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block titulo2 %} Gestion Administrador {% endblock %}
+{% block content %}
+
+
+<h2>Gestionar Disponibilidad de Terapeuta</h2>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, msg in messages %}
+      <div class="alert alert-{{ category }}">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<!-- Filtro y lista de terapeutas -->
+<form method="get" class="mb-3">
+    <input type="text" name="filtro_nombre" placeholder="Filtrar por nombre" value="{{ filtro_nombre }}" class="form-control" style="max-width: 300px; display: inline-block;" />
+    <button type="submit" class="btn btn-primary">Buscar</button>
+</form>
+
+<ul class="list-group mb-4" style="max-width: 400px;">
+    {% for terapeuta in terapeutas %}
+        <li class="list-group-item d-flex justify-content-between align-items-center">
+            {{ terapeuta.nombre }} {{ terapeuta.apellido }}
+            <a href="{{ url_for('administrador_bp.gestionar_horarios', terapeuta=terapeuta.id_usuario) }}" class="btn btn-sm btn-outline-primary">Seleccionar</a>
+        </li>
+    {% else %}
+        <li class="list-group-item">No hay terapeutas disponibles.</li>
+    {% endfor %}
+</ul>
+
+{% if id_terapeuta %}
+    <!-- Formulario para agregar horario -->
+    <h4>Agregar disponibilidad</h4>
+    <form method="post" class="mb-4">
+        <input type="hidden" name="action" value="add">
+        <div class="row mb-2">
+            <div class="col">
+                <label for="dia">Día:</label>
+                <select name="dia" class="form-select" required>
+                    <option value="">Seleccione día</option>
+                    {% for dia in ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado', 'Domingo'] %}
+                        <option value="{{ dia }}">{{ dia }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col">
+                <label for="hora_inicio">Hora Inicio:</label>
+                <input type="time" name="hora_inicio" class="form-control" required>
+            </div>
+            <div class="col">
+                <label for="hora_fin">Hora Fin:</label>
+                <input type="time" name="hora_fin" class="form-control" required>
+            </div>
+        </div>
+        <div class="row mb-2">
+            <div class="col">
+                <label for="id_especialidad">Especialidad:</label>
+                <select name="id_especialidad" class="form-select" required>
+                    <option value="">Seleccione especialidad</option>
+                    {% for esp, especialidad in especialidades_terapeuta %}
+                        <option value="{{ esp.id_especialidad }}">{{ especialidad.nombre }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col">
+                <label for="id_sala">Sala:</label>
+                <select name="id_sala" class="form-select" required>
+                    <option value="">Seleccione sala</option>
+                    {% for sala in salas %}
+                        <option value="{{ sala.id_sala }}">{{ sala.numero }} - {{ sala.alias }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-success">Agregar</button>
+    </form>
+
+    <!-- Lista de horarios existentes -->
+    <h4>Disponibilidades existentes</h4>
+    <table class="table table-bordered">
+        <thead>
+            <tr>
+                <th>Día</th>
+                <th>Hora Inicio</th>
+                <th>Hora Fin</th>
+                <th>Especialidad</th>
+                <th>Sala</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for horario in horarios_existentes %}
+                <tr>
+                    <td>{{ horario.dia }}</td>
+                    <td>{{ horario.hora_inicio.strftime('%H:%M') }}</td>
+                    <td>{{ horario.hora_fin.strftime('%H:%M') }}</td>
+                    <td>{{ horario.especialidad.nombre }}</td>
+                    <td>{{ horario.sala.numero }} - {{ horario.sala.alias }}</td>
+                    <td>
+                        <form method="post" style="display: inline;">
+                            <input type="hidden" name="action" value="delete">
+                            <input type="hidden" name="id_horario" value="{{ horario.id_horario_terapeuta }}">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('¿Está seguro de eliminar este horario?');">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            {% else %}
+                <tr><td colspan="6">No hay horarios registrados.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endif %}
+    <div class="mt-4">
+        <a href="{{ url_for('administrador_bp.panel_principal') }}" class="btn btn-secondary">← Volver al panel</a>
+    </div>
+    <br>
+    <br>
+    
+{% endblock %}

@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Gestión de Citas - Administrador{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h2 class="mb-0">Gestión de Citas - Administrador</h2>
+    <div>
+      <a href="{{ url_for('administrador_bp.ver_citas_admin') }}" class="btn btn-outline-secondary me-2">Regresar</a>
+      <a href="/" class="btn btn-outline-danger">Salir</a>
+    </div>
+  </div>
+
+  <form method="get" action="" class="mb-4">
+    <div class="input-group">
+      <input type="text" name="filtro" class="form-control" placeholder="Buscar por DNI o nombre" value="{{ request.args.get('filtro', '') }}">
+      <button class="btn btn-primary" type="submit">Filtrar</button>
+    </div>
+  </form>
+
+  <div class="mb-4 text-center">
+    <button class="btn btn-primary me-2" onclick="mostrar('actuales')">Citas actuales</button>
+    <button class="btn btn-secondary" onclick="mostrar('historial')">Historial</button>
+  </div>
+
+  <!-- Citas actuales -->
+  <div id="tabla_actuales" style="display:block;">
+    <h4>Citas actuales</h4>
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped">
+        <thead class="table-light">
+          <tr>
+            <th>Paciente</th>
+            <th>DNI</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Terapeuta</th>
+            <th>Servicio</th>
+            <th>Sala</th>
+            <th>¿Pagada?</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r, paciente, terapeuta, servicio, was_paid, sala in actuales %}
+          <tr>
+            <td>{{ paciente.nombre }} {{ paciente.apellido }}</td>
+            <td>{{ paciente.dni }}</td>
+            <td>{{ r.fecha }}</td>
+            <td>{{ r.hora_inicio }} - {{ r.hora_fin }}</td>
+            <td>{{ terapeuta.nombre }} {{ terapeuta.apellido }}</td>
+            <td>{{ servicio }}</td>
+            <td>{{ sala.numero }} - {{ sala.alias }}</td>
+            <td>{{ "Sí" if was_paid else "No" }}</td>
+            <td>
+              <form method="POST"
+                    action="{{ url_for('administrador_bp.cancelar_reserva_admin', id_reserva=r.id_reserva) }}"
+                    onsubmit="return confirmarCancelacion();">
+                <button type="submit" class="btn btn-sm btn-danger">Cancelar</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Historial de citas -->
+  <div id="tabla_historial" style="display:none;">
+    <h4>Historial de citas</h4>
+    <div class="table-responsive">
+      <table class="table table-bordered table-striped">
+        <thead class="table-light">
+          <tr>
+            <th>Paciente</th>
+            <th>DNI</th>
+            <th>Fecha</th>
+            <th>Hora</th>
+            <th>Terapeuta</th>
+            <th>Servicio</th>
+            <th>Sala</th>
+            <th>¿Pagada?</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for r, paciente, terapeuta, servicio, was_paid, sala in historial %}
+          <tr>
+            <td>{{ paciente.nombre }} {{ paciente.apellido }}</td>
+            <td>{{ paciente.dni }}</td>
+            <td>{{ r.fecha }}</td>
+            <td>{{ r.hora_inicio }} - {{ r.hora_fin }}</td>
+            <td>{{ terapeuta.nombre }} {{ terapeuta.apellido }}</td>
+            <td>{{ servicio }}</td>
+            <td>{{ sala.numero }} - {{ sala.alias }}</td>
+            <td>{{ "Sí" if was_paid else "No" }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script>
+  function mostrar(tabla) {
+    document.getElementById("tabla_actuales").style.display = (tabla === 'actuales') ? 'block' : 'none';
+    document.getElementById("tabla_historial").style.display = (tabla === 'historial') ? 'block' : 'none';
+  }
+
+  function confirmarCancelacion() {
+    return confirm("¿Estás seguro de que deseas cancelar esta cita?");
+  }
+</script>
+{% endblock %}
