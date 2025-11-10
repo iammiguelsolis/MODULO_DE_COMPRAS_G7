@@ -14,6 +14,9 @@ class Dias_Semana(Enum):
 # cliente se puede enviar cualquier cosa
 
 
+
+
+
 def in_enum_dia_semana(cadena):
     for d in (Dias_Semana):
         if d.value == cadena:
