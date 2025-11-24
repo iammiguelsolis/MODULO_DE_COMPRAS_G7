@@ -117,8 +117,8 @@ const Solicitud: React.FC = () => {
           <div className="col-span-1">
             <SummaryCard
               totalAmount={totalAmount}
-              processType="Tipo de Proceso: Simple"
-              processDescription="Compra simple, rápida de bajo monto."
+              processType={ totalAmount >= 5000 ? 'Tipo de Proceso: Licitación' : 'Tipo de Proceso: Simple' }
+              processDescription={ totalAmount >= 5000 ? 'Esta solicitud supera el límite y debeseguir un proceso de licitación formal.' : 'Compra simple, rápida de bajo monto.' }
               purchaseType={purchaseType}
               onCreateRequest={handleCreateRequest}
             />

@@ -20,6 +20,9 @@ function App() {
           <Route path="/licitaciones" element={<h1>licitaciones</h1>} />
           <Route path="/ordenes" element={<h1>ordenes</h1>} />
           <Route path="/facturacion" element={<h1>facturacion</h1>} />
+          <Route path="/comparacion" element={<h1>reportes</h1>} />
+          <Route path="/analisis" element={<h1>analisis de Proveedores</h1>} />
+          <Route path="/cuentas" element={<h1>Cuentas por Pagar</h1>} />
 
         </Route>
 

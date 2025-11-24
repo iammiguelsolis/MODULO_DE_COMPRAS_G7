@@ -26,7 +26,7 @@ export const MenuItem: React.FC<MenuItemProps> = ({ icon, label, isActive = fals
         />
 
         <span
-          className={`${isActive ? "text-black" : "text-white"} font-medium`}
+          className={`${isActive ? "text-black" : "text-white"} font-medium text-left`}
         >
           {label}
         </span>
