@@ -473,7 +473,7 @@ const ListaFacturas: React.FC<ListaFacturasProps> = ({ facturas, onFacturaClick,
                 <tr>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Factura</th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Proveedor</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Fecha</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Fecha</th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Moneda</th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Monto</th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Estado</th>
