@@ -478,7 +478,7 @@ const ListaFacturas: React.FC<ListaFacturasProps> = ({ facturas, onFacturaClick,
                   <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Monto</th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Estado</th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Origen</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Acciones</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
