@@ -65,7 +65,7 @@ export const RequestModal: React.FC<RequestModalProps> = ({
               <div className="text-black">
                 <p className="text-sm font-medium opacity-90">Clasificación del proceso:</p>
                 <p className="font-semibold">
-                  {totalAmount >= 5000 ? 'Requiere proceso de licitación' : 'Proceso de compra directa'}
+                  {totalAmount >= 5000 ? 'Esta solicitud supera el límite y debeseguir un proceso de licitación formal.' : 'Compra simple, rápida de bajo monto.'}
                 </p>
               </div>
             </div>
