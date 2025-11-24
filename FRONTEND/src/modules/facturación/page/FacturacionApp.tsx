@@ -516,7 +516,7 @@ const DetalleFactura: React.FC<DetalleFacturaProps> = ({ factura, onClose }) => 
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 p-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="mx-auto">
         {/* Bento Grid Layout */}
         <div className="grid grid-cols-12 gap-6">
           {/* Main Content - 8 cols */}
