@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from "react-router-dom";
-import { FileText, Users, Package, Network, ShoppingCart, DollarSign, Scale, BarChart2, Wallet } from 'lucide-react';
+import { FileText, Users, Package, Network, ShoppingCart, DollarSign, Scale, BarChart2 } from 'lucide-react';
 import { MenuItem } from '../molecules/MenuItem';
 import Logo from '../../../assets/logo.svg';
 
@@ -21,7 +21,6 @@ const menuItems: MenuItemType[] = [
   { id: 'facturacion', icon: DollarSign, label: 'Facturación' },
   { id: 'comparacion', icon: Scale, label: 'Comparación' },
   { id: 'analisis', icon: BarChart2, label: 'Análisis de Proveedores' },
-  { id: 'cuentas', icon: Wallet, label: 'Cuentas por Pagar' },
 ];
 
 const Sidebar: React.FC = () => {
