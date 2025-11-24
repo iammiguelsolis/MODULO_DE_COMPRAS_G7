@@ -33,7 +33,7 @@ const Input: React.FC<InputProps> = ({
       onChange={onChange}
       placeholder={placeholder}
       disabled={disabled}
-      className="px-3 py-2.5 text-sm bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-500 transition-all"
+      className="px-3 py-2.5 text-sm bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-50 disabled:text-gray-500 transition-all border border-gray-300 rounded-lg"
     />
   </div>
 );
@@ -55,7 +55,7 @@ const Select: React.FC<SelectProps> = ({
   required,
   placeholder 
 }) => (
-  <div className="flex flex-col gap-1.5">
+  <div className="flex flex-col gap-1.5 ">
     {label && (
       <label className="text-xs text-gray-600 font-medium">
         {label} {required && <span className="text-red-500">*</span>}
@@ -64,7 +64,7 @@ const Select: React.FC<SelectProps> = ({
     <select
       value={value}
       onChange={onChange}
-      className="px-3 py-2.5 text-sm bg-white rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+      className="px-3 py-2.5 text-sm bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
     >
       {placeholder && <option value="">{placeholder}</option>}
       {options.map(opt => (
@@ -102,7 +102,7 @@ const Button: React.FC<ButtonProps> = ({
     <button
       type={type}
       onClick={onClick}
-      className={`px-4 py-2.5 text-sm font-medium rounded-lg transition-all flex items-center justify-center gap-2 ${variants[variant]} ${fullWidth ? 'w-full' : ''}`}
+      className={`px-4 py-2.5 text-sm font-medium rounded-lg transition-all cursor-pointer flex items-center justify-center gap-2 ${variants[variant]} ${fullWidth ? 'w-full' : ''}`}
     >
       {Icon && <Icon size={16} />}
       {children}
@@ -117,7 +117,7 @@ interface BadgeProps {
 
 const Badge: React.FC<BadgeProps> = ({ children, variant = 'pendiente' }) => {
   const variants = {
-    pendiente: 'bg-amber-100 text-amber-700',
+    pendiente: 'bg-amber-100 text-amber-700 ',
     conciliada: 'bg-emerald-100 text-emerald-700',
     observada: 'bg-orange-100 text-orange-700',
     aprobada: 'bg-blue-100 text-blue-700'
@@ -139,7 +139,7 @@ interface TabProps {
 const Tab: React.FC<TabProps> = ({ active, onClick, children }) => (
   <button
     onClick={onClick}
-    className={`px-5 py-3 text-sm font-medium transition-all rounded-lg ${
+    className={`px-5 py-3 text-sm font-medium transition-all border border-gray-300 rounded-lg cursor-pointer ${
       active 
         ? 'bg-blue-600 text-white shadow-sm' 
         : 'text-gray-600 hover:bg-gray-100'
@@ -408,7 +408,7 @@ const ListaFacturas: React.FC<ListaFacturasProps> = ({ facturas, onFacturaClick,
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="p-8">
         {/* Header Card */}
-        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-200">
+        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-300">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-3xl font-bold text-gray-900">Facturas</h1>
             <Button icon={FileText} onClick={onNuevaFactura}>Nueva factura</Button>
@@ -448,7 +448,7 @@ const ListaFacturas: React.FC<ListaFacturasProps> = ({ facturas, onFacturaClick,
         </div>
 
         {/* Tabs Card */}
-        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-200">
+        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-300">
           <div className="flex gap-2">
             <Tab active={activeTab === 'pendiente'} onClick={() => setActiveTab('pendiente')}>
               Pendiente
@@ -466,7 +466,7 @@ const ListaFacturas: React.FC<ListaFacturasProps> = ({ facturas, onFacturaClick,
         </div>
 
         {/* Table Card */}
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-200">
+        <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-300">
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-blue-500">

@@ -89,7 +89,7 @@ const Solicitud: React.FC = () => {
         <div className="grid grid-cols-3 gap-6 mb-6">
           {/* Detalles de la Solicitud */}
           <div className="col-span-2">
-            <div className="bg-white rounded-lg border border-gray-200 p-6">
+            <div className="bg-white rounded-lg border border-gray-300 p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-2">Detalles de la Solicitud</h2>
               <p className="text-sm text-gray-600 mb-6">
                 Ingrese un título y las notas adicionales de manera opcional.
@@ -126,7 +126,7 @@ const Solicitud: React.FC = () => {
         </div>
 
         {/* Sección Inferior: Productos/Servicios - Full Width */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
+        <div className="bg-white rounded-lg border border-gray-300 p-6">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-xl font-semibold text-gray-900">
               {requestType === 'producto' ? 'Productos' : 'Servicios'}
