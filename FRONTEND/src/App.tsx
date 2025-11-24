@@ -1,6 +1,6 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MainLayaout from "./global/layaouts/MainLayaout";
-import Solicitud from "./modules/solicitudes/components/organisms/Solicitud";
+import Solicitud from "./modules/solicitudes/page/Solicitud";
 function App() {
 
   return (

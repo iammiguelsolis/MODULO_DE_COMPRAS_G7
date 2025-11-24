@@ -1,12 +1,13 @@
 
 import { PlusCircle } from 'lucide-react';
 import { useState } from 'react';
-import { Input } from '../atoms/Input';
-import { TextArea } from '../atoms/TextArea';
-import { Button } from '../atoms/Button';
-import { ProductRow } from '../molecules/ProductRow';
-import { SummaryCard } from '../molecules/SummaryCard';
-import { Select } from '../atoms/Select';
+import { Input } from '../components/atoms/Input';
+import { TextArea } from '../components/atoms/TextArea';
+import { Button } from '../components/atoms/Button';
+import { ProductRow } from '../components/molecules/ProductRow';
+import { SummaryCard } from '../components/molecules/SummaryCard';
+import { Select } from '../components/atoms/Select';
+import { RequestModal } from '../components/molecules/RequestModal';
 
 interface ItemType {
   id: string;
@@ -22,6 +23,7 @@ const Solicitud: React.FC = () => {
   const [items, setItems] = useState<ItemType[]>([
     { id: '1', name: '', quantity: 50, price: '$ 20.00' },
   ]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const handleRequestTypeChange = (newType: 'producto' | 'servicio') => {
     setRequestType(newType);
@@ -64,6 +66,17 @@ const Solicitud: React.FC = () => {
     }, 0);
   };
 
+  const getPurchaseType = (total: number) => {
+    return total >= 5000 ? 'LICITACIÓN' : 'COMPRA';
+  };
+
+  const handleCreateRequest = () => {
+    setIsModalOpen(true);
+  };
+
+  const totalAmount = calculateTotal();
+  const purchaseType = getPurchaseType(totalAmount);
+
   return (
     <div className="min-h-screen bg-gray-50 p-8">
       <div className="mx-auto">
@@ -103,9 +116,11 @@ const Solicitud: React.FC = () => {
           {/* Resumen */}
           <div className="col-span-1">
             <SummaryCard
-              totalAmount={calculateTotal()}
+              totalAmount={totalAmount}
               processType="Tipo de Proceso: Simple"
               processDescription="Compra simple, rápida de bajo monto."
+              purchaseType={purchaseType}
+              onCreateRequest={handleCreateRequest}
             />
           </div>
         </div>
@@ -163,6 +178,18 @@ const Solicitud: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Modal */}
+      <RequestModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        title={title}
+        notes={notes}
+        requestType={requestType}
+        items={items}
+        totalAmount={totalAmount}
+        purchaseType={purchaseType}
+      />
     </div>
   );
 };
