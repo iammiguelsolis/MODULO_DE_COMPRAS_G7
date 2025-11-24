@@ -1,9 +1,18 @@
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import MainLayaout from "./global/layaouts/MainLayaout";
+import Solicitud from "./modules/solicitudes/components/organisms/Solicitud";
 function App() {
 
   return (
-    <>
-      <h1 className="text-3xl font-bold underline"> Hello world </h1>
-    </>
+    <Router>
+      <Routes>
+
+        <Route element={<MainLayaout />}>
+          <Route path="/*" element={<Solicitud />} />
+        </Route>
+
+      </Routes>
+    </Router>
   )
 }
 
