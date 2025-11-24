@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from "react-router-dom";
 import { FileText, Users, Package, Network, ShoppingCart, DollarSign } from 'lucide-react';
 import { MenuItem } from '../molecules/MenuItem';
 
@@ -19,35 +20,38 @@ const menuItems: MenuItem[] = [
 
 const Sidebar: React.FC = () => {
   const [activeItem, setActiveItem] = React.useState<string>("solicitudes");
+  const navigate = useNavigate();
+
+  const handleClick = (id: string) => {
+    setActiveItem(id);
+    navigate(`/${id}`);
+  };
+
   return (
-    <div>
-      
-      <aside className='w-64 h-screen bg-blue-500 flex flex-col shadow-xl gap-4'>
+    <aside className='w-64 h-screen bg-blue-500 flex flex-col shadow-xl gap-4'>
 
+      <div className='flex items-center justify-center h-1 mt-8'>
+        <h1 className='text-2xl font-bold text-white'>TEXTO</h1>
+      </div>
 
-        <div className='flex items-center justify-center h-1 mt-8'>
-          <h1 className='text-2xl font-bold text-white'>TEXTO</h1>
-        </div>
+      <nav className='flex-1 py-6'>
+        {menuItems.map((item) => (
+          <MenuItem
+            key={item.id}
+            icon={item.icon}
+            label={item.label}
+            isActive={activeItem === item.id}
+            onClick={() => handleClick(item.id)}
+          />
+        ))}
+      </nav>
 
-        <nav className='flex-1 py-6'>
-          {menuItems.map((item) => (
-            <MenuItem
-              key={item.id}
-              icon={item.icon}
-              label={item.label}
-              isActive={activeItem === item.id}
-              onClick={() => setActiveItem(item.id)}
-            />
-          ))}
-        </nav>
+      <div className='flex items-center justify-center h-1 mb-8'>
+        <h1 className='text-2xl font-bold text-white'>TEXTO</h1>
+      </div>
 
-        <div className='flex items-center justify-center h-1 mb-8'>
-          <h1 className='text-2xl font-bold text-white'>TEXTO</h1>
-        </div>
-
-      </aside>
-    </div>
-  )
-}
+    </aside>
+  );
+};
 
 export default Sidebar;
