@@ -408,14 +408,14 @@ const ListaFacturas: React.FC<ListaFacturasProps> = ({ facturas, onFacturaClick,
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="p-8">
         {/* Header Card */}
-        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-200">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-3xl font-bold text-gray-900">Facturas</h1>
             <Button icon={FileText} onClick={onNuevaFactura}>Nueva factura</Button>
           </div>
           
           {/* Filters Grid */}
-          <div className="grid grid-cols-12 gap-4">
+          <div className="grid grid-cols-12 gap-4 ">
             <div className="col-span-4">
               <Input
                 placeholder="Número, proveedor, OC..."
@@ -448,7 +448,7 @@ const ListaFacturas: React.FC<ListaFacturasProps> = ({ facturas, onFacturaClick,
         </div>
 
         {/* Tabs Card */}
-        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6 border border-gray-200">
           <div className="flex gap-2">
             <Tab active={activeTab === 'pendiente'} onClick={() => setActiveTab('pendiente')}>
               Pendiente
@@ -466,12 +466,12 @@ const ListaFacturas: React.FC<ListaFacturasProps> = ({ facturas, onFacturaClick,
         </div>
 
         {/* Table Card */}
-        <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
+        <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-200">
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-blue-500">
                 <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Factura</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Factura</th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Proveedor</th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Fecha</th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Moneda</th>
