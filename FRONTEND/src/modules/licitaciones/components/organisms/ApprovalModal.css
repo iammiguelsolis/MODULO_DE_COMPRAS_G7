@@ -1,0 +1,24 @@
+.approval-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.approval-icon {
+  color: #10b981;
+}
+
+/* Licitacion Info Card styles are now in LicitacionInfoCard.css */
+
+.alert-title {
+  font-weight: 600;
+  margin: 0 0 4px 0;
+}
+
+.alert-title + p {
+  margin: 0 0 4px 0;
+}
+
+.alert-title ~ p:last-child {
+  margin: 0;
+}

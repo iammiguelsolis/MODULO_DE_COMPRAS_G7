@@ -1,0 +1,76 @@
+.summary-card {
+  /* Estilos específicos si es necesario */
+}
+
+.summary-card-header {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.summary-card-header h2 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.summary-card-header p {
+  font-size: 0.9rem;
+  color: #6b7280;
+  margin: 0.25rem 0 0;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid #e5e7eb;
+  font-size: 1rem;
+}
+
+.total-amount {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.process-type {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1.25rem;
+  background-color: #eff6ff;
+  border-radius: 8px;
+  margin-top: 1.5rem;
+  border-left: 4px solid #3b82f6;
+}
+
+.process-type .icon {
+  flex-shrink: 0;
+  color: #3b82f6;
+}
+
+.licitacion-process-type {
+  background-color: #fff7ed;
+  border-left-color: #f97316;
+}
+
+.licitacion-process-type .icon {
+  color: #f97316;
+}
+
+.process-type p {
+  margin: 0;
+  color: #374151;
+  line-height: 1.5;
+}
+
+.process-type p:first-child {
+  margin-bottom: 0.25rem;
+}
+
+.button-container {
+  margin-top: 1.5rem;
+  display: flex;
+  justify-content: center;
+}

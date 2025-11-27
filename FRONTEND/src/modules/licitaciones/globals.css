@@ -1,0 +1,42 @@
+html {
+  height: 100%;
+}
+
+body {
+  background-color: #f9fafb;
+  margin: 0;
+  font-family: "Inter", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  color: #111827;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* Layout Structure */
+.main-layout {
+  display: flex;
+}
+
+.main-content-area {
+  flex: 1;
+  margin-left: 250px;
+  min-height: 100vh;
+  position: relative;
+  z-index: 1;
+}
+
+.page-container {
+  max-width: 1600px;
+  margin: 0 auto;
+  padding: 2.5rem;
+}
+
+/* Main Content Area */
+.main-page-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}

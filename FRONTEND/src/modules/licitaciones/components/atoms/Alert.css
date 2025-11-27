@@ -1,0 +1,63 @@
+.alert {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.alert-icon {
+  flex-shrink: 0;
+  display: flex;
+  align-items: flex-start;
+  padding-top: 2px;
+}
+
+.alert-content {
+  flex: 1;
+}
+
+/* Info variant */
+.alert-info {
+  background-color: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #93c5fd;
+}
+
+.alert-info .alert-icon {
+  color: #3b82f6;
+}
+
+/* Warning variant */
+.alert-warning {
+  background-color: #fef3c7;
+  color: #92400e;
+  border: 1px solid #fde68a;
+}
+
+.alert-warning .alert-icon {
+  color: #f59e0b;
+}
+
+/* Error variant */
+.alert-error {
+  background-color: #fee2e2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.alert-error .alert-icon {
+  color: #ef4444;
+}
+
+/* Success variant */
+.alert-success {
+  background-color: #d1fae5;
+  color: #065f46;
+  border: 1px solid #6ee7b7;
+}
+
+.alert-success .alert-icon {
+  color: #10b981;
+}

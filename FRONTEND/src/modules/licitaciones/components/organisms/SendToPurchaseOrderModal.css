@@ -1,0 +1,77 @@
+.send-to-purchase-order-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.winning-provider-section h4,
+.contract-file-section h4 {
+  margin: 0 0 12px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #374151;
+}
+
+/* Reusing style from FinalizeInvitationModal for consistency */
+.winning-provider-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.winning-provider-list li {
+  padding: 8px 12px;
+  background: #f9fafb;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #374151;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.winning-provider-list li::before {
+  content: "•";
+  color: #2563eb;
+  font-weight: bold;
+  margin-right: 8px;
+}
+
+.uploaded-file-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  font-size: 13px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-left: 0;
+}
+
+.uploaded-file-preview svg {
+  color: #2563eb;
+  flex-shrink: 0;
+}
+
+.file-name {
+  flex: 1;
+  color: #374151;
+  font-weight: normal;
+  font-size: inherit;
+}
+
+.file-size {
+  color: #6b7280;
+  font-size: 12px;
+}
+
+.send-icon {
+  color: #3b82f6;
+}

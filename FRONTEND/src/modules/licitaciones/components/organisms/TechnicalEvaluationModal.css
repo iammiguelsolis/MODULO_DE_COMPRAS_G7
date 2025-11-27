@@ -1,0 +1,85 @@
+.technical-evaluation-modal {
+  display: flex;
+  flex-direction: column;
+  min-height: 600px;
+  max-height: 90vh;
+}
+
+.evaluation-modal-body {
+  display: grid;
+  grid-template-columns: 400px 1fr;
+  gap: 24px;
+  padding: 24px;
+  flex: 1;
+  overflow: hidden;
+  background-color: #f9fafb;
+}
+
+.evaluation-left-column {
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  height: 100%;
+}
+
+.evaluation-right-column {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  overflow-y: auto;
+  padding-right: 8px;
+  background-color: white;
+  padding: 24px;
+  border-radius: 8px;
+  border: 1px solid #e5e7eb;
+}
+
+.evaluation-save-container {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 20px;
+  border-top: 1px solid #e5e7eb;
+  margin-top: 10px;
+}
+
+.save-evaluation-btn {
+  min-width: 200px;
+  justify-content: center;
+}
+
+/* Scrollbar styling for columns */
+.evaluation-left-column::-webkit-scrollbar,
+.evaluation-right-column::-webkit-scrollbar {
+  width: 6px;
+}
+
+.evaluation-left-column::-webkit-scrollbar-track,
+.evaluation-right-column::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+.evaluation-left-column::-webkit-scrollbar-thumb,
+.evaluation-right-column::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 10px;
+}
+
+.evaluation-left-column::-webkit-scrollbar-thumb:hover,
+.evaluation-right-column::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .evaluation-modal-body {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .evaluation-left-column,
+  .evaluation-right-column {
+    max-height: none;
+    overflow-y: visible;
+  }
+}

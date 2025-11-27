@@ -1,0 +1,30 @@
+.selector-header {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.selector-icon {
+  background-color: #e0e7ff;
+  color: #4338ca;
+  border-radius: 50%;
+  width: 48px;
+  height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.selector-header h3 {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.selector-header p {
+  font-size: 0.875rem;
+  color: #6b7280;
+  margin: 0;
+}

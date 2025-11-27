@@ -1,0 +1,52 @@
+.licitacion-detail-header-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 1.5rem;
+}
+
+.back-button {
+  background: white;
+  border: 1px solid #d1d5db;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  color: #374151;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.back-button:hover {
+  background-color: #f3f4f6;
+}
+
+.licitacion-detail-layout {
+  display: grid;
+  grid-template-columns: 500px 1fr;
+  gap: 2rem;
+  align-items: start;
+}
+
+.licitacion-detail-left-col {
+  position: sticky;
+  top: 1.5rem;
+}
+
+.licitacion-detail-right-col {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.header-metadata {
+  display: flex;
+  gap: 1.5rem;
+  margin-top: 0.5rem;
+  color: #4b5563;
+  font-size: 0.9rem;
+}
+
+.header-metadata span strong {
+  color: #111827;
+  font-weight: 600;
+}

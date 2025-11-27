@@ -1,0 +1,28 @@
+.rejection-modal-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.rejection-icon {
+  color: #ef4444;
+}
+
+/* Licitacion Info Card styles are now in LicitacionInfoCard.css */
+
+.rejection-reason-field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.required-mark {
+  color: #ef4444;
+  font-weight: 600;
+}
+
+.error-text {
+  color: #dc2626;
+  font-size: 13px;
+  margin-top: 4px;
+}
