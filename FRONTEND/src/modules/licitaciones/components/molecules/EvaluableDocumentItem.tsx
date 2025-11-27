@@ -1,7 +1,8 @@
 import React from 'react';
 import { FileText, Eye, Download } from 'lucide-react';
 import IconButton from '../atoms/IconButton';
-import EvaluationStatusButtons, { EvaluationStatus } from '../atoms/EvaluationStatusButtons';
+import EvaluationStatusButtons from '../atoms/EvaluationStatusButtons';
+import type { EvaluationStatus } from '../atoms/EvaluationStatusButtons';
 import './EvaluableDocumentItem.css';
 
 interface EvaluableDocumentItemProps {

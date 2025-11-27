@@ -14,10 +14,10 @@ import FinalizeInvitationModal from '../organisms/FinalizeInvitationModal';
 import RegisterProposalModal from '../organisms/RegisterProposalModal';
 import FinalizeProposalsModal from '../organisms/FinalizeProposalsModal';
 import SendToEvaluationModal from '../organisms/SendToEvaluationModal';
-// import TechnicalEvaluationModal from '../organisms/TechnicalEvaluationModal';
-// import EconomicEvaluationModal from '../organisms/EconomicEvaluationModal';
-// import GenerateContractModal from '../organisms/GenerateContractModal';
-// import SendToPurchaseOrderModal from '../organisms/SendToPurchaseOrderModal';
+import TechnicalEvaluationModal from '../organisms/TechnicalEvaluationModal';
+import EconomicEvaluationModal from '../organisms/EconomicEvaluationModal';
+import GenerateContractModal from '../organisms/GenerateContractModal';
+import SendToPurchaseOrderModal from '../organisms/SendToPurchaseOrderModal';
 import type { Proposal } from '../molecules/ProposalCard';
 import type { LicitacionStatus, EconomicEvaluation, Item, DocumentCategory } from '../../lib/types';
 import { Scale, Wrench, PiggyBank } from 'lucide-react';
@@ -518,7 +518,7 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                 suppliersWithProposals={registeredProposals.map(p => p.supplierName)}
             />
 
-            {/*
+
             <TechnicalEvaluationModal
                 isOpen={showTechnicalEvaluationModal}
                 onClose={() => setShowTechnicalEvaluationModal(false)}
@@ -533,6 +533,7 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                 onSaveEvaluation={handleSaveEvaluation}
                 onFinishEvaluation={handleFinishTechnicalEvaluation}
             />
+
 
             <EconomicEvaluationModal
                 isOpen={showEconomicEvaluationModal}
@@ -579,7 +580,7 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                 estimatedAmount={estimatedAmount}
                 maxBudget={maxBudget}
                 providerName={registeredProposals.find(p => p.isWinner)?.supplierName || "Proveedor Ganador"}
-            /> */}
+            />
         </div>
     );
 };

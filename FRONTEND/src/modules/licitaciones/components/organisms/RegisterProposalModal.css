@@ -160,7 +160,8 @@
 
 .upload-icon {
   color: #9ca3af;
-  margin-bottom: 8px;
+  margin: 0 auto 8px auto;
+  display: block;
 }
 
 .upload-text {
