@@ -10,7 +10,7 @@ const LicitacionGeneralInfo: React.FC<LicitacionGeneralInfoProps> = ({
     presupuesto = 'S/. 45,000.00',
     solicitudOrigen = 'N° 2025123',
     fechaLimite = '10 Nov 2025',
-    comprador = 'Juan Pérez'
+    comprador = 'Samnuel Luque'
 }) => {
     return (
         <Card>

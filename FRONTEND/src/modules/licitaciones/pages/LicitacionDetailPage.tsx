@@ -13,7 +13,7 @@ const LicitacionDetailPage: React.FC = () => {
         id: "2025001",
         title: "Compra de equipos de cómputo",
         createdDate: "01/11/2025",
-        buyer: "Juan Pérez",
+        buyer: "Samnuel Luque",
         supervisor: "---",
         estimatedAmount: 39000,
         maxBudget: 45000,
