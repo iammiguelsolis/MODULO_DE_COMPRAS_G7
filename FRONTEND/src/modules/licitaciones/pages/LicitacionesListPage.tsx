@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import '../globals.css';
+
 import LicitacionesListTemplate from '../components/templates/LicitacionesListTemplate';
 import { allLicitaciones } from '../lib/mock-data';
 import type { Licitacion } from '../lib/types';

@@ -7,7 +7,7 @@ import Label from '../atoms/Label';
 import Input from '../atoms/Input';
 import Textarea from '../atoms/Textarea';
 import ErrorMessage from '../atoms/ErrorMessage';
-import { DetallesSolicitudProps } from '../../lib/types';
+import type { DetallesSolicitudProps } from '../../lib/types';
 
 const DetallesSolicitudForm: React.FC<DetallesSolicitudProps> = ({
     title,

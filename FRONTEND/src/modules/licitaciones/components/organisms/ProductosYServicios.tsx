@@ -1,6 +1,6 @@
 import React from 'react';
 import { PlusCircle } from 'lucide-react';
-import { Item } from '../../lib/types';
+import type { Item } from '../../lib/types';
 import ItemSolicitud from '../molecules/ItemSolicitud';
 import Button from '../atoms/Button';
 import Card from '../atoms/Card';
@@ -9,7 +9,7 @@ import CardBody from '../atoms/CardBody';
 import EmptyState from '../molecules/EmptyState';
 import ErrorMessage from '../atoms/ErrorMessage';
 import './ProductosYServicios.css';
-import { ProductosYServiciosProps } from '../../lib/types';
+import type { ProductosYServiciosProps } from '../../lib/types';
 
 const ProductosYServicios: React.FC<ProductosYServiciosProps> = ({ items, onItemsChange, error }) => {
 

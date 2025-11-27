@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import LicitacionDetailTemplate from '../components/templates/LicitacionDetailTemplate';
-import { LicitacionStatus } from '../lib/types';
+import type { LicitacionStatus } from '../lib/types';
 
 const LicitacionDetailPage: React.FC = () => {
     // Estado de la licitación - Por ahora local, luego vendrá del backend

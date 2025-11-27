@@ -3,7 +3,7 @@ import Card from '../atoms/Card';
 import CardHeader from '../atoms/CardHeader';
 import CardBody from '../atoms/CardBody';
 import DocCategoryBlock from '../molecules/DocCategoryBlock';
-import { DocumentCategory } from '../../lib/types';
+import type { DocumentCategory } from '../../lib/types';
 
 interface LicitacionRequiredDocsProps {
     documentCategories: DocumentCategory[];

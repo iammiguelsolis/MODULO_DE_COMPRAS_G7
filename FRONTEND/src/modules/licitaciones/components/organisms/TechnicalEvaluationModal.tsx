@@ -9,8 +9,8 @@ import RejectionJustification from '../molecules/RejectionJustification';
 import DocumentsChecklist from '../molecules/DocumentsChecklist';
 import EvaluableDocumentsList from './EvaluableDocumentsList';
 import EvaluatedProvidersList from './EvaluatedProvidersList';
-import { DocumentEvaluation, ProviderEvaluation } from '../../lib/types';
-import { EvaluationStatus } from '../atoms/EvaluationStatusButtons';
+import type { DocumentEvaluation, ProviderEvaluation } from '../../lib/types';
+import type { EvaluationStatus } from '../atoms/EvaluationStatusButtons';
 import './TechnicalEvaluationModal.css';
 
 interface Supplier {

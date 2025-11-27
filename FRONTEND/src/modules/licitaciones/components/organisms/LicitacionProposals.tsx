@@ -3,7 +3,8 @@ import Card from '../atoms/Card';
 import CardHeader from '../atoms/CardHeader';
 import CardBody from '../atoms/CardBody';
 import EmptyState from '../molecules/EmptyState';
-import ProposalCard, { Proposal } from '../molecules/ProposalCard';
+import ProposalCard from '../molecules/ProposalCard';
+import type { Proposal } from '../molecules/ProposalCard';
 import './LicitacionProposals.css';
 
 interface LicitacionProposalsProps {

@@ -3,7 +3,7 @@ import Card from '../atoms/Card';
 import CardHeader from '../atoms/CardHeader';
 import CardBody from '../atoms/CardBody';
 import ReadOnlyField from '../molecules/ReadOnlyField';
-import { LicitacionGeneralInfoProps } from '../../lib/types';
+import type { LicitacionGeneralInfoProps } from '../../lib/types';
 import './LicitacionGeneralInfo.css';
 
 const LicitacionGeneralInfo: React.FC<LicitacionGeneralInfoProps> = ({

@@ -2,7 +2,7 @@ import React from 'react';
 import Card from '../atoms/Card';
 import CardHeader from '../atoms/CardHeader';
 import CardBody from '../atoms/CardBody';
-import { Item } from '../../lib/types';
+import type { Item } from '../../lib/types';
 import './LicitacionItemsTable.css';
 
 interface LicitacionItemsTableProps {

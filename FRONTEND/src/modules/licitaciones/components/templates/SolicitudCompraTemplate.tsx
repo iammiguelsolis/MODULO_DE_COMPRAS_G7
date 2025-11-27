@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Item } from '../../lib/types';
+import type { Item } from '../../lib/types';
 import DetallesSolicitudForm from '../organisms/DetallesSolicitudForm';
 import ProductosYServicios from '../organisms/ProductosYServicios';
 import ResumenCard from '../organisms/ResumenCard';

@@ -2,7 +2,7 @@ import React from 'react';
 import TimelineItem from '../molecules/TimelineItem';
 import Button from '../atoms/Button';
 import { CheckCircle, XCircle, Send, Mail, Flag, PencilLine, ArrowRight, Settings, FileText } from 'lucide-react';
-import { LicitacionStatus } from '../../lib/types';
+import type { LicitacionStatus } from '../../lib/types';
 import './LicitacionTimeline.css';
 
 interface LicitacionTimelineProps {

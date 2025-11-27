@@ -1,7 +1,7 @@
 import React from 'react';
-import { DocumentEvaluation } from '../../lib/types';
+import type { DocumentEvaluation } from '../../lib/types';
 import EvaluableDocumentItem from '../molecules/EvaluableDocumentItem';
-import { EvaluationStatus } from '../atoms/EvaluationStatusButtons';
+import type { EvaluationStatus } from '../atoms/EvaluationStatusButtons';
 import './EvaluableDocumentsList.css';
 
 interface EvaluableDocumentsListProps {

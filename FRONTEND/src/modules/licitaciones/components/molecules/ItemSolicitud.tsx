@@ -1,6 +1,6 @@
 import React from 'react';
 import { Trash2 } from 'lucide-react';
-import { Item } from '../../lib/types';
+import type { Item } from '../../lib/types';
 import Select from '../atoms/Select';
 import Input from '../atoms/Input';
 import Label from '../atoms/Label';

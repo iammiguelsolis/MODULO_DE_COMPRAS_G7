@@ -10,7 +10,7 @@ import CardBody from '../atoms/CardBody';
 import ReadOnlyField from '../molecules/ReadOnlyField';
 import ReadOnlyItem from '../molecules/ReadOnlyItem';
 import PageHeader from '../molecules/PageHeader';
-import { Item } from '../../lib/types';
+import type { Item } from '../../lib/types';
 
 const hardcodedTitle = "Licitación de Suministros y Servicios TI";
 const hardcodedNotes = "Requerimos la cotización para la renovación de equipos y la contratación de servicios de soporte técnico especializado.";

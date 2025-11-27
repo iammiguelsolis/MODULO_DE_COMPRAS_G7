@@ -1,6 +1,6 @@
 import React from 'react';
 import EvaluatedProviderCard from '../molecules/EvaluatedProviderCard';
-import { EconomicEvaluation } from '../../lib/types';
+import type { EconomicEvaluation } from '../../lib/types';
 import './EconomicEvaluationResults.css';
 
 interface EconomicEvaluationResultsProps {

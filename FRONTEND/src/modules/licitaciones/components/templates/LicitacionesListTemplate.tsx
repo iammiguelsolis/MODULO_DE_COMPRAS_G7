@@ -40,33 +40,36 @@ const LicitacionesListTemplate = ({
     onPageChange,
 }: LicitacionesListTemplateProps) => {
     return (
-        <>
-            <PageHeader
-                title="Gestión de Licitaciones"
-                description="Consulte el estado y avance de todos los procesos de licitación."
-            />
-            <div className="main-page-content">
-                <FilterPanel
-                    searchQuery={searchQuery}
-                    onSearchQueryChange={onSearchQueryChange}
-                    status={status}
-                    onStatusChange={onStatusChange}
-                    startDate={startDate}
-                    onStartDateChange={onStartDateChange}
-                    endDate={endDate}
-                    onEndDateChange={onEndDateChange}
-                    onApplyFilters={onApplyFilters}
-                    onClearFilters={onClearFilters}
+        <div className="min-h-screen bg-gray-50 p-8">
+            <div className="mx-auto">
+                <PageHeader
+                    title="Gestión de Licitaciones"
+                    description="Consulte el estado y avance de todos los procesos de licitación."
+                    className="mb-8"
                 />
-                <LicitacionesTable licitaciones={licitaciones} />
-                <Pagination
-                    currentPage={currentPage}
-                    totalItems={totalItems}
-                    itemsPerPage={itemsPerPage}
-                    onPageChange={onPageChange}
-                />
+                <div className="flex flex-col gap-6">
+                    <FilterPanel
+                        searchQuery={searchQuery}
+                        onSearchQueryChange={onSearchQueryChange}
+                        status={status}
+                        onStatusChange={onStatusChange}
+                        startDate={startDate}
+                        onStartDateChange={onStartDateChange}
+                        endDate={endDate}
+                        onEndDateChange={onEndDateChange}
+                        onApplyFilters={onApplyFilters}
+                        onClearFilters={onClearFilters}
+                    />
+                    <LicitacionesTable licitaciones={licitaciones} />
+                    <Pagination
+                        currentPage={currentPage}
+                        totalItems={totalItems}
+                        itemsPerPage={itemsPerPage}
+                        onPageChange={onPageChange}
+                    />
+                </div>
             </div>
-        </>
+        </div>
     );
 };
 

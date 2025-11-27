@@ -7,7 +7,7 @@ import Input from '../atoms/Input';
 import Label from '../atoms/Label';
 import Button from '../atoms/Button';
 import SearchInput from '../molecules/SearchInput';
-import { FilterBarProps } from '../../lib/types';
+import type { FilterBarProps } from '../../lib/types';
 import { estados_li } from '../../lib/constants';
 
 

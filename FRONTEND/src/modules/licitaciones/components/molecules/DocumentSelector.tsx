@@ -2,7 +2,7 @@ import React from 'react';
 import SelectorHeader from './SelectorHeader';
 import CustomDropdown from './CustomDropdown';
 import PillList from './PillList';
-import { Documento } from '../../lib/types';
+import type { Documento } from '../../lib/types';
 import './DocumentSelector.css';
 
 interface DocumentSelectorProps {

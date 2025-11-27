@@ -5,7 +5,7 @@ import Card from '../atoms/Card';
 import CardHeader from '../atoms/CardHeader';
 import CardBody from '../atoms/CardBody';
 import Button from '../atoms/Button';
-import { ResumenProps } from '../../lib/types';
+import type { ResumenProps } from '../../lib/types';
 import { limite_money } from '../../lib/constants';
 
 const ResumenCard: React.FC<ResumenProps> = ({

@@ -18,8 +18,8 @@ import TechnicalEvaluationModal from '../organisms/TechnicalEvaluationModal';
 import EconomicEvaluationModal from '../organisms/EconomicEvaluationModal';
 import GenerateContractModal from '../organisms/GenerateContractModal';
 import SendToPurchaseOrderModal from '../organisms/SendToPurchaseOrderModal';
-import { Proposal } from '../molecules/ProposalCard';
-import { LicitacionStatus, EconomicEvaluation, Item, DocumentCategory } from '../../lib/types';
+import type { Proposal } from '../molecules/ProposalCard';
+import type { LicitacionStatus, EconomicEvaluation, Item, DocumentCategory } from '../../lib/types';
 import { Scale, Wrench, PiggyBank } from 'lucide-react';
 import './LicitacionDetailTemplate.css';
 

@@ -9,7 +9,7 @@ import EconomicCriteriaInfo from '../molecules/EconomicCriteriaInfo';
 import ScoreInput from '../molecules/ScoreInput';
 import EconomicDocumentsList from './EconomicDocumentsList';
 import EconomicEvaluationResults from './EconomicEvaluationResults';
-import { EconomicEvaluation } from '../../lib/types';
+import type { EconomicEvaluation } from '../../lib/types';
 import './EconomicEvaluationModal.css';
 
 interface Supplier {

@@ -5,7 +5,7 @@ import StatusPill from '../molecules/StatusPill';
 import Button from '../atoms/Button';
 import Card from '../atoms/Card';
 import './LicitacionesTable.css';
-import { LicitacionesTableProps } from '../../lib/types';
+import type { LicitacionesTableProps } from '../../lib/types';
 
 const LicitacionesTable: React.FC<LicitacionesTableProps> = ({ licitaciones }) => {
     const navigate = useNavigate();
