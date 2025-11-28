@@ -70,25 +70,41 @@ const RequestLicitacionTemplate: React.FC = () => {
   };
 
   return (
-    <>
+    <div className="min-h-screen bg-gray-50 p-8">
       <PageHeader
         title="Crear Solicitud de Licitación"
         description="Complete el formulario especializado para iniciar el proceso de licitación formal."
       />
 
-      <div className="main-page-content">
+      <div className="grid grid-cols-3 gap-6 mb-6">
+        {/* Información General */}
+        <div className="col-span-2">
+          <Card>
+            <CardHeader>
+              <h2>Información General</h2>
+              <p>Datos heredados de la solicitud de compra.</p>
+            </CardHeader>
+            <CardBody>
+              <ReadOnlyField label="Título" value={title} />
+              <ReadOnlyField label="Notas" value={notes} />
+            </CardBody>
+          </Card>
+        </div>
 
-        <Card>
-          <CardHeader>
-            <h2>Información General</h2>
-            <p>Datos heredados de la solicitud de compra.</p>
-          </CardHeader>
-          <CardBody>
-            <ReadOnlyField label="Título" value={title} />
-            <ReadOnlyField label="Notas" value={notes} />
-          </CardBody>
-        </Card>
+        {/* Resumen */}
+        <div className="col-span-1">
+          <ResumenCard
+            totalAmount={totalAmount}
+            onSubmit={handleSubmit}
+            title={title}
+            items={items}
+            subtitle="Revisar el monto máximo, la fecha límite y los documentos requetidos"
+            buttonText="Crear licitación"
+          />
+        </div>
+      </div>
 
+      <div className="space-y-6">
         <Card>
           <CardHeader>
             <h2>Ítems Solicitados</h2>
@@ -122,17 +138,8 @@ const RequestLicitacionTemplate: React.FC = () => {
           deadlineError={deadlineError}
         />
         <DocumentacionRequerida selectedDocs={selectedDocs} onSelectedDocsChange={setSelectedDocs} />
-
-        <ResumenCard
-          totalAmount={totalAmount}
-          onSubmit={handleSubmit}
-          title={title}
-          items={items}
-          subtitle="Revisar el monto máximo, la fecha límite y los documentos requetidos"
-          buttonText="Crear licitación"
-        />
       </div>
-    </>
+    </div>
   );
 };
 
