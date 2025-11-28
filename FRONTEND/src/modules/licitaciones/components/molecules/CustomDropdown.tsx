@@ -9,6 +9,7 @@ interface CustomDropdownProps {
     onChange: (selected: string[]) => void;
     requiredIds?: string[];
     placeholder?: string;
+    dropUp?: boolean;
 }
 
 const CustomDropdown: React.FC<CustomDropdownProps> = ({
@@ -16,7 +17,8 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
     selected,
     onChange,
     requiredIds = [],
-    placeholder = 'Seleccionar documento...'
+    placeholder = 'Seleccionar documento...',
+    dropUp = false
 }) => {
     const [isOpen, setIsOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
@@ -59,7 +61,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
                 </div>
             </div>
             {isOpen && (
-                <div className="custom-options">
+                <div className={`custom-options ${dropUp ? 'drop-up' : ''}`}>
                     <div className="option-item select-all-item">
                         <Checkbox
                             id="select-all-dropdown"

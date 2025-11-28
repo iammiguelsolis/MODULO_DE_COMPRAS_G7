@@ -76,17 +76,19 @@ const RequestLicitacionTemplate: React.FC = () => {
         description="Complete el formulario especializado para iniciar el proceso de licitación formal."
       />
 
-      <div className="grid grid-cols-3 gap-6 mb-6">
+      <div className="grid grid-cols-3 gap-6 mb-6 items-stretch">
         {/* Información General */}
         <div className="col-span-2">
-          <Card>
+          <Card className="h-full flex flex-col">
             <CardHeader>
               <h2>Información General</h2>
               <p>Datos heredados de la solicitud de compra.</p>
             </CardHeader>
-            <CardBody>
+            <CardBody className="flex-1 flex flex-col gap-4">
               <ReadOnlyField label="Título" value={title} />
-              <ReadOnlyField label="Notas" value={notes} />
+              <div className="flex-1">
+                <ReadOnlyField label="Notas" value={notes} className="h-full" />
+              </div>
             </CardBody>
           </Card>
         </div>
@@ -104,40 +106,47 @@ const RequestLicitacionTemplate: React.FC = () => {
         </div>
       </div>
 
-      <div className="space-y-6">
-        <Card>
-          <CardHeader>
-            <h2>Ítems Solicitados</h2>
-            <p>Datos heredados de la solicitud de compra.</p>
-          </CardHeader>
-          <CardBody className="items-table-body">
-            <table className="items-table">
-              <thead>
-                <tr>
-                  <th>Tipo</th>
-                  <th>Descripción</th>
-                  <th className="text-center">Cantidad / Horas</th>
-                  <th className="text-right">Precio Uni. / Tarifa</th>
-                  <th className="text-right">Total Item</th>
-                </tr>
-              </thead>
-              <tbody>
-                {items.map((item) => <ReadOnlyItem key={item.id} item={item} />)}
-              </tbody>
-            </table>
-          </CardBody>
-        </Card>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Columna Izquierda: Ítems y Detalles */}
+        <div className="lg:col-span-2 space-y-6">
+          <Card>
+            <CardHeader>
+              <h2>Ítems Solicitados</h2>
+              <p>Datos heredados de la solicitud de compra.</p>
+            </CardHeader>
+            <CardBody className="items-table-body">
+              <table className="items-table">
+                <thead>
+                  <tr>
+                    <th>Tipo</th>
+                    <th>Descripción</th>
+                    <th className="text-center">Cantidad / Horas</th>
+                    <th className="text-right">Precio Uni. / Tarifa</th>
+                    <th className="text-right">Total Item</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {items.map((item) => <ReadOnlyItem key={item.id} item={item} />)}
+                </tbody>
+              </table>
+            </CardBody>
+          </Card>
 
-        <DetallesLicitacion
-          budget={budget}
-          onBudgetChange={setBudget}
-          deadline={deadline}
-          onDeadlineChange={setDeadline}
-          totalAmount={totalAmount}
-          budgetError={budgetError}
-          deadlineError={deadlineError}
-        />
-        <DocumentacionRequerida selectedDocs={selectedDocs} onSelectedDocsChange={setSelectedDocs} />
+          <DetallesLicitacion
+            budget={budget}
+            onBudgetChange={setBudget}
+            deadline={deadline}
+            onDeadlineChange={setDeadline}
+            totalAmount={totalAmount}
+            budgetError={budgetError}
+            deadlineError={deadlineError}
+          />
+        </div>
+
+        {/* Columna Derecha: Documentación */}
+        <div className="lg:col-span-1">
+          <DocumentacionRequerida selectedDocs={selectedDocs} onSelectedDocsChange={setSelectedDocs} />
+        </div>
       </div>
     </div>
   );

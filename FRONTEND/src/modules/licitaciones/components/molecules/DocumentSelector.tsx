@@ -14,6 +14,7 @@ interface DocumentSelectorProps {
     onChange: (selected: string[]) => void;
     requiredIds?: string[];
     emptyStateVariant?: 'default' | 'error';
+    dropUp?: boolean;
 }
 
 const DocumentSelector: React.FC<DocumentSelectorProps> = ({
@@ -24,7 +25,8 @@ const DocumentSelector: React.FC<DocumentSelectorProps> = ({
     selected,
     onChange,
     requiredIds = [],
-    emptyStateVariant
+    emptyStateVariant,
+    dropUp
 }) => {
     const handleRemove = (id: string) => {
         if (requiredIds.includes(id)) return;
@@ -45,6 +47,7 @@ const DocumentSelector: React.FC<DocumentSelectorProps> = ({
                 selected={selected}
                 onChange={onChange}
                 requiredIds={requiredIds}
+                dropUp={dropUp}
             />
 
             <PillList

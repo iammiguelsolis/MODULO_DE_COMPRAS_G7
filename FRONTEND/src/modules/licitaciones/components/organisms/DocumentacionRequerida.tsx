@@ -60,6 +60,7 @@ const DocumentacionRequerida: React.FC<DocumentacionRequeridaProps> = ({ selecte
                     onChange={(selected) => handleSelectionChange('financial', selected)}
                     requiredIds={doc_finan_req}
                     emptyStateVariant="error"
+                    dropUp={true}
                 />
             </CardBody>
         </Card>
