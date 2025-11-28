@@ -29,10 +29,10 @@ const LicitacionesTable: React.FC<LicitacionesTableProps> = ({ licitaciones }) =
                             licitaciones.map((lic) => (
                                 <tr key={lic.id}>
                                     <td className="font-medium">{lic.id}</td>
-                                    <td>{lic.titulo}</td>
+                                    <td>{lic.nombre}</td>
                                     <td>{new Date(lic.fechaCreacion + 'T00:00:00').toLocaleDateString('es-PE', { timeZone: 'UTC' })}</td>
                                     <td suppressHydrationWarning>
-                                        S/ {lic.presupuesto.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        S/ {lic.presupuestoMaximo.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </td>
                                     <td><StatusPill status={lic.estado} /></td>
                                     <td>

@@ -9,22 +9,22 @@ import ErrorMessage from '../atoms/ErrorMessage';
 import './DetallesLicitacion.css';
 
 interface DetallesLicitacionProps {
-  budget: number | string;
-  onBudgetChange: (value: number | string) => void;
+  presupuestoMaximo: number | string;
+  onPresupuestoChange: (value: number | string) => void;
   deadline: string;
   onDeadlineChange: (value: string) => void;
   totalAmount: number;
-  budgetError?: string;
+  presupuestoError?: string;
   deadlineError?: string;
 }
 
 
 const DetallesLicitacion: React.FC<DetallesLicitacionProps> = ({
-  budget,
-  onBudgetChange,
+  presupuestoMaximo,
+  onPresupuestoChange,
   deadline,
   onDeadlineChange,
-  budgetError,
+  presupuestoError,
   deadlineError
 }) => {
 
@@ -44,13 +44,13 @@ const DetallesLicitacion: React.FC<DetallesLicitacionProps> = ({
               <Input
                 type="number"
                 id="presupuesto"
-                value={budget}
-                onChange={(e) => onBudgetChange(e.target.value)}
+                value={presupuestoMaximo}
+                onChange={(e) => onPresupuestoChange(e.target.value)}
                 placeholder="0.00"
                 min="0"
               />
             </div>
-            {budgetError && <ErrorMessage>{budgetError}</ErrorMessage>}
+            {presupuestoError && <ErrorMessage>{presupuestoError}</ErrorMessage>}
           </FormGroup>
 
           <FormGroup>

@@ -23,15 +23,15 @@ const hardcodedItems: Item[] = [
 const RequestLicitacionTemplate: React.FC = () => {
   const navigate = useNavigate();
 
-  const [title] = useState(hardcodedTitle);
+  const [nombre] = useState(hardcodedTitle);
   const [notes] = useState(hardcodedNotes);
   const [items] = useState<Item[]>(hardcodedItems);
 
-  const [budget, setBudget] = useState<number | string>('');
+  const [presupuestoMaximo, setPresupuestoMaximo] = useState<number | string>('');
   const [deadline, setDeadline] = useState('');
   const [selectedDocs, setSelectedDocs] = useState<Record<string, string[]>>({ financial: ['propuesta-economica'] });
 
-  const [budgetError, setBudgetError] = useState('');
+  const [presupuestoError, setPresupuestoError] = useState('');
   const [deadlineError, setDeadlineError] = useState('');
 
   const totalAmount = items.reduce((sum, item) => {
@@ -44,16 +44,16 @@ const RequestLicitacionTemplate: React.FC = () => {
   const handleSubmit = () => {
     let isValid = true;
 
-    setBudgetError('');
+    setPresupuestoError('');
     setDeadlineError('');
 
-    if (!budget) {
+    if (!presupuestoMaximo) {
       alert('Por favor, ingrese un presupuesto.');
-      setBudgetError('Por favor, ingrese un presupuesto.');
+      setPresupuestoError('Por favor, ingrese un presupuesto.');
       isValid = false;
-    } else if (parseFloat(String(budget)) < totalAmount) {
+    } else if (parseFloat(String(presupuestoMaximo)) < totalAmount) {
       alert(`El presupuesto no puede ser menor al monto total estimado (S/ ${totalAmount.toFixed(2)}).`);
-      setBudgetError(`El presupuesto no puede ser menor al monto total estimado (S/ ${totalAmount.toFixed(2)}).`);
+      setPresupuestoError(`El presupuesto no puede ser menor al monto total estimado (S/ ${totalAmount.toFixed(2)}).`);
       isValid = false;
     }
 
@@ -85,7 +85,7 @@ const RequestLicitacionTemplate: React.FC = () => {
               <p>Datos heredados de la solicitud de compra.</p>
             </CardHeader>
             <CardBody className="flex-1 flex flex-col gap-4">
-              <ReadOnlyField label="Título" value={title} />
+              <ReadOnlyField label="Título" value={nombre} />
               <div className="flex-1">
                 <ReadOnlyField label="Notas" value={notes} className="h-full" />
               </div>
@@ -98,7 +98,7 @@ const RequestLicitacionTemplate: React.FC = () => {
           <ResumenCard
             totalAmount={totalAmount}
             onSubmit={handleSubmit}
-            title={title}
+            nombre={nombre}
             items={items}
             subtitle="Revisar el monto máximo, la fecha límite y los documentos requetidos"
             buttonText="Crear licitación"
@@ -133,12 +133,12 @@ const RequestLicitacionTemplate: React.FC = () => {
           </Card>
 
           <DetallesLicitacion
-            budget={budget}
-            onBudgetChange={setBudget}
+            presupuestoMaximo={presupuestoMaximo}
+            onPresupuestoChange={setPresupuestoMaximo}
             deadline={deadline}
             onDeadlineChange={setDeadline}
             totalAmount={totalAmount}
-            budgetError={budgetError}
+            presupuestoError={presupuestoError}
             deadlineError={deadlineError}
           />
         </div>

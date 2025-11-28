@@ -4,7 +4,7 @@ import Checkbox from '../atoms/Checkbox';
 import './CustomDropdown.css';
 
 interface CustomDropdownProps {
-    options: Array<{ id: string; name: string }>;
+    options: Array<{ id: string; nombre: string }>;
     selected: string[];
     onChange: (selected: string[]) => void;
     requiredIds?: string[];
@@ -74,7 +74,7 @@ const CustomDropdown: React.FC<CustomDropdownProps> = ({
                         <div key={option.id} className="option-item">
                             <Checkbox
                                 id={option.id}
-                                label={option.name}
+                                label={option.nombre}
                                 checked={selected.includes(option.id)}
                                 onChange={() => handleOptionClick(option.id)}
                                 disabled={requiredIds.includes(option.id)}

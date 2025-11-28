@@ -1,0 +1,538 @@
+{
+  "info": {
+    "title": "APIs de Gestión de Licitaciones"
+  },
+  "paths": {
+    "/licitaciones": {
+      "get": {
+        "tags": ["Licitaciones"],
+        "summary": "Listar licitaciones con filtros",
+        "description": "Obtiene todas las licitaciones con filtros opcionales por estado, fecha y presupuesto",
+        "operationId": "listarLicitaciones",
+        "parameters": [
+          {
+            "name": "estado",
+            "in": "query",
+            "description": "Filtrar por estado de la licitación",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/EstadoLicitacion"
+            }
+          },
+          {
+            "name": "fechaDesde",
+            "in": "query",
+            "description": "Fecha de inicio del rango de búsqueda",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "example": "2025-01-01"
+            }
+          },
+          {
+            "name": "fechaHasta",
+            "in": "query",
+            "description": "Fecha de fin del rango de búsqueda",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "format": "date",
+              "example": "2025-12-31"
+            }
+          },
+          {
+            "name": "presupuestoMin",
+            "in": "query",
+            "description": "Presupuesto mínimo",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "example": 10000
+            }
+          },
+          {
+            "name": "presupuestoMax",
+            "in": "query",
+            "description": "Presupuesto máximo",
+            "required": false,
+            "schema": {
+              "type": "number",
+              "format": "float",
+              "example": 500000
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "Número de página (inicia en 0)",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0
+            }
+          },
+          {
+            "name": "size",
+            "in": "query",
+            "description": "Cantidad de elementos por página",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de licitaciones",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/inline_response_200"
+                },
+                "example": {
+                  "content": [
+                    {
+                      "idLicitacion": 456,
+                      "nombre": "Compra de equipos de cómputo",
+                      "estado": "NUEVA",
+                      "fechaLimite": "2025-12-31",
+                      "presupuestoMaximo": 150000,
+                      "cantidadPropuestas": 0
+                    },
+                    {
+                      "idLicitacion": 457,
+                      "nombre": "Servicio de limpieza anual",
+                      "estado": "CON_PROPUESTAS",
+                      "fechaLimite": "2025-11-30",
+                      "presupuestoMaximo": 80000,
+                      "cantidadPropuestas": 3
+                    }
+                  ],
+                  "totalElements": 2,
+                  "totalPages": 1,
+                  "currentPage": 0
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      },
+      "post": {
+        "tags": ["Licitaciones"],
+        "summary": "Crear nueva licitación",
+        "description": "Tras completar el formulario y llenar los datos, cuando una solicitud de compra \nsupera el monto límite establecido. Hereda nombre e ítems de la solicitud original.\n",
+        "operationId": "crearLicitacion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrearLicitacionRequest"
+              },
+              "example": {
+                "solicitudId": 123,
+                "nombreSolicitud": "Compra de equipos de cómputo",
+                "items": {
+                  "itemsMaterial": [
+                    {
+                      "material": {
+                        "idMaterial": 1,
+                        "nombre": "Laptop HP Pavilion",
+                        "descripcion": "Intel i7, 16GB RAM, 512GB SSD",
+                        "unidadMedida": "unidad"
+                      },
+                      "cantidad": 10,
+                      "precioUnitario": 2500
+                    },
+                    {
+                      "material": {
+                        "idMaterial": 2,
+                        "nombre": "Mouse inalámbrico",
+                        "descripcion": "Logitech MX Master 3",
+                        "unidadMedida": "unidad"
+                      },
+                      "cantidad": 10,
+                      "precioUnitario": 250
+                    }
+                  ],
+                  "itemsServicio": [
+                    {
+                      "servicio": {
+                        "idServicio": 1,
+                        "nombre": "Instalación y configuración",
+                        "descripcion": "Incluye sistema operativo y software básico",
+                        "categoria": "Instalación"
+                      },
+                      "tarifaHora": 150,
+                      "horasEstimadas": 8
+                    }
+                  ]
+                },
+                "fechaLimite": "2025-12-31T23:59:59",
+                "presupuestoMaximo": 150000,
+                "documentosRequeridos": [
+                  {
+                    "idRequerido": 1,
+                    "tipo": "LEGAL",
+                    "documento": "RUC y Ficha RUC",
+                    "obligatorio": true
+                  },
+                  {
+                    "idRequerido": 2,
+                    "tipo": "LEGAL",
+                    "documento": "DNI del Representante Legal",
+                    "obligatorio": true
+                  },
+                  {
+                    "idRequerido": 3,
+                    "tipo": "TECNICO",
+                    "documento": "Certificaciones de Calidad (ISO)",
+                    "obligatorio": false
+                  },
+                  {
+                    "idRequerido": 4,
+                    "tipo": "TECNICO",
+                    "documento": "Ficha Técnica del Producto/Servicio",
+                    "obligatorio": true
+                  },
+                  {
+                    "idRequerido": 5,
+                    "tipo": "ECONOMICO",
+                    "documento": "Estados Financieros Auditados",
+                    "obligatorio": true
+                  },
+                  {
+                    "idRequerido": 6,
+                    "tipo": "ECONOMICO",
+                    "documento": "Carta de Fianza",
+                    "obligatorio": true
+                  }
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Licitación creada exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LicitacionResponse"
+                },
+                "example": {
+                  "idLicitacion": 456,
+                  "solicitudId": 123,
+                  "nombre": "Compra de equipos de cómputo",
+                  "estado": "BORRADOR",
+                  "fechaCreacion": "2025-11-13T10:30:00",
+                  "fechaLimite": "2025-12-31T23:59:59",
+                  "presupuestoMaximo": 150000,
+                  "mensaje": "Licitación creada. Pendiente de aprobación del supervisor."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponse"
+                }
+              }
+            }
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/licitaciones/{id}/aprobacion": {
+      "put": {
+        "tags": ["Aprobaciones"],
+        "summary": "Aprobar o rechazar licitación (Supervisor)",
+        "description": "Permite al supervisor aprobar o rechazar una licitación en estado BORRADOR.\n- Si aprueba: cambia a estado NUEVA\n- Si rechaza: cambia a estado CANCELADA\n",
+        "operationId": "aprobarRechazarLicitacion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la licitación",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "example": 456
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AprobacionRequest"
+              },
+              "example": {
+                "aprobada": true,
+                "supervisorId": 10,
+                "comentarios": "Licitación aprobada. Los montos y documentos están correctos. Proceder con invitaciones a proveedores."
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Licitación aprobada/rechazada exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/LicitacionResponse"
+                },
+                "example": {
+                  "idLicitacion": 456,
+                  "solicitudId": 123,
+                  "nombre": "Compra de equipos de cómputo",
+                  "estado": "NUEVA",
+                  "fechaCreacion": "2025-11-13T10:30:00",
+                  "fechaAprobacion": "2025-11-13T14:20:00",
+                  "supervisorId": 10,
+                  "comentariosSupervisor": "Licitación aprobada. Los montos y documentos están correctos.",
+                  "mensaje": "Licitación aprobada. Puede proceder con el envío de invitaciones."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Operación inválida (ej. licitación no está en estado BORRADOR)"
+          },
+          "404": {
+            "description": "Licitación no encontrada"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/licitaciones/{id}/propuestas": {
+      "post": {
+        "tags": ["Propuestas"],
+        "summary": "Registrar propuesta de proveedor",
+        "description": "Registra manualmente la propuesta enviada por un proveedor.\nDebe incluir documentos clasificados en tres categorías: LEGAL, TECNICO y ECONOMICO.\nCada categoría puede tener múltiples documentos específicos.\n",
+        "operationId": "registrarPropuesta",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la licitación",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "example": 456
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "$ref": "#/components/schemas/id_propuestas_body"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Propuesta registrada exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PropuestaResponse"
+                },
+                "example": {
+                  "idPropuesta": 1001,
+                  "idLicitacion": 456,
+                  "proveedor": {
+                    "id": 789,
+                    "nombre": "TechSupply S.A.C.",
+                    "ruc": "20123456789"
+                  },
+                  "items": {
+                    "itemsMaterial": [
+                      {
+                        "material": {
+                          "idMaterial": 1,
+                          "nombre": "Laptop HP Pavilion"
+                        },
+                        "cantidad": 10,
+                        "precioUnitario": 2400
+                      }
+                    ],
+                    "itemsServicio": [
+                      {
+                        "servicio": {
+                          "idServicio": 1,
+                          "nombre": "Instalación y configuración"
+                        },
+                        "tarifaHora": 140,
+                        "horasEstimadas": 8
+                      }
+                    ]
+                  },
+                  "montoOfertado": 25120,
+                  "plazoEntrega": 30,
+                  "garantiaMeses": 12,
+                  "fechaPresentacion": "2025-11-15T16:45:00",
+                  "estadoLicitacion": "CON_PROPUESTAS",
+                  "documentosRegistrados": {
+                    "legales": 4,
+                    "tecnicos": 3,
+                    "economicos": 3
+                  },
+                  "evaluaciones": {},
+                  "mensaje": "Propuesta registrada. La licitación ahora tiene 1 propuesta(s)."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos o documentos obligatorios faltantes"
+          },
+          "404": {
+            "description": "Licitación no encontrada"
+          },
+          "409": {
+            "description": "La fecha límite ya pasó o el proveedor ya envió una propuesta"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/licitaciones/{id}/adjudicacion": {
+      "post": {
+        "tags": ["Aprobaciones"],
+        "summary": "Adjudicar licitación a proveedor ganador",
+        "description": "Adjudica la licitación al proveedor ganador después de las evaluaciones\ndel Comité Técnico y Comité de Economía.\n",
+        "operationId": "adjudicarLicitacion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la licitación",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "example": 456
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdjudicacionRequest"
+              },
+              "example": {
+                "propuestaGanadoraId": 1001,
+                "evaluaciones": {
+                  "comiteTecnico": {
+                    "idEvaluacion": 2001,
+                    "aprobada": true,
+                    "supervisorTecnicoId": 11,
+                    "puntajeTecnico": 95.5,
+                    "observaciones": "Cumple con todas las especificaciones técnicas. Certificaciones vigentes.",
+                    "fecha": "2025-11-18",
+                    "tipo": "TECNICA"
+                  },
+                  "comiteEconomia": {
+                    "idEvaluacion": 2002,
+                    "aprobada": true,
+                    "supervisorEconomicoId": 12,
+                    "puntajeEconomico": 88,
+                    "observaciones": "Mejor relación precio-calidad. Plazo de entrega óptimo. Garantía extendida.",
+                    "fecha": "2025-11-19",
+                    "tipo": "ECONOMICA"
+                  }
+                },
+                "justificacion": "La propuesta de TechSupply S.A.C. ofrece el mejor balance entre calidad técnica, precio competitivo y garantías. Cumple con todos los requisitos establecidos en las bases."
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Licitación adjudicada exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdjudicacionResponse"
+                },
+                "example": {
+                  "idLicitacion": 456,
+                  "estado": "ADJUDICADA",
+                  "propuestaGanadora": {
+                    "idPropuesta": 1001,
+                    "proveedor": {
+                      "id": 789,
+                      "nombre": "TechSupply S.A.C.",
+                      "ruc": "20123456789"
+                    },
+                    "montoAdjudicado": 145000
+                  },
+                  "contrato": {
+                    "idContrato": 5001,
+                    "fechaGeneracion": "2025-11-20T10:00:00",
+                    "estadoContrato": "GENERADO",
+                    "urlDocumento": "/contratos/5001/documento.pdf",
+                    "proveedorGanador": {
+                      "id": 789,
+                      "nombre": "TechSupply S.A.C.",
+                      "ruc": "20123456789"
+                    },
+                    "solicitudLicitacion": {
+                      "idLicitacion": 456,
+                      "nombre": "Compra de equipos de cómputo"
+                    }
+                  },
+                  "evaluaciones": {
+                    "puntajeTecnico": 95.5,
+                    "puntajeEconomico": 88,
+                    "puntajeTotal": 91.75
+                  },
+                  "mensaje": "Licitación adjudicada exitosamente. Contrato generado automáticamente."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Evaluaciones incompletas o propuesta no válida"
+          },
+          "404": {
+            "description": "Licitación o propuesta no encontrada"
+          },
+          "409": {
+            "description": "La licitación no está en estado válido para adjudicación"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    }
+  }
+}

@@ -25,14 +25,14 @@ import './LicitacionDetailTemplate.css';
 
 interface LicitacionDetailTemplateProps {
     id: string;
-    title: string;
+    nombre: string;
     createdDate: string;
     buyer: string;
     supervisor: string;
     currentStatus: LicitacionStatus;
     timestamps: Partial<Record<LicitacionStatus, string>>;
     estimatedAmount: number;
-    maxBudget: number;
+    presupuestoMaximo: number;
     proveedoresCount?: number;
     propuestasRegistradas?: number;
     propuestasAprobadasTecnicamente?: number;
@@ -51,14 +51,14 @@ interface LicitacionDetailTemplateProps {
 
 const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
     id,
-    title,
+    nombre,
     createdDate,
     buyer,
     supervisor,
     currentStatus,
     timestamps,
     estimatedAmount,
-    maxBudget,
+    presupuestoMaximo,
     proveedoresCount: _proveedoresCount,
     propuestasRegistradas: _propuestasRegistradas,
     propuestasAprobadasTecnicamente,
@@ -382,7 +382,7 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
         <div className="min-h-screen bg-gray-50 p-8">
             <div className="licitacion-detail-header-wrapper">
                 <PageHeader
-                    title={title}
+                    title={nombre}
                     description={
                         <div className="header-metadata">
                             <span><strong>ID:</strong> {id}</span>
@@ -431,7 +431,7 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                     />
                 </div>
                 <div className="licitacion-detail-right-col">
-                    <LicitacionGeneralInfo />
+                    <LicitacionGeneralInfo presupuestoMaximo={`S/. ${presupuestoMaximo.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`} />
                     <LicitacionItemsTable items={mockItems} />
                     <LicitacionProposals proposals={registeredProposals} />
                     <LicitacionRequiredDocs documentCategories={mockDocumentCategories} />
@@ -446,7 +446,7 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                 licitacionId={id}
                 buyer={buyer}
                 estimatedAmount={estimatedAmount}
-                maxBudget={maxBudget}
+                maxBudget={presupuestoMaximo}
             />
 
             <CancellationModal
@@ -456,16 +456,16 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                 licitacionId={id}
                 buyer={buyer}
                 estimatedAmount={estimatedAmount}
-                maxBudget={maxBudget}
+                maxBudget={presupuestoMaximo}
             />
 
             <InviteSuppliersModal
                 isOpen={showInviteModal}
                 onClose={() => setShowInviteModal(false)}
                 licitacionId={id}
-                licitacionTitle={title}
+                licitacionTitle={nombre}
                 estimatedAmount={estimatedAmount}
-                maxBudget={maxBudget}
+                maxBudget={presupuestoMaximo}
                 availableSuppliers={mockAvailableSuppliers}
                 requiredDocuments={mockRequiredDocuments}
                 onSuppliersInvited={setInvitedSuppliers}
@@ -479,7 +479,7 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                 buyer={buyer}
                 supervisor={supervisorName}
                 estimatedAmount={estimatedAmount}
-                maxBudget={maxBudget}
+                maxBudget={presupuestoMaximo}
                 invitedSuppliers={invitedSuppliers}
             />
 
@@ -487,7 +487,7 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                 isOpen={showRegisterProposalModal}
                 onClose={() => setShowRegisterProposalModal(false)}
                 licitacionId={id}
-                licitacionTitle={title}
+                licitacionTitle={nombre}
                 suppliers={mockSuppliersForRegistration.filter(s => invitedSuppliers.includes(s.name))}
                 onRegisterProposal={handleRegisterProposalConfirm}
             />
@@ -500,7 +500,7 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                 buyerName={buyer}
                 supervisorName={supervisorName}
                 estimatedAmount={estimatedAmount}
-                maxBudget={maxBudget}
+                maxBudget={presupuestoMaximo}
                 suppliersWithProposals={registeredProposals.map(p => p.supplierName)}
                 suppliersWithoutDocs={Math.max(0, (invitedSuppliers.length > 0 ? invitedSuppliers.length : mockSuppliersForRegistration.length) - registeredProposals.length)}
             />
@@ -514,7 +514,7 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                 buyer={buyer}
                 supervisor={isApproved || isRejected ? supervisorName : supervisor}
                 estimatedAmount={estimatedAmount}
-                maxBudget={maxBudget}
+                maxBudget={presupuestoMaximo}
                 suppliersWithProposals={registeredProposals.map(p => p.supplierName)}
             />
 
@@ -523,7 +523,7 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                 isOpen={showTechnicalEvaluationModal}
                 onClose={() => setShowTechnicalEvaluationModal(false)}
                 licitacionId={id}
-                licitacionTitle={title}
+                licitacionTitle={nombre}
                 suppliers={registeredProposals.map(p => ({
                     id: p.id,
                     name: p.supplierName,
@@ -539,8 +539,8 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                 isOpen={showEconomicEvaluationModal}
                 onClose={() => setShowEconomicEvaluationModal(false)}
                 licitacionId={id}
-                licitacionTitle={title}
-                presupuesto={`S/. ${maxBudget.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`}
+                licitacionTitle={nombre}
+                presupuesto={`S/. ${presupuestoMaximo.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`}
                 solicitudOrigen={`Nº ${id}`}
                 proveedoresTecnicamenteAprobados={registeredProposals.filter(p => p.technicalStatus === 'Approved').length}
                 suppliers={registeredProposals
@@ -560,7 +560,7 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                 isOpen={showGenerateContractModal}
                 onClose={() => setShowGenerateContractModal(false)}
                 licitacionId={id}
-                licitacionTitle={title}
+                licitacionTitle={nombre}
                 winnerProvider={registeredProposals.find(p => p.isWinner) ? {
                     id: registeredProposals.find(p => p.isWinner)!.id,
                     name: registeredProposals.find(p => p.isWinner)!.supplierName,
@@ -578,7 +578,7 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                 buyer={buyer}
                 supervisor={isApproved || isRejected ? supervisorName : supervisor}
                 estimatedAmount={estimatedAmount}
-                maxBudget={maxBudget}
+                maxBudget={presupuestoMaximo}
                 providerName={registeredProposals.find(p => p.isWinner)?.supplierName || "Proveedor Ganador"}
             />
         </div>

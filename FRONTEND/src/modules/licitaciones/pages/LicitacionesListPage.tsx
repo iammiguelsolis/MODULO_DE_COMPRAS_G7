@@ -23,7 +23,7 @@ const LicitacionesListPage = () => {
 
         if (searchQuery) {
             filtered = filtered.filter(lic =>
-                lic.titulo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                lic.nombre.toLowerCase().includes(searchQuery.toLowerCase()) ||
                 lic.id.toLowerCase().includes(searchQuery.toLowerCase())
             );
         }

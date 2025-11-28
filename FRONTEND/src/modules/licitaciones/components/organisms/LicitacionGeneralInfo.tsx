@@ -7,7 +7,7 @@ import type { LicitacionGeneralInfoProps } from '../../lib/types';
 import './LicitacionGeneralInfo.css';
 
 const LicitacionGeneralInfo: React.FC<LicitacionGeneralInfoProps> = ({
-    presupuesto = 'S/. 45,000.00',
+    presupuestoMaximo = 'S/. 45,000.00',
     solicitudOrigen = 'N° 2025123',
     fechaLimite = '10 Nov 2025',
     comprador = 'Samnuel Luque'
@@ -19,7 +19,7 @@ const LicitacionGeneralInfo: React.FC<LicitacionGeneralInfoProps> = ({
             </CardHeader>
             <CardBody>
                 <div className="general-info-grid">
-                    <ReadOnlyField label="Presupuesto Máximo" value={presupuesto} />
+                    <ReadOnlyField label="Presupuesto Máximo" value={presupuestoMaximo} />
                     <ReadOnlyField label="Solicitud de Origen" value={solicitudOrigen} />
                     <ReadOnlyField label="Fecha límite para recibir propuestas" value={fechaLimite} />
                     <ReadOnlyField label="Comprador" value={comprador} />

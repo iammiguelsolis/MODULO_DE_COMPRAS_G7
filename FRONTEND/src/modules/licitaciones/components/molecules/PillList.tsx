@@ -5,7 +5,7 @@ import './PillList.css';
 
 interface PillListProps {
     selectedIds: string[];
-    options: Array<{ id: string; name: string }>;
+    options: Array<{ id: string; nombre: string }>;
     onRemove: (id: string) => void;
     requiredIds?: string[];
     emptyMessage?: string;
@@ -20,7 +20,7 @@ const PillList: React.FC<PillListProps> = ({
     emptyMessage = 'No se han seleccionado documentos',
     emptyStateVariant = 'default'
 }) => {
-    const getOptionName = (id: string) => options.find(opt => opt.id === id)?.name || id;
+    const getOptionName = (id: string) => options.find(opt => opt.id === id)?.nombre || id;
 
     if (selectedIds.length === 0) {
         return <EmptyState message={emptyMessage} variant={emptyStateVariant} />;

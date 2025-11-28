@@ -15,9 +15,9 @@ export interface Item {
  */
 export interface Licitacion {
   id: string;
-  titulo: string;
+  nombre: string;
   fechaCreacion: string;
-  presupuesto: number;
+  presupuestoMaximo: number;
   estado: string;
 }
 
@@ -41,7 +41,9 @@ export type LicitacionStatus =
  */
 export interface Documento {
   id: string;
-  name: string;
+  nombre: string; // Renamed from name to match API 'documento' or keep 'name' and map? API says 'documento'. Let's use 'nombre' as it's more standard for an object. API 'documento' field is the name.
+  tipo: "LEGAL" | "TECNICO" | "ECONOMICO";
+  obligatorio: boolean;
 }
 
 /**
@@ -80,14 +82,14 @@ export interface Contract {
  */
 export interface LicitacionDetail {
   id: string;
-  title: string;
+  nombre: string;
   createdDate: string;
   buyer: string;
   supervisor: string;
   currentStatus: LicitacionStatus;
   timestamps: Partial<Record<LicitacionStatus, string>>;
   estimatedAmount: number;
-  maxBudget: number;
+  presupuestoMaximo: number;
   items: Item[];
   requiredDocuments: Documento[];
   providers?: Provider[];
@@ -115,7 +117,7 @@ export interface DetallesSolicitudProps {
 export interface ResumenProps {
   totalAmount: number;
   onSubmit: () => void;
-  title: string;
+  nombre: string;
   items: Item[];
   subtitle?: string;
   buttonText?: string;
@@ -191,7 +193,7 @@ export interface ProviderEvaluation {
  * Props para LicitacionGeneralInfo (ahora parametrizable)
  */
 export interface LicitacionGeneralInfoProps {
-  presupuesto?: string;
+  presupuestoMaximo?: string;
   solicitudOrigen?: string;
   fechaLimite?: string;
   comprador?: string;
