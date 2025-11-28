@@ -1,0 +1,265 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API de Gestión de Propuestas",
+    "version": "1.0.0",
+    "description": "Endpoints para registrar propuestas de proveedores y finalizar el período de registro"
+  },
+  "paths": {
+    "/licitaciones/{id}/propuestas": {
+      "post": {
+        "tags": ["Propuestas"],
+        "summary": "Registrar propuesta de proveedor",
+        "description": "Registra manualmente la propuesta enviada por un proveedor. Debe incluir documentos clasificados en tres categorías: LEGAL, TECNICO y ECONOMICO.",
+        "operationId": "registrarPropuesta",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la licitación",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "example": 456
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "proveedorId",
+                  "items",
+                  "montoOfertado",
+                  "plazoEntrega",
+                  "garantiaMeses"
+                ],
+                "properties": {
+                  "proveedorId": {
+                    "type": "integer",
+                    "description": "ID del proveedor"
+                  },
+                  "items": {
+                    "type": "string",
+                    "description": "JSON con itemsMaterial e itemsServicio ofertados"
+                  },
+                  "montoOfertado": {
+                    "type": "number",
+                    "format": "float"
+                  },
+                  "plazoEntrega": {
+                    "type": "integer",
+                    "description": "Plazo de entrega en días"
+                  },
+                  "garantiaMeses": {
+                    "type": "integer",
+                    "description": "Garantía en meses"
+                  },
+                  "documentosLegales": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  },
+                  "documentosTecnicos": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  },
+                  "documentosEconomicos": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "binary"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Propuesta registrada exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "idPropuesta": {
+                      "type": "integer"
+                    },
+                    "idLicitacion": {
+                      "type": "integer"
+                    },
+                    "proveedor": {
+                      "type": "object",
+                      "properties": {
+                        "id": {
+                          "type": "integer"
+                        },
+                        "nombre": {
+                          "type": "string"
+                        },
+                        "ruc": {
+                          "type": "string"
+                        }
+                      }
+                    },
+                    "montoOfertado": {
+                      "type": "number"
+                    },
+                    "plazoEntrega": {
+                      "type": "integer"
+                    },
+                    "garantiaMeses": {
+                      "type": "integer"
+                    },
+                    "fechaPresentacion": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "estadoLicitacion": {
+                      "type": "string"
+                    },
+                    "documentosRegistrados": {
+                      "type": "object",
+                      "properties": {
+                        "legales": {
+                          "type": "integer"
+                        },
+                        "tecnicos": {
+                          "type": "integer"
+                        },
+                        "economicos": {
+                          "type": "integer"
+                        }
+                      }
+                    },
+                    "mensaje": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Datos inválidos o documentos obligatorios faltantes"
+          },
+          "404": {
+            "description": "Licitación no encontrada"
+          },
+          "409": {
+            "description": "La fecha límite ya pasó o el proveedor ya envió una propuesta"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    },
+    "/licitaciones/{id}/finalizarRegistro": {
+      "put": {
+        "tags": ["Propuestas"],
+        "summary": "Finalizar registro de propuestas",
+        "description": "Finaliza el período de registro de propuestas y cambia el estado de EN_INVITACION a CON_PROPUESTAS. Si no hay propuestas registradas, cambia a CANCELADA.",
+        "operationId": "finalizarRegistro",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la licitación",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64",
+              "example": 456
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["compradorId"],
+                "properties": {
+                  "compradorId": {
+                    "type": "integer"
+                  },
+                  "notas": {
+                    "type": "string"
+                  }
+                }
+              },
+              "example": {
+                "compradorId": 5,
+                "notas": "Se recibieron 3 propuestas de 8 proveedores invitados."
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Registro de propuestas finalizado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "idLicitacion": {
+                      "type": "integer"
+                    },
+                    "estado": {
+                      "type": "string",
+                      "enum": ["CON_PROPUESTAS", "CANCELADA"]
+                    },
+                    "propuestasRegistradas": {
+                      "type": "integer"
+                    },
+                    "proveedoresInvitados": {
+                      "type": "integer"
+                    },
+                    "fechaFinalizacion": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "mensaje": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "example": {
+                  "idLicitacion": 456,
+                  "estado": "CON_PROPUESTAS",
+                  "propuestasRegistradas": 3,
+                  "proveedoresInvitados": 8,
+                  "fechaFinalizacion": "2025-11-20T16:45:00",
+                  "mensaje": "Registro de propuestas finalizado. Se recibieron 3 propuestas. Puede proceder con la evaluación."
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Operación inválida (ej. licitación no está en estado EN_INVITACION)"
+          },
+          "404": {
+            "description": "Licitación no encontrada"
+          },
+          "500": {
+            "description": "Error interno del servidor"
+          }
+        }
+      }
+    }
+  }
+}
