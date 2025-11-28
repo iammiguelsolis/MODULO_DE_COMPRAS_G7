@@ -16,7 +16,6 @@ const hardcodedTitle = "Licitación de Suministros y Servicios TI";
 const hardcodedNotes = "Requerimos la cotización para la renovación de equipos y la contratación de servicios de soporte técnico especializado.";
 const hardcodedItems: Item[] = [
   { id: 'prod-1', type: 'Producto', description: 'Laptop de alto rendimiento para desarrolladores', quantity: 10, price: 6000 },
-  { id: 'serv-1', type: 'Servicio', description: 'Consultoría y desarrollo de software a medida', estimatedHours: 120, hourlyRate: 200 }
 ];
 
 
@@ -66,7 +65,7 @@ const RequestLicitacionTemplate: React.FC = () => {
 
     if (isValid) {
       alert('¡Solicitud de licitación creada con éxito!');
-      navigate('/licitacioneslist');
+      navigate('/licitaciones');
     }
   };
 
