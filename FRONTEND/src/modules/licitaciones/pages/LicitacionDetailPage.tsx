@@ -11,12 +11,12 @@ const LicitacionDetailPage: React.FC = () => {
 
     const licitacionData = {
         id: "2025001",
-        title: "Compra de equipos de cómputo",
+        nombre: "Compra de equipos de cómputo",
         createdDate: "01/11/2025",
         buyer: "Samnuel Luque",
         supervisor: "---",
         estimatedAmount: 39000,
-        maxBudget: 45000,
+        presupuestoMaximo: 45000,
         proveedoresCount: 8,
         propuestasRegistradas: 3,
         propuestasAprobadasTecnicamente: 2,
@@ -125,14 +125,14 @@ const LicitacionDetailPage: React.FC = () => {
     return (
         <LicitacionDetailTemplate
             id={licitacionData.id}
-            title={licitacionData.title}
+            nombre={licitacionData.nombre}
             createdDate={licitacionData.createdDate}
             buyer={licitacionData.buyer}
             supervisor={licitacionData.supervisor}
             currentStatus={currentStatus}
             timestamps={timestamps}
             estimatedAmount={licitacionData.estimatedAmount}
-            maxBudget={licitacionData.maxBudget}
+            presupuestoMaximo={licitacionData.presupuestoMaximo}
             proveedoresCount={licitacionData.proveedoresCount}
             propuestasRegistradas={licitacionData.propuestasRegistradas}
             propuestasAprobadasTecnicamente={licitacionData.propuestasAprobadasTecnicamente}
