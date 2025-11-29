@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from app.licitaciones.services.aprobacion_service import AprobacionService
+from app.services.licitaciones.aprobacion_service import AprobacionService
 
 aprobacion_bp = Blueprint('aprobacion', __name__, url_prefix='/api/licitaciones')
 service = AprobacionService()

@@ -1,8 +1,8 @@
 from app.bdd import db
-from app.licitaciones.models.licitacion import Licitacion
-from app.licitaciones.models.propuesta import PropuestaProveedor
-from app.licitaciones.models.documentos import Documento
-from app.licitaciones.enums.tipo_documento import TipoDocumento
+from app.models.licitaciones.licitacion import Licitacion
+from app.models.licitaciones.propuesta import PropuestaProveedor
+from app.models.licitaciones.documentos import Documento
+from app.enums.licitaciones.tipo_documento import TipoDocumento
 from datetime import datetime
 
 class PropuestaService:

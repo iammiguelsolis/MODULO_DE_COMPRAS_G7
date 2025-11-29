@@ -1,4 +1,4 @@
-from app.licitaciones.models.estados.estado_licitacion_state import EstadoLicitacionState
+from app.models.licitaciones.estados.estado_licitacion_state import EstadoLicitacionState
 
 class EstadoAdjudicada(EstadoLicitacionState):
     """
@@ -17,7 +17,7 @@ class EstadoAdjudicada(EstadoLicitacionState):
         if not self.licitacion.contrato_generado:
             raise ValueError("No se puede avanzar sin subir el contrato firmado")
         
-        from app.licitaciones.models.estados.estado_con_contrato import EstadoConContrato
+        from app.models.licitaciones.estados.estado_con_contrato import EstadoConContrato
         return EstadoConContrato(self.licitacion)
     
     def subir_contrato(self, documento_url):

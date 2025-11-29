@@ -1,8 +1,8 @@
 from app.bdd import db
-from app.licitaciones.models.licitacion import Licitacion
-from app.licitaciones.models.items.material_solicitado import MaterialSolicitado
-from app.licitaciones.models.items.servicio_solicitado import ServicioSolicitado
-from app.licitaciones.enums.tipo_item import TipoItem
+from app.models.licitaciones.licitacion import Licitacion
+from app.models.licitaciones.items.material_solicitado import MaterialSolicitado
+from app.models.licitaciones.items.servicio_solicitado import ServicioSolicitado
+from app.enums.licitaciones.tipo_item import TipoItem
 
 class LicitacionService:
     """

@@ -1,4 +1,4 @@
-from app.licitaciones.models.estados.estado_licitacion_state import EstadoLicitacionState
+from app.models.licitaciones.estados.estado_licitacion_state import EstadoLicitacionState
 
 class EstadoConPropuestas(EstadoLicitacionState):
     """
@@ -9,7 +9,7 @@ class EstadoConPropuestas(EstadoLicitacionState):
         """
         Pasa a evaluación técnica.
         """
-        from app.licitaciones.models.estados.estado_en_evaluacion import EstadoEnEvaluacion
+        from app.models.licitaciones.estados.estado_en_evaluacion import EstadoEnEvaluacion
         return EstadoEnEvaluacion(self.licitacion)
     
     def get_nombre(self):

@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 # from app.licitaciones.services.orden_compra_service import OrdenCompraService
 
-from app.licitaciones.services.orden_compra_integration_service import OrdenCompraIntegrationService
+from app.services.licitaciones.orden_compra_integration_service import OrdenCompraIntegrationService
 
 orden_compra_bp = Blueprint('orden_compra', __name__, url_prefix='/api/licitaciones')
 service = OrdenCompraIntegrationService()

@@ -1,7 +1,7 @@
 from app.bdd import db
-from app.licitaciones.models.estados.estado_borrador import EstadoBorrador
-from app.licitaciones.models.estados.estado_nueva import EstadoNueva
-from app.licitaciones.models.estados.estado_cancelada import EstadoCancelada
+from app.models.licitaciones.estados.estado_borrador import EstadoBorrador
+from app.models.licitaciones.estados.estado_nueva import EstadoNueva
+from app.models.licitaciones.estados.estado_cancelada import EstadoCancelada
 # Importar otros estados aquí a medida que se creen, o usar importación dinámica/local en _reconstruir_estado
 
 class Licitacion(db.Model):
@@ -88,16 +88,16 @@ class Licitacion(db.Model):
         nombre = self._estado_nombre
         
         # Importación local para evitar ciclos
-        from app.licitaciones.models.estados.estado_borrador import EstadoBorrador
-        from app.licitaciones.models.estados.estado_nueva import EstadoNueva
-        from app.licitaciones.models.estados.estado_en_invitacion import EstadoEnInvitacion
-        from app.licitaciones.models.estados.estado_con_propuestas import EstadoConPropuestas
-        from app.licitaciones.models.estados.estado_en_evaluacion import EstadoEnEvaluacion
-        from app.licitaciones.models.estados.estado_evaluacion_economia import EstadoEvaluacionEconomia
-        from app.licitaciones.models.estados.estado_adjudicada import EstadoAdjudicada
-        from app.licitaciones.models.estados.estado_con_contrato import EstadoConContrato
-        from app.licitaciones.models.estados.estado_finalizada import EstadoFinalizada
-        from app.licitaciones.models.estados.estado_cancelada import EstadoCancelada
+        from app.models.licitaciones.estados.estado_borrador import EstadoBorrador
+        from app.models.licitaciones.estados.estado_nueva import EstadoNueva
+        from app.models.licitaciones.estados.estado_en_invitacion import EstadoEnInvitacion
+        from app.models.licitaciones.estados.estado_con_propuestas import EstadoConPropuestas
+        from app.models.licitaciones.estados.estado_en_evaluacion import EstadoEnEvaluacion
+        from app.models.licitaciones.estados.estado_evaluacion_economia import EstadoEvaluacionEconomia
+        from app.models.licitaciones.estados.estado_adjudicada import EstadoAdjudicada
+        from app.models.licitaciones.estados.estado_con_contrato import EstadoConContrato
+        from app.models.licitaciones.estados.estado_finalizada import EstadoFinalizada
+        from app.models.licitaciones.estados.estado_cancelada import EstadoCancelada
         
         estados_map = {
             "BORRADOR": EstadoBorrador,

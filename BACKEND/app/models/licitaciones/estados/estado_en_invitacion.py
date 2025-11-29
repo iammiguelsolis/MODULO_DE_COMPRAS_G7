@@ -1,4 +1,4 @@
-from app.licitaciones.models.estados.estado_licitacion_state import EstadoLicitacionState
+from app.models.licitaciones.estados.estado_licitacion_state import EstadoLicitacionState
 
 class EstadoEnInvitacion(EstadoLicitacionState):
     """
@@ -12,7 +12,7 @@ class EstadoEnInvitacion(EstadoLicitacionState):
         """
         # Nota: Asumimos que licitacion.propuestas es una lista o relación
         if getattr(self.licitacion, 'propuestas', []) and len(self.licitacion.propuestas) > 0:
-            from app.licitaciones.models.estados.estado_con_propuestas import EstadoConPropuestas
+            from app.models.licitaciones.estados.estado_con_propuestas import EstadoConPropuestas
             return EstadoConPropuestas(self.licitacion)
         else:
             return self.cancelar()

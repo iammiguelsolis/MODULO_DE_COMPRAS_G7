@@ -1,4 +1,4 @@
-from app.licitaciones.models.estados.estado_licitacion_state import EstadoLicitacionState
+from app.models.licitaciones.estados.estado_licitacion_state import EstadoLicitacionState
 
 class EstadoNueva(EstadoLicitacionState):
     """
@@ -11,7 +11,7 @@ class EstadoNueva(EstadoLicitacionState):
         Si se enviaron invitaciones y se finalizó el periodo -> EN_INVITACION
         """
         if getattr(self.licitacion, 'invitaciones_enviadas', False):
-            from app.licitaciones.models.estados.estado_en_invitacion import EstadoEnInvitacion
+            from app.models.licitaciones.estados.estado_en_invitacion import EstadoEnInvitacion
             return EstadoEnInvitacion(self.licitacion)
         return self
     

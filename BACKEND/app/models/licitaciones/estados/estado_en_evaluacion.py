@@ -1,4 +1,4 @@
-from app.licitaciones.models.estados.estado_licitacion_state import EstadoLicitacionState
+from app.models.licitaciones.estados.estado_licitacion_state import EstadoLicitacionState
 
 class EstadoEnEvaluacion(EstadoLicitacionState):
     """
@@ -17,7 +17,7 @@ class EstadoEnEvaluacion(EstadoLicitacionState):
         aprobadas = [p for p in propuestas if getattr(p, 'aprobada_tecnicamente', False)]
         
         if len(aprobadas) > 0:
-            from app.licitaciones.models.estados.estado_evaluacion_economia import EstadoEvaluacionEconomia
+            from app.models.licitaciones.estados.estado_evaluacion_economia import EstadoEvaluacionEconomia
             return EstadoEvaluacionEconomia(self.licitacion)
         else:
             return self.cancelar()

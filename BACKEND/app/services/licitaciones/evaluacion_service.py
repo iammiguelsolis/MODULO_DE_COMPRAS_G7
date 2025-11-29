@@ -1,8 +1,8 @@
 from app.bdd import db
-from app.licitaciones.models.licitacion import Licitacion
-from app.licitaciones.models.supervisores.supervisor_compra import SupervisorCompra
-from app.licitaciones.models.supervisores.supervisor_tecnico import SupervisorTecnico
-from app.licitaciones.models.supervisores.supervisor_economico import SupervisorEconomico
+from app.models.licitaciones.licitacion import Licitacion
+from app.models.licitaciones.supervisores.supervisor_compra import SupervisorCompra
+from app.models.licitaciones.supervisores.supervisor_tecnico import SupervisorTecnico
+from app.models.licitaciones.supervisores.supervisor_economico import SupervisorEconomico
 
 class EvaluacionService:
     """

@@ -1,5 +1,5 @@
 from app.bdd import db
-from app.licitaciones.models.licitacion import Licitacion
+from app.models.licitaciones.licitacion import Licitacion
 
 class ContratoService:
     """

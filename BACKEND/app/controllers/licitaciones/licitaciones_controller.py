@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
-from app.licitaciones.services.licitacion_service import LicitacionService
-from app.licitaciones.dtos.licitacion_dto import LicitacionResponseDTO
+from app.services.licitaciones.licitacion_service import LicitacionService
+from app.dtos.licitaciones.licitacion_dto import LicitacionResponseDTO
 
 licitaciones_bp = Blueprint('licitaciones', __name__, url_prefix='/api/licitaciones')
 service = LicitacionService()

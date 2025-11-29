@@ -1,4 +1,4 @@
-from app.licitaciones.models.estados.estado_licitacion_state import EstadoLicitacionState
+from app.models.licitaciones.estados.estado_licitacion_state import EstadoLicitacionState
 
 class EstadoBorrador(EstadoLicitacionState):
     """
@@ -14,7 +14,7 @@ class EstadoBorrador(EstadoLicitacionState):
         # Nota: Asumimos que la licitación tiene un atributo 'aprobada_por_supervisor'
         # que se setea antes de llamar a siguiente()
         if getattr(self.licitacion, 'aprobada_por_supervisor', False):
-            from app.licitaciones.models.estados.estado_nueva import EstadoNueva
+            from app.models.licitaciones.estados.estado_nueva import EstadoNueva
             return EstadoNueva(self.licitacion)
         else:
             return self.cancelar()

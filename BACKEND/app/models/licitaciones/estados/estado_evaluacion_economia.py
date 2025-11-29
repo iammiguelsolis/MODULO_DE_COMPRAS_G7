@@ -1,4 +1,4 @@
-from app.licitaciones.models.estados.estado_licitacion_state import EstadoLicitacionState
+from app.models.licitaciones.estados.estado_licitacion_state import EstadoLicitacionState
 
 class EstadoEvaluacionEconomia(EstadoLicitacionState):
     """
@@ -16,11 +16,11 @@ class EstadoEvaluacionEconomia(EstadoLicitacionState):
         """
         # Verificar que hay un ganador
         if getattr(self.licitacion, 'propuesta_ganadora', None):
-            from app.licitaciones.models.estados.estado_adjudicada import EstadoAdjudicada
+            from app.models.licitaciones.estados.estado_adjudicada import EstadoAdjudicada
             return EstadoAdjudicada(self.licitacion)
         else:
             # Cancelar si no hay ganador viable
-            from app.licitaciones.models.estados.estado_cancelada import EstadoCancelada
+            from app.models.licitaciones.estados.estado_cancelada import EstadoCancelada
             return EstadoCancelada(self.licitacion)
     
     def puede_evaluar(self):

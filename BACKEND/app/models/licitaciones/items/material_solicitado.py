@@ -1,6 +1,6 @@
 from app.bdd import db
-from app.licitaciones.models.items.item_solicitado import ItemSolicitado
-from app.licitaciones.enums.tipo_item import TipoItem
+from app.models.licitaciones.items.item_solicitado import ItemSolicitado
+from app.enums.licitaciones.tipo_item import TipoItem
 
 class MaterialSolicitado(ItemSolicitado):
     """

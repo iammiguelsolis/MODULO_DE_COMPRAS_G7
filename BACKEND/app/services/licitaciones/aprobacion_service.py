@@ -1,6 +1,6 @@
 from app.bdd import db
-from app.licitaciones.models.licitacion import Licitacion
-from app.licitaciones.models.supervisores.supervisor_compra import SupervisorCompra
+from app.models.licitaciones.licitacion import Licitacion
+from app.models.licitaciones.supervisores.supervisor_compra import SupervisorCompra
 
 class AprobacionService:
     """

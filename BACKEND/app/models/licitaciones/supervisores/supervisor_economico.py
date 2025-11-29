@@ -1,5 +1,5 @@
-from app.licitaciones.models.supervisores.supervisor import Supervisor
-from app.licitaciones.enums.tipo_supervisor import TipoSupervisor
+from app.models.licitaciones.supervisores.supervisor import Supervisor
+from app.enums.licitaciones.tipo_supervisor import TipoSupervisor
 
 class SupervisorEconomico(Supervisor):
     """

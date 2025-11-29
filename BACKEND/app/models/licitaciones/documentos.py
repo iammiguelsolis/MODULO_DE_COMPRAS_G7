@@ -1,5 +1,5 @@
 from app.bdd import db
-from app.licitaciones.enums.tipo_documento import TipoDocumento
+from app.enums.licitaciones.tipo_documento import TipoDocumento
 
 class Documento(db.Model):
     """

@@ -1,16 +1,3 @@
-from flask import Blueprint, request, jsonify
-from app.licitaciones.services.propuesta_service import PropuestaService
-
-propuestas_bp = Blueprint('propuestas', __name__, url_prefix='/api/licitaciones')
-service = PropuestaService()
-
-from app.licitaciones.dtos.propuesta_dto import PropuestaResponseDTO
-
-@propuestas_bp.route('/<int:id>/propuestas', methods=['GET'])
-def listar_propuestas(id):
-    """
-    GET /api/licitaciones/{id}/propuestas
-    Lista las propuestas de una licitación.
     """
     try:
         # Obtener licitación para verificar existencia (opcional pero recomendado)

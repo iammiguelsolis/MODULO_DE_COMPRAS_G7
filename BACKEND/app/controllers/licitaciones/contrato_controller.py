@@ -1,5 +1,5 @@
 from flask import Blueprint, request, jsonify
-from app.licitaciones.services.contrato_service import ContratoService
+from app.services.licitaciones.contrato_service import ContratoService
 
 contrato_bp = Blueprint('contrato', __name__, url_prefix='/api/licitaciones')
 service = ContratoService()

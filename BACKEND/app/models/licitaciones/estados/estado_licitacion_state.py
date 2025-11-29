@@ -42,5 +42,5 @@ class EstadoLicitacionState(ABC):
         """
         Transición forzada al estado CANCELADA.
         """
-        from app.licitaciones.models.estados.estado_cancelada import EstadoCancelada
+        from app.models.licitaciones.estados.estado_cancelada import EstadoCancelada
         return EstadoCancelada(self.licitacion)
