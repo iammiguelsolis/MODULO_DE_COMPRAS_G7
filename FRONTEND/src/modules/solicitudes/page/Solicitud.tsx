@@ -15,7 +15,6 @@ interface ItemType {
   quantity: number;
   price: string;
 }
-
 const Solicitud: React.FC = () => {
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
