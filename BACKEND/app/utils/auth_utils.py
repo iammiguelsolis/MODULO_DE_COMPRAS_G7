@@ -1,4 +1,5 @@
 # app/utils/auth_utils.py
+"""
 from functools import wraps
 from flask import session, redirect, url_for, flash
 
@@ -10,3 +11,4 @@ def login_requerido(f):
             return redirect(url_for('auth_bp.login'))  # Usa el blueprint correcto
         return f(*args, **kwargs)
     return decorada
+"""

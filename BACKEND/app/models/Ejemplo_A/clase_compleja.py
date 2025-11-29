@@ -1,3 +1,4 @@
+"""
 from app.bdd import db
 from .enums import Dias_Semana
 from sqlalchemy import Enum as SQLEnum
@@ -30,3 +31,4 @@ class Usuario(db.Model):
     def check_password(self, password):
         from app import bcrypt
         return bcrypt.check_password_hash(self.contraseña, password)
+"""

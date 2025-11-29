@@ -10,7 +10,9 @@
 """
 
 
+#En desarrollo, todavia no listo para ejecutar run.py
 
+"""
 from abc import ABC, abstractmethod
 from app.bdd import db
 from .inventario_enums import *
@@ -86,9 +88,10 @@ class Proveedor(db.Model):
     def actualizar_datos(self):
         pass
 
-
+"""
+"""
 class DetallesProveedor:
-    """DTO lógico que agrupa información extendida o derivada del proveedor."""
+    #DTO lógico que agrupa información extendida o derivada del proveedor.
 
     def __init__(
         self,
@@ -111,7 +114,7 @@ class DetallesProveedor:
     # --- Métodos de negocio / validación ---
 
     def evaluar_riesgo_laboral(self) -> str:
-        """Evalúa el riesgo de relaciones laborales del proveedor."""
+        # Evalúa el riesgo de relaciones laborales del proveedor.
         if self.ha_tomado_represalias_contra_sindicato == "Sí" or self.denuncias_incumplimiento_contrato > 10:
             return "Alto"
         elif self.tiene_sindicato and self.tiene_procesos_de_mejora_de_condiciones_laborales:
@@ -119,12 +122,12 @@ class DetallesProveedor:
         return "Medio"
 
     def resumen(self) -> str:
-        """Devuelve un resumen textual."""
+        #Devuelve un resumen textual.
         return (
             f"Trabajadores: {self.numero_trabajadores}, Sindicato: {self.tiene_sindicato}, "
             f"Denuncias: {self.denuncias_incumplimiento_contrato}, Riesgo: {self.evaluar_riesgo_laboral()}"
         )
-
+""""
 
 
 
