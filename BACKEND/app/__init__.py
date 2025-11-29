@@ -3,7 +3,8 @@ from app.bdd import db
 from app.extensiones import bcrypt
 from flask_bcrypt import Bcrypt
 from app.bdd import coneccion
-from app.BP.Colaborador import colaborador_bp
+#Lo de abajo es ejemplo de importacion de BP
+#from app.BP.Colaborador import colaborador_bp
 from sqlalchemy.sql import text #permite ejecutar consultas sql puras 
 import os
 from dotenv import load_dotenv
@@ -11,12 +12,6 @@ from dotenv import load_dotenv
 load_dotenv() # aqui usamos esto para cargar API keys de otros servicios
 
 bcrypt = Bcrypt()
-
-api_key = os.getenv("API_KEY") #ahorita no lo usamos pero lo dejo de referencia
-
-if not api_key:
-    raise ValueError("La clave de API no está configurada correctamente.")
-
 
 def create_app():
     app = Flask(__name__)

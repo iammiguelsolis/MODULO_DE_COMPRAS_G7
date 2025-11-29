@@ -1,0 +1,4 @@
+C:\Python-3.11\python.exe -m venv env
+
+
+pip install -r requirements.txt

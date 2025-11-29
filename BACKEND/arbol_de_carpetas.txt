@@ -1,0 +1,43 @@
+│   bdd.py
+│   extensiones.py
+│   utils.py
+│   __init__.py
+│
+├───BP
+│       Algo.py
+│
+├───enums
+│       ejemplo_enums.py
+│       evaluacion_enums.py
+│       inventario_enums.py
+│       __init__.py
+│
+├───models
+│   ├───clases_puente_inventario
+│   │       as.py
+│   │       conexion_alamacen.py
+│   │
+│   ├───Ejemplo_A
+│   │       clase_compleja.py
+│   │       k1.py
+│   │       k2.py
+│   │       __init__.py
+│   │
+│   ├───Ejemplo_B
+│   │       clase_compleja.py
+│   │       m.py
+│   │       __init__.py
+│   │
+│   └───Evaluacion
+│           core_analisis.py
+│           dominio_orden_compra.py
+│
+├───service
+│       EjemploCliente.py
+│       EjemploService.py
+│
+├───templates
+│
+└───utils
+        auth_utils.py
+        __init__.py

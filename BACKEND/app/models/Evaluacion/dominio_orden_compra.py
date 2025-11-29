@@ -48,6 +48,8 @@ class LineaOC(db.Model):
     def verificar_estado():
         pass
 
+from typing import Optional
+
 class DetallesLineaOC:
     """Lógica de negocio y validación para los detalles de una línea de orden de compra."""
 
