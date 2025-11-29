@@ -1,0 +1,7 @@
+.document-selector-container {
+  position: relative;
+}
+
+.document-selector-container .empty-state {
+  margin-top: 1rem;
+}

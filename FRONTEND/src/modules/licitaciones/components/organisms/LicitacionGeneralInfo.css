@@ -1,0 +1,41 @@
+.general-info-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 0; /* Remove gap, control spacing with padding/border */
+}
+
+/* Target the specific structure of ReadOnlyField within this grid */
+.general-info-grid .readonly-field {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid #f3f4f6;
+  padding: 1rem 0; /* Vertical padding for the row */
+  margin-bottom: 0; /* Override ReadOnlyField margin */
+}
+
+.general-info-grid .readonly-field:last-child {
+  border-bottom: none;
+}
+
+/* Override Label styles */
+.general-info-grid .readonly-field label {
+  margin-bottom: 0;
+  color: #9ca3af; /* Lighter gray for labels */
+  font-weight: 400;
+  font-size: 0.95rem;
+}
+
+/* Override Paragraph (Value) styles to remove the "box" look */
+.general-info-grid .readonly-field p {
+  background-color: transparent;
+  border: none;
+  padding: 0;
+  min-height: auto;
+  margin: 0;
+  text-align: right;
+  font-weight: 600; /* Bold for value */
+  color: #374151; /* Dark gray */
+  font-size: 0.95rem;
+  width: auto; /* Let it shrink/grow as needed */
+}

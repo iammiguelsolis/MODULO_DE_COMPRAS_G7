@@ -1,0 +1,70 @@
+
+.licitaciones-table-card {
+    padding: 0; 
+    overflow: hidden;
+}
+
+.table-responsive {
+    width: 100%;
+    overflow-x: auto; 
+}
+
+.licitaciones-table {
+    width: 100%;
+    border-collapse: collapse; 
+    text-align: left;
+    font-size: 0.9rem; 
+}
+
+.licitaciones-table th,
+.licitaciones-table td {
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid #E5E7EB; 
+    white-space: nowrap;
+}
+
+.licitaciones-table th {
+    background-color: #1989fa; 
+    color: #ffffff; 
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-size: 0.75rem; 
+}
+
+.licitaciones-table tbody tr:last-child td {
+    border-bottom: none; 
+}
+
+.licitaciones-table td {
+    color: #374151;
+}
+
+.licitaciones-table .font-medium {
+    font-weight: 500;
+    color: #1F2937;
+}
+
+.view-details-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid #D1D5DB; 
+    background-color: #FFFFFF; 
+    color: #374151; 
+    transition: all 0.2s ease-in-out;
+}
+
+.view-details-btn:hover {
+    background-color: #F9FAFB;
+    border-color: #B0B5BB; 
+}
+
+.view-details-btn svg {
+    stroke: #6B7280; 
+}

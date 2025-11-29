@@ -1,0 +1,52 @@
+.solicitud-item-card {
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.5rem;
+}
+
+.items-list-container > .solicitud-item-card:not(:last-child) {
+  margin-bottom: 1rem;
+}
+
+.solicitud-item-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 1.5rem 1rem;
+  align-items: flex-end;
+}
+
+.solicitud-item-grid label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.solicitud-col-span-2 {
+  grid-column: span 2 / span 2;
+}
+
+.solicitud-col-span-4 {
+  grid-column: span 4 / span 4;
+}
+
+.solicitud-col-span-full {
+  grid-column: 1 / -1;
+}
+
+.solicitud-total-column {
+  text-align: left;
+  padding-bottom: 0.75rem;
+}
+
+.solicitud-total-column span {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #1f2937;
+}
+
+.solicitud-remove-column {
+  text-align: right;
+}

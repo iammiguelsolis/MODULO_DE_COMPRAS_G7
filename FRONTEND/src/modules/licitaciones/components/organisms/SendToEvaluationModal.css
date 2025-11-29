@@ -1,0 +1,45 @@
+.send-evaluation-body {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.send-icon {
+  color: #3b82f6;
+}
+
+/* Suppliers Proposals Section */
+.suppliers-proposals-section {
+  margin: 8px 0;
+}
+
+.suppliers-proposals-section h4 {
+  margin: 0 0 12px 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #374151;
+}
+
+.suppliers-proposals-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.suppliers-proposals-list li {
+  padding: 8px 12px;
+  background: #f9fafb;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #374151;
+}
+
+.suppliers-proposals-list li::before {
+  content: "•";
+  color: #2563eb;
+  font-weight: bold;
+  margin-right: 8px;
+}
