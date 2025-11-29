@@ -37,7 +37,10 @@ class Licitacion(db.Model):
     motivo_rechazo = db.Column(db.Text, nullable=True)
     
     # Relaciones
-    # propuestas = db.relationship('PropuestaProveedor', backref='licitacion', lazy=True)
+    propuestas = db.relationship('PropuestaProveedor', backref='licitacion', lazy=True)
+    propuesta_ganadora = db.relationship('PropuestaProveedor', 
+                                       primaryjoin="and_(Licitacion.id_licitacion==PropuestaProveedor.licitacion_id, PropuestaProveedor.es_ganadora==True)",
+                                       uselist=False, viewonly=True)
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

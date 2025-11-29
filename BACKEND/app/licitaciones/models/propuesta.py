@@ -28,4 +28,4 @@ class PropuestaProveedor(db.Model):
     es_ganadora = db.Column(db.Boolean, default=False)
     
     # Relaciones
-    # documentos = db.relationship('Documento', backref='propuesta', lazy=True)
+    documentos = db.relationship('Documento', backref='propuesta', lazy=True)

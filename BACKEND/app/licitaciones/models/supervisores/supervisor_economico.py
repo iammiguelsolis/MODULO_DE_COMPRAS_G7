@@ -9,6 +9,13 @@ class SupervisorEconomico(Supervisor):
     
     def __init__(self, id_supervisor):
         super().__init__(id_supervisor, TipoSupervisor.ECONOMICO)
+
+    def aprobar(self, propuesta, puntuacion, justificacion):
+        """
+        Asigna puntuación y justificación a una propuesta.
+        """
+        propuesta.puntuacion_economica = puntuacion
+        propuesta.justificacion_economica = justificacion
     
     def validar(self, licitacion):
         """
@@ -25,7 +32,7 @@ class SupervisorEconomico(Supervisor):
         ganador = self.seleccionar_ganador(propuestas_tecnicas)
         
         if ganador:
-            licitacion.propuesta_ganadora = ganador
+            ganador.es_ganadora = True
             # Avanzar estado a ADJUDICADA
             # Nota: Esto podría hacerse en el servicio, pero el patrón sugiere que el handler actúa
             licitacion.siguiente_estado() 
