@@ -1,0 +1,28 @@
+.note-box {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 12px;
+}
+
+.note-box-title {
+  margin: 0 0 4px 0;
+  font-weight: 600;
+  font-size: 13px;
+  color: #374151;
+}
+
+.note-box-content {
+  margin: 0;
+  font-size: 13px;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
+.note-box-content p {
+  margin: 0 0 4px 0;
+}
+
+.note-box-content p:last-child {
+  margin-bottom: 0;
+}

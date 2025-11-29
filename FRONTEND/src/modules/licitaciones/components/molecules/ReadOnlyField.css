@@ -1,0 +1,27 @@
+.readonly-field {
+  margin-bottom: 1rem;
+}
+
+.readonly-field:last-child {
+  margin-bottom: 0;
+}
+
+.readonly-field label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #4b5563;
+}
+
+.readonly-field p {
+  background-color: #f9fafb;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  color: #1f2937;
+  border: 1px solid #e5e7eb;
+  white-space: pre-wrap;
+  min-height: 46px;
+  margin: 0;
+}

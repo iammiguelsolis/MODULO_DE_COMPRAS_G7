@@ -1,0 +1,11 @@
+/* Import shared table styles */
+@import "../organisms/LicitacionItemsTable.css";
+
+/* Styles for ReadOnlyItem when used as table row */
+.readonly-item-row {
+  transition: background-color 0.2s;
+}
+
+.readonly-item-row:hover {
+  background-color: #f9fafb;
+}

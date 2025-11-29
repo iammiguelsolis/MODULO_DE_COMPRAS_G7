@@ -1,0 +1,62 @@
+.score-input-container {
+  margin-bottom: 20px;
+}
+
+.score-input-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 8px;
+}
+
+.score-input-label .required {
+  color: #ef4444;
+}
+
+.score-input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.score-input {
+  flex: 1;
+  height: 42px;
+  padding: 10px 50px 10px 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+  color: #111827;
+  background: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.score-input:hover:not(:disabled) {
+  border-color: #9ca3af;
+}
+
+.score-input:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.score-input:disabled {
+  background: #f3f4f6;
+  color: #9ca3af;
+  cursor: not-allowed;
+}
+
+.score-input::placeholder {
+  font-weight: 600;
+  color: #6b7280;
+  pointer-events: none;
+}
+
+.score-input-hint {
+  margin: 6px 0 0 0;
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.4;
+}

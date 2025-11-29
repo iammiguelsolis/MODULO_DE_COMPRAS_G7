@@ -1,5 +1,7 @@
+import React from 'react';
 import { CheckCircle, FileText, X } from "lucide-react";
 import { Button } from "../atoms/Button";
+import { useNavigate } from 'react-router-dom';
 
 interface ItemType {
   id: string;
@@ -19,16 +21,18 @@ interface RequestModalProps {
   purchaseType: string;
 }
 
-export const RequestModal: React.FC<RequestModalProps> = ({ 
-  isOpen, 
-  onClose, 
-  title, 
-  notes, 
-  requestType, 
+export const RequestModal: React.FC<RequestModalProps> = ({
+  isOpen,
+  onClose,
+  title,
+  notes,
+  requestType,
   items,
   totalAmount,
   purchaseType
 }) => {
+  const navigate = useNavigate();
+
   if (!isOpen) return null;
 
   return (
@@ -147,8 +151,13 @@ export const RequestModal: React.FC<RequestModalProps> = ({
           <Button variant="secondary" onClick={onClose}>
             Cerrar
           </Button>
-          <Button variant="primary" onClick={onClose}>
-            Aceptar
+          <Button variant="primary" onClick={() => {
+            if (totalAmount >= 10000) {
+              navigate('/licitaciones/crear');
+            }
+            onClose();
+          }}>
+            {totalAmount >= 10000 ? 'Iniciar Licitación' : 'Aceptar'}
           </Button>
         </div>
       </div>

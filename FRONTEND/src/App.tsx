@@ -2,6 +2,9 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MainLayaout from "./global/layaouts/MainLayaout";
 import Solicitud from "./modules/solicitudes/page/Solicitud";
 import FacturacionApp from "./modules/facturación/page/FacturacionApp";
+import LicitacionesListPage from "./modules/licitaciones/pages/LicitacionesListPage";
+import LicitacionDetailPage from "./modules/licitaciones/pages/LicitacionDetailPage";
+import LicitacionPage from "./modules/licitaciones/pages/LicitacionPage";
 
 function App() {
   return (
@@ -18,7 +21,11 @@ function App() {
 
           <Route path="/proveedores" element={<h1>proveedores</h1>} />
           <Route path="/compras" element={<h1>compras</h1>} />
-          <Route path="/licitaciones" element={<h1>licitaciones</h1>} />
+
+          <Route path="/licitaciones" element={<LicitacionesListPage />} />
+          <Route path="/licitacion/detail" element={<LicitacionDetailPage />} />
+          <Route path="/licitaciones/crear" element={<LicitacionPage />} />
+
           <Route path="/ordenes" element={<h1>ordenes</h1>} />
           <Route path="/facturacion" element={<FacturacionApp />} />
           <Route path="/comparacion" element={<h1>reportes</h1>} />

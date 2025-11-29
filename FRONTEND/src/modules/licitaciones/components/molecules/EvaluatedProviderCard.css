@@ -1,0 +1,62 @@
+.evaluated-provider-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid;
+  margin-bottom: 8px;
+}
+
+.evaluated-provider-card.approved {
+  background-color: #d1fae5;
+  border-color: #6ee7b7;
+  color: #065f46;
+}
+
+.evaluated-provider-card.approved .provider-icon {
+  color: #10b981;
+}
+
+.evaluated-provider-card.rejected {
+  background-color: #fee2e2;
+  border-color: #fca5a5;
+  color: #991b1b;
+}
+
+.evaluated-provider-card.rejected .provider-icon {
+  color: #ef4444;
+}
+
+.provider-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.provider-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+}
+
+.provider-name {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.provider-status {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.provider-score {
+  font-size: 12px;
+  font-weight: 600;
+  color: #059669;
+}
