@@ -8,7 +8,10 @@ class PropuestaProveedor(db.Model):
     
     id_propuesta = db.Column(db.Integer, primary_key=True)
     licitacion_id = db.Column(db.Integer, db.ForeignKey('licitaciones.id_licitacion'))
-    proveedor_id = db.Column(db.Integer) # db.ForeignKey('proveedores.id_proveedor')
+    proveedor_id = db.Column(db.Integer, db.ForeignKey('proveedores.id_proveedor'))
+    
+    # Relación con Proveedor
+    proveedor = db.relationship('Proveedor', backref='propuestas')
     
     fecha_presentacion = db.Column(db.DateTime)
     monto_total = db.Column(db.Numeric(10, 2))

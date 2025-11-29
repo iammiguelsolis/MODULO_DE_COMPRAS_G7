@@ -78,3 +78,8 @@ class PropuestaService:
         except Exception as e:
             db.session.rollback()
             raise e
+    def listar_por_licitacion(self, id_licitacion):
+        """
+        Lista todas las propuestas de una licitación.
+        """
+        return PropuestaProveedor.query.filter_by(licitacion_id=id_licitacion).all()

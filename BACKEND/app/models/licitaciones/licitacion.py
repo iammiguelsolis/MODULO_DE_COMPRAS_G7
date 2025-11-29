@@ -42,6 +42,9 @@ class Licitacion(db.Model):
                                        primaryjoin="and_(Licitacion.id_licitacion==PropuestaProveedor.licitacion_id, PropuestaProveedor.es_ganadora==True)",
                                        uselist=False, viewonly=True)
     
+    # Relación con Items Solicitados
+    items = db.relationship('ItemSolicitado', backref='licitacion', lazy=True)
+    
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         # Inicializa el estado en memoria
