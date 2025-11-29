@@ -3,12 +3,9 @@ from app.bdd import db
 from app.extensiones import bcrypt
 from flask_bcrypt import Bcrypt
 from app.bdd import coneccion
-from app.BP.Colaborador import colaborador_bp
+# Lo de abajo es un ejemplo de como importar una BP
+#from app.BP.Colaborador import colaborador_bp
 from sqlalchemy.sql import text #permite ejecutar consultas sql puras 
-import os
-from dotenv import load_dotenv
-
-load_dotenv() # aqui usamos esto para cargar API keys de otros servicios
 
 bcrypt = Bcrypt()
 
