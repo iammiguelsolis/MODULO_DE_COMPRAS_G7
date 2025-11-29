@@ -52,7 +52,7 @@ const SendToPurchaseOrderModal: React.FC<SendToPurchaseOrderModalProps> = ({
 
                 {/* Winning Provider Section */}
                 <div className="winning-provider-section">
-                    <h4>Proveedor adjudicado:</h4>
+                    <h4>Proveedor adjudicada:</h4>
                     <ul className="winning-provider-list">
                         <li>{providerName}</li>
                     </ul>
