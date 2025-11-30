@@ -7,6 +7,8 @@ from app.bdd import coneccion
 #from app.BP.Colaborador import colaborador_bp
 from sqlalchemy.sql import text #permite ejecutar consultas sql puras 
 
+from app.controllers.solicitudes.solicitudes_controller import solicitudes_bp
+
 bcrypt = Bcrypt()
 
 def create_app():
@@ -22,6 +24,8 @@ def create_app():
     # Registrar Blueprints
     # ejemplo de restro, ahorita tira error si descomento
     # app.register_blueprint(colaborador_bp, url_prefix='/colaborador')
+    
+    app.register_blueprint(solicitudes_bp, url_prefix='/solicitudes')
 
     # 🔴 Manejador de errores
 
