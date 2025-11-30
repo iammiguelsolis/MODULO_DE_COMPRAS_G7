@@ -18,3 +18,22 @@ class Documento(db.Model):
     # Validación técnica
     validado = db.Column(db.Boolean, default=False)
     observaciones = db.Column(db.Text)
+
+class DocumentoRequerido(db.Model):
+    """
+    Modelo para definir qué documentos se requieren en una licitación y sus plantillas.
+    """
+    __tablename__ = 'documentos_requeridos'
+    
+    id_requerido = db.Column(db.Integer, primary_key=True)
+    licitacion_id = db.Column(db.Integer, db.ForeignKey('licitaciones.id_licitacion'))
+    
+    tipo = db.Column(db.Enum(TipoDocumento))
+    obligatorio = db.Column(db.Boolean, default=True)
+    
+    # Información de la plantilla
+    nombre_plantilla = db.Column(db.String(255))
+    ruta_plantilla = db.Column(db.String(500)) # Ruta relativa en frontend/public o URL externa
+    
+    # Relación inversa
+    licitacion = db.relationship('Licitacion', backref=db.backref('documentos_requeridos', lazy=True))

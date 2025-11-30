@@ -36,6 +36,14 @@ def verify_full_lifecycle():
         id_licitacion = res.json['id_licitacion']
         print(f"   ✓ Licitación creada. ID: {id_licitacion}, Estado: BORRADOR")
         
+        # 1.1 VERIFICAR DOCUMENTOS REQUERIDOS (NUEVO)
+        print("   -> Verificando documentos requeridos por defecto...")
+        res_docs = client.get(f'/api/licitaciones/{id_licitacion}/documentos-requeridos')
+        assert res_docs.status_code == 200, f"Failed getting docs: {res_docs.data}"
+        docs = res_docs.json
+        assert len(docs) == 3, f"Se esperaban 3 documentos requeridos, obtenidos {len(docs)}"
+        print(f"   ✓ Documentos requeridos verificados: {len(docs)}")
+        
         # 2. APROBAR (BORRADOR → NUEVA)
         print("\n[2/10] APROBAR LICITACIÓN (BORRADOR → NUEVA)...")
         from app.services.licitaciones.licitacion_service import LicitacionService
@@ -209,7 +217,7 @@ def verify_full_lifecycle():
         print(f"   ✓ Estado: {licitacion.estado_actual.get_nombre()}")
         
         print("\n" + "=" * 80)
-        print("✅ CICLO COMPLETO VERIFICADO EXITOSAMENTE")
+        print("CICLO COMPLETO VERIFICADO EXITOSAMENTE")
         print("=" * 80)
         print(f"\nEstados recorridos:")
         print("  1. BORRADOR")
@@ -221,16 +229,16 @@ def verify_full_lifecycle():
         print("  7. ADJUDICADA")
         print("  8. CON_CONTRATO")
         print("  9. FINALIZADA")
-        print("\n✅ TODAS LAS TRANSICIONES EXITOSAS")
+        print("\nTODAS LAS TRANSICIONES EXITOSAS")
 
 if __name__ == '__main__':
     try:
         verify_full_lifecycle()
     except AssertionError as e:
-        print(f"\n❌ ASSERTION ERROR: {e}")
+        print(f"\nASSERTION ERROR: {e}")
         sys.exit(1)
     except Exception as e:
-        print(f"\n❌ ERROR: {e}")
+        print(f"\nERROR: {e}")
         import traceback
         traceback.print_exc()
         sys.exit(1)

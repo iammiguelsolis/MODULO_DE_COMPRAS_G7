@@ -56,6 +56,43 @@ class LicitacionService:
                 db.session.add(nuevo_item)
             
             db.session.add(licitacion)
+            db.session.flush() # Obtener ID
+
+            # Crear documentos requeridos por defecto
+            from app.models.licitaciones.documentos import DocumentoRequerido
+            from app.enums.licitaciones.tipo_documento import TipoDocumento
+
+            docs_default = [
+                {
+                    'tipo': TipoDocumento.LEGAL,
+                    'nombre': 'Contrato Marco',
+                    'ruta': '/documentos licitaciones/legales/contrato_marco.docx',
+                    'obligatorio': True
+                },
+                {
+                    'tipo': TipoDocumento.TECNICO,
+                    'nombre': 'Especificaciones Técnicas',
+                    'ruta': '/documentos licitaciones/tecnicos/especificaciones.docx',
+                    'obligatorio': True
+                },
+                {
+                    'tipo': TipoDocumento.ECONOMICO,
+                    'nombre': 'Oferta Económica',
+                    'ruta': '/documentos licitaciones/financieros/oferta_economica.xlsx',
+                    'obligatorio': True
+                }
+            ]
+
+            for doc in docs_default:
+                nuevo_doc = DocumentoRequerido(
+                    licitacion_id=licitacion.id_licitacion,
+                    tipo=doc['tipo'],
+                    nombre_plantilla=doc['nombre'],
+                    ruta_plantilla=doc['ruta'],
+                    obligatorio=doc['obligatorio']
+                )
+                db.session.add(nuevo_doc)
+
             db.session.commit()
             return licitacion
             

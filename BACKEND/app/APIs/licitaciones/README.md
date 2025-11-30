@@ -13,6 +13,7 @@ apis/
 ├── evaluaciones.json      # Evaluaciones técnicas y económicas
 ├── adjudicacion.json      # Adjudicación (deprecado)
 ├── contrato.json          # Generación de contratos
+├── documentos.json        # Documentos requeridos y plantillas
 ├── orden-compra.json      # Envío a orden de compra y finalización
 └── proveedores.json       # Gestión de proveedores
 ```
@@ -63,7 +64,12 @@ apis/
 - `POST /licitaciones/{id}/orden-compra` - Crea orden de compra y finaliza proceso
 - Transiciones: `CON_CONTRATO` → `FINALIZADA`
 
-### 8. **Proveedores** (`proveedores.json`)
+### 8. **Documentos Requeridos** (`documentos.json`)
+
+- `GET /licitaciones/{id}/documentos-requeridos` - Lista documentos requeridos y sus plantillas
+- Uso: Estado `NUEVA` - Para descargar plantillas antes de enviar a proveedores
+
+### 9. **Proveedores** (`proveedores.json`)
 
 - `GET /proveedores` - Lista proveedores disponibles para invitar
 - `GET /proveedores/{id}` - Obtiene detalle de proveedor
