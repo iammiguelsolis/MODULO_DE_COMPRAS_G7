@@ -5,6 +5,7 @@ import FacturacionApp from "./modules/facturación/page/FacturacionApp";
 import LicitacionesListPage from "./modules/licitaciones/pages/LicitacionesListPage";
 import LicitacionDetailPage from "./modules/licitaciones/pages/LicitacionDetailPage";
 import LicitacionPage from "./modules/licitaciones/pages/LicitacionPage";
+import ProveedorPage from "./modules/proveedor/page/ProveedorPage";
 
 function App() {
   return (
@@ -19,7 +20,7 @@ function App() {
 
           {/*FALTAN*/}
 
-          <Route path="/proveedores" element={<h1>proveedores</h1>} />
+          <Route path="/proveedores" element={<ProveedorPage />} />
           <Route path="/compras" element={<h1>compras</h1>} />
 
           <Route path="/licitaciones" element={<LicitacionesListPage />} />
