@@ -5,6 +5,7 @@ from flask_bcrypt import Bcrypt
 
 # Importamos el Blueprint
 from app.controllers.solicitudes.solicitudes_controller import solicitudes_bp
+from app.controllers.adquisiciones.adquisiciones_controller import adquisiciones_bp
 
 def create_app():
     app = Flask(__name__)
@@ -21,6 +22,7 @@ def create_app():
 
     # Registro de Blueprints
     app.register_blueprint(solicitudes_bp) 
+    app.register_blueprint(adquisiciones_bp)
 
     with app.app_context():
         from app.models.solicitudes.solicitud import Solicitud
