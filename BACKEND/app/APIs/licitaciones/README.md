@@ -53,9 +53,10 @@ apis/
 
 ### 6. **Contrato** (`contrato.json`)
 
-- `POST /licitaciones/{id}/contrato` - Genera contrato de adjudicación
+- `POST /licitaciones/{id}/contrato/plantilla` - Genera plantilla de contrato (Paso 1)
+- `POST /licitaciones/{id}/contrato` - Carga contrato firmado (Paso 2)
 - `GET /licitaciones/{id}/contrato` - Obtiene información del contrato
-- Transiciones: `ADJUDICADA` → `CON_CONTRATO`
+- Transiciones: `ADJUDICADA` → `CON_CONTRATO` (al completar paso 2)
 
 ### 7. **Orden de Compra** (`orden-compra.json`)
 
@@ -137,13 +138,15 @@ Todos los archivos siguen el estándar **OpenAPI 3.0** e incluyen:
 
 ## Nomenclatura Consistente
 
-Todos los endpoints usan nomenclatura consistente:
+Todos los endpoints usan nomenclatura consistente (Python snake_case):
 
 - `nombre` (no `titulo`)
-- `presupuestoMaximo` (no `limiteMonto` o `presupuesto`)
-- `idLicitacion`, `idPropuesta`, `idContrato`
+- `presupuesto_maximo` (no `limite_monto` o `presupuesto`)
+- `id_licitacion`, `id_propuesta`, `id_contrato`
 - Documentos con `tipo` (LEGAL, TECNICO, ECONOMICO) y `obligatorio`
-- Items separados en `itemsMaterial` e `itemsServicio`
+- Items separados en `items_material` e `items_servicio`
+
+**Nota**: Los contratos de API (JSON) pueden usar camelCase para compatibilidad con frontend TypeScript, pero los modelos internos del backend usan snake_case.
 
 ## Notas de Implementación
 

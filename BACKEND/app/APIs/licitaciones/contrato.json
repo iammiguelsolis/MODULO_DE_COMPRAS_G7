@@ -6,12 +6,12 @@
     "description": "Endpoint para generar contrato de adjudicación"
   },
   "paths": {
-    "/licitaciones/{id}/contrato": {
+    "/licitaciones/{id}/contrato/plantilla": {
       "post": {
         "tags": ["Contratos"],
-        "summary": "Generar contrato de adjudicación",
-        "description": "Genera automáticamente el contrato formal para el proveedor adjudicado. Cambia el estado de ADJUDICADA a CON_CONTRATO.",
-        "operationId": "generarContrato",
+        "summary": "Generar plantilla de contrato",
+        "description": "Paso 1: Genera la plantilla del contrato prellenada con los datos del proveedor ganador.",
+        "operationId": "generarPlantillaContrato",
         "parameters": [
           {
             "name": "id",
@@ -20,8 +20,62 @@
             "required": true,
             "schema": {
               "type": "integer",
-              "format": "int64",
-              "example": 456
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["supervisorId"],
+                "properties": {
+                  "supervisorId": {
+                    "type": "integer",
+                    "description": "ID del supervisor que genera la plantilla"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Plantilla generada exitosamente",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": { "type": "boolean" },
+                    "mensaje": { "type": "string" },
+                    "url_plantilla": { "type": "string" },
+                    "id_contrato": { "type": "integer" }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/licitaciones/{id}/contrato": {
+      "post": {
+        "tags": ["Contratos"],
+        "summary": "Cargar contrato firmado",
+        "description": "Paso 2: Sube el contrato firmado por el usuario y finaliza la etapa de contrato. Cambia el estado a CON_CONTRATO.",
+        "operationId": "cargarContratoFirmado",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la licitación",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
             }
           }
         ],
@@ -31,16 +85,12 @@
             "multipart/form-data": {
               "schema": {
                 "type": "object",
-                "required": ["supervisorId"],
+                "required": ["archivoContrato"],
                 "properties": {
-                  "supervisorId": {
-                    "type": "integer",
-                    "description": "ID del supervisor que genera el contrato"
-                  },
                   "archivoContrato": {
                     "type": "string",
                     "format": "binary",
-                    "description": "Archivo PDF del contrato firmado (opcional si se genera automáticamente)"
+                    "description": "Archivo PDF del contrato firmado"
                   }
                 }
               }
@@ -49,87 +99,22 @@
         },
         "responses": {
           "201": {
-            "description": "Contrato generado exitosamente",
+            "description": "Contrato firmado cargado exitosamente",
             "content": {
               "application/json": {
                 "schema": {
                   "type": "object",
                   "properties": {
-                    "idContrato": {
-                      "type": "integer"
-                    },
-                    "idLicitacion": {
-                      "type": "integer"
-                    },
-                    "estado": {
-                      "type": "string",
-                      "enum": ["CON_CONTRATO"]
-                    },
-                    "proveedor": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "integer"
-                        },
-                        "nombre": {
-                          "type": "string"
-                        },
-                        "ruc": {
-                          "type": "string"
-                        }
-                      }
-                    },
-                    "montoContrato": {
-                      "type": "number"
-                    },
-                    "fechaGeneracion": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "fechaFirma": {
-                      "type": "string",
-                      "format": "date"
-                    },
-                    "urlDocumento": {
-                      "type": "string",
-                      "description": "URL para descargar el contrato PDF"
-                    },
-                    "numeroContrato": {
-                      "type": "string",
-                      "description": "Número único del contrato"
-                    },
-                    "mensaje": {
-                      "type": "string"
-                    }
+                    "success": { "type": "boolean" },
+                    "mensaje": { "type": "string" },
+                    "estado_licitacion": { "type": "string" }
                   }
-                },
-                "example": {
-                  "idContrato": 5001,
-                  "idLicitacion": 456,
-                  "estado": "CON_CONTRATO",
-                  "proveedor": {
-                    "id": 789,
-                    "nombre": "TechSupply S.A.C.",
-                    "ruc": "20123456789"
-                  },
-                  "montoContrato": 145000,
-                  "fechaGeneracion": "2025-11-25T10:00:00",
-                  "fechaFirma": "2025-11-25",
-                  "urlDocumento": "/contratos/5001/documento.pdf",
-                  "numeroContrato": "CONT-2025-5001",
-                  "mensaje": "Contrato generado exitosamente. Puede proceder a enviar a orden de compra."
                 }
               }
             }
           },
           "400": {
-            "description": "Estado inválido (licitación no está ADJUDICADA) o datos incorrectos"
-          },
-          "404": {
-            "description": "Licitación no encontrada"
-          },
-          "500": {
-            "description": "Error interno del servidor"
+            "description": "Error en la carga o falta de plantilla previa"
           }
         }
       },

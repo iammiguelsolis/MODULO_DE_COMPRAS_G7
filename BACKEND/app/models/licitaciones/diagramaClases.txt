@@ -18,7 +18,7 @@ Procedimientos: cambiarEstado(nuevoEstado: EstadoCompra), iniciarComparacionSimp
 
 Contrato
 
-Atributos: idContrato: int, proveedorGanador: Proveedor, fechaGeneracion: Date, solicitudLicitacion: Licitacion, documento: string
+Atributos: idContrato: int, licitacionId: int, proveedorId: int, + fechaGeneracionPlantilla: date, plantillaUrl: String, plantillaUrl: String, fechaCargaFirmado: date, documentoFirmadoUrl: String, estado: EstadoContrato, generadoPor: int
 
 Solicitud <T extends ItemSolicitado>
 
@@ -228,6 +228,10 @@ PENDIENTE, ACTIVO, INACTIVO
 
 COMPRA, LICITACION
 
+<<enumeration>> EstadoContrato
+
+PLANTILLA_GENERADA, FIRMADO_CARGADO
+
 ----------------------------------
 
 Conexiones
@@ -236,4 +240,4 @@ Herencia (Extends): Licitacion y Compra → ProcesoAdquisicion; Comprador y Supe
 
 Implementación (Implements): SupervisorCompra → Aprobable; SupervisorTecnico → AprobableDocumento, AprobablePropuesta; SupervisorEconomico → Puntuar; NotificadorProveedorCorreo, NotificadorProveedorWhatsapp → NotificadorProveedor; NotificadorInventarioHTTP → NotificadorInventario.
 
-Asociación/Composición/Uso: Solicitud → ItemSolicitado (List); ProcesoAdquisicion → Solicitud (origen); ProcesoAdquisicion → OfertaProveedor (List); Contrato → Licitacion, Proveedor;OfertaProveedor → ItemOfertado (List); OfertaProveedor → Proveedor; PropuestaProveedor → Documento (List); MaterialSolicitado → Material; ServicioSolicitado → Servicio; MaterialOfertado → MaterialSolicitado; ServicioOfertado → ServicioSolicitado; OrdenCompra → Solicitud, Proveedor; Proveedor → HistorialProveedor (List); ProveedorBase → ItemSuministrable (List); SolicitudProveedor → EstadoSolicitud; ServicioProveedor → SolicitudProveedor; ServicioProveedor → ProveedorBase; ServicioProveedor → Proveedor.
+Asociación/Composición/Uso: Solicitud → ItemSolicitado (List); ProcesoAdquisicion → Solicitud (origen); ProcesoAdquisicion → OfertaProveedor (List); Contrato → Licitacion, Proveedor;OfertaProveedor → ItemOfertado (List); OfertaProveedor → Proveedor; PropuestaProveedor → Documento (List); MaterialSolicitado → Material; ServicioSolicitado → Servicio; MaterialOfertado → MaterialSolicitado; ServicioOfertado → ServicioSolicitado; OrdenCompra → Solicitud, Proveedor; Proveedor → HistorialProveedor (List); ProveedorBase → ItemSuministrable (List); SolicitudProveedor → EstadoSolicitud; ServicioProveedor → SolicitudProveedor; ServicioProveedor → ProveedorBase; ServicioProveedor → Proveedor; Contrato → EstadoContrato

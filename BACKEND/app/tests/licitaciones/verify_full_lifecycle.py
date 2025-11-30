@@ -173,25 +173,30 @@ def verify_full_lifecycle():
         print(f"   ✓ Estado: {licitacion.estado_actual.get_nombre()}")
         print(f"   ✓ Ganador: Proveedor ID {licitacion.propuesta_ganadora.proveedor_id}")
         
-        # 9. GENERAR CONTRATO (ADJUDICADA → CON_CONTRATO)
-        print("\n[9/10] GENERAR CONTRATO (ADJUDICADA → CON_CONTRATO)...")
+        # 9. GESTIÓN DE CONTRATO (ADJUDICADA → CON_CONTRATO)
+        print("\n[9/10] GESTIÓN DE CONTRATO (→ CON_CONTRATO)...")
         
+        # Paso 1: Generar Plantilla
+        print("   -> Generando plantilla de contrato...")
+        data_plantilla = {"supervisorId": 1}
+        res_plantilla = client.post(f'/api/licitaciones/{id_licitacion}/contrato/plantilla', json=data_plantilla)
+        assert res_plantilla.status_code == 201, f"Failed Template: {res_plantilla.data}"
+        print("   ✓ Plantilla generada")
+        
+        # Paso 2: Cargar Firmado
+        print("   -> Cargando contrato firmado...")
         data_contrato = {
-            'supervisorId': 1
+            "archivoContrato": (io.BytesIO(b"%PDF-1.4 content"), 'contrato_firmado.pdf')
         }
-        
-        archivo = (io.BytesIO(b"contrato firmado PDF"), 'contrato.pdf')
-        data_files = {'archivoContrato': archivo}
-        data_post = {**data_contrato, **data_files}
-        
-        res = client.post(f'/api/licitaciones/{id_licitacion}/contrato',
-                          data=data_post,
-                          content_type='multipart/form-data')
-        assert res.status_code == 201, f"Failed: {res.data}"
+        res = client.post(f'/api/licitaciones/{id_licitacion}/contrato', 
+                         data=data_contrato, 
+                         content_type='multipart/form-data')
+        assert res.status_code == 201, f"Failed Upload: {res.data}"
         
         licitacion = service.obtener_por_id(id_licitacion)
-        assert licitacion.estado_actual.get_nombre() == "CON_CONTRATO"
-        print(f"   ✓ Estado: {licitacion.estado_actual.get_nombre()}")
+        assert licitacion.estado_actual.get_nombre() == "CON_CONTRATO", f"Estado esperado CON_CONTRATO, actual {licitacion.estado_actual.get_nombre()}"
+        assert licitacion.contrato.estado.value == "FIRMADO_CARGADO", "El contrato debería estar en estado FIRMADO_CARGADO"
+        print(f"   ✓ Contrato firmado cargado. Estado: {licitacion.estado_actual.get_nombre()}")
         
         # 10. ENVIAR A ORDEN DE COMPRA (CON_CONTRATO → FINALIZADA)
         print("\n[10/10] ENVIAR A ORDEN DE COMPRA (CON_CONTRATO → FINALIZADA)...")
