@@ -10,12 +10,11 @@ from app import create_app, db
 
 def verify_api():
     app = create_app()
-    app.config['TESTING'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-    
     client = app.test_client()
     
     with app.app_context():
+        # Limpiar y recrear BD antes de cada test
+        db.drop_all()
         db.create_all()
         
         print("--- INICIANDO VERIFICACIÓN DE API ---")

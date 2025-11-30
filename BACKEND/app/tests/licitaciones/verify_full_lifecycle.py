@@ -10,11 +10,6 @@ from app import create_app, db
 
 def verify_full_lifecycle():
     app = create_app()
-    
-    # ✅ CONFIGURAR PARA USAR :memory: (NO archivo)
-    app.config['TESTING'] = True
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
-    
     client = app.test_client()
     
     with app.app_context():
