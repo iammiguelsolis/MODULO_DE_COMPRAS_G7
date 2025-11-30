@@ -58,28 +58,17 @@ class LicitacionService:
             db.session.add(licitacion)
             db.session.flush() # Obtener ID
 
-            # Crear documentos requeridos por defecto
+            # Crear documento requerido por defecto (Propuesta Económica SIEMPRE es obligatoria)
+            # Los demás documentos requeridos se agregarán dinámicamente según la selección del comprador
             from app.models.licitaciones.documentos import DocumentoRequerido
             from app.enums.licitaciones.tipo_documento import TipoDocumento
-
+            
             docs_default = [
                 {
-                    'tipo': TipoDocumento.LEGAL,
-                    'nombre': 'Contrato Marco',
-                    'ruta': '/documentos licitaciones/legales/contrato_marco.docx',
-                    'obligatorio': True
-                },
-                {
-                    'tipo': TipoDocumento.TECNICO,
-                    'nombre': 'Especificaciones Técnicas',
-                    'ruta': '/documentos licitaciones/tecnicos/especificaciones.docx',
-                    'obligatorio': True
-                },
-                {
                     'tipo': TipoDocumento.ECONOMICO,
-                    'nombre': 'Oferta Económica',
-                    'ruta': '/documentos licitaciones/financieros/oferta_economica.xlsx',
-                    'obligatorio': True
+                    'nombre': 'Propuesta Económica',
+                    'ruta': 'https://xoghfokrptchamewjcrc.supabase.co/storage/v1/object/public/plantillas-licitaciones/financieros/Plantilla%20-%20Propuesta%20Economica.docx',
+                    'obligatorio': True  # ✓ ÚNICO DOCUMENTO SIEMPRE OBLIGATORIO (constants.ts línea 216)
                 }
             ]
 

@@ -41,8 +41,10 @@ def verify_full_lifecycle():
         res_docs = client.get(f'/api/licitaciones/{id_licitacion}/documentos-requeridos')
         assert res_docs.status_code == 200, f"Failed getting docs: {res_docs.data}"
         docs = res_docs.json
-        assert len(docs) == 3, f"Se esperaban 3 documentos requeridos, obtenidos {len(docs)}"
-        print(f"   ✓ Documentos requeridos verificados: {len(docs)}")
+        assert len(docs) == 1, f"Se esperaba 1 documento requerido (Propuesta Económica), obtenidos {len(docs)}"
+        print(f"   ✓ Documento requerido verificado: {len(docs)}")
+        for d in docs:
+            print(f"     - {d['nombre_plantilla']}: {d['ruta_plantilla']}")
         
         # 2. APROBAR (BORRADOR → NUEVA)
         print("\n[2/10] APROBAR LICITACIÓN (BORRADOR → NUEVA)...")
@@ -105,8 +107,8 @@ def verify_full_lifecycle():
             }
             
             data_files = {
-                'documentosLegales': (io.BytesIO(b"dummy legal"), f'legal_{i}.pdf'),
-                'documentosTecnicos': (io.BytesIO(b"dummy tech"), f'tech_{i}.pdf'),
+                # 'documentosLegales': (io.BytesIO(b"dummy legal"), f'legal_{i}.pdf'),
+                # 'documentosTecnicos': (io.BytesIO(b"dummy tech"), f'tech_{i}.pdf'),
                 'documentosEconomicos': (io.BytesIO(b"dummy eco"), f'eco_{i}.pdf')
             }
             
@@ -181,7 +183,6 @@ def verify_full_lifecycle():
         print(f"   ✓ Estado: {licitacion.estado_actual.get_nombre()}")
         print(f"   ✓ Ganador: Proveedor ID {licitacion.propuesta_ganadora.proveedor_id}")
         
-        # 9. GESTIÓN DE CONTRATO (ADJUDICADA → CON_CONTRATO)
         print("\n[9/10] GESTIÓN DE CONTRATO (→ CON_CONTRATO)...")
         
         # Paso 1: Generar Plantilla
@@ -189,7 +190,7 @@ def verify_full_lifecycle():
         data_plantilla = {"supervisorId": 1}
         res_plantilla = client.post(f'/api/licitaciones/{id_licitacion}/contrato/plantilla', json=data_plantilla)
         assert res_plantilla.status_code == 201, f"Failed Template: {res_plantilla.data}"
-        print("   ✓ Plantilla generada")
+        print(f"   ✓ Plantilla generada: {res_plantilla.json.get('url_plantilla')}")
         
         # Paso 2: Cargar Firmado
         print("   -> Cargando contrato firmado...")

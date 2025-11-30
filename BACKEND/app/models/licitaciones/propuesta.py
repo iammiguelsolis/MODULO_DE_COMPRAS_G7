@@ -14,10 +14,6 @@ class PropuestaProveedor(db.Model):
     proveedor = db.relationship('Proveedor', backref='propuestas')
     
     fecha_presentacion = db.Column(db.DateTime)
-    monto_total = db.Column(db.Numeric(10, 2))
-    plazo_entrega_dias = db.Column(db.Integer)
-    garantia_meses = db.Column(db.Integer)
-    comentarios = db.Column(db.Text)
     
     # Estado de evaluaciones
     aprobada_tecnicamente = db.Column(db.Boolean, default=False)

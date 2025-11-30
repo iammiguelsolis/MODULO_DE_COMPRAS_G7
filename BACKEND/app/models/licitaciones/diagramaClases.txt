@@ -88,7 +88,7 @@ Procedimientos: calcularMontoTotal(): float, agregarItemOfertado(item: T): void
 
 PropuestaProveedor
 
-Atributos: documentos: List<Documento>, evaluacionTecnica: EvaluacionTecnica, evaluacionEconomica: EvaluacionEconomica
+Atributos: documentos: List<Documento>, fechaPresentacion: date, aprobadaTecnicamente: boolean, motivoRechazoTecnico: string, aprobadaEconomicamente: boolean, puntuacionEconomica: float, justificacionEconomica: string, motivoRechazoEconomico: string, esGanadora: boolean
 
 Procedimientos: estaTecAprobado(): Boolean, estaEcoAprobado(): Boolean
 
@@ -240,4 +240,4 @@ Herencia (Extends): Licitacion y Compra → ProcesoAdquisicion; Comprador y Supe
 
 Implementación (Implements): SupervisorCompra → Aprobable; SupervisorTecnico → AprobableDocumento, AprobablePropuesta; SupervisorEconomico → Puntuar; NotificadorProveedorCorreo, NotificadorProveedorWhatsapp → NotificadorProveedor; NotificadorInventarioHTTP → NotificadorInventario.
 
-Asociación/Composición/Uso: Solicitud → ItemSolicitado (List); ProcesoAdquisicion → Solicitud (origen); ProcesoAdquisicion → OfertaProveedor (List); Contrato → Licitacion, Proveedor;OfertaProveedor → ItemOfertado (List); OfertaProveedor → Proveedor; PropuestaProveedor → Documento (List); MaterialSolicitado → Material; ServicioSolicitado → Servicio; MaterialOfertado → MaterialSolicitado; ServicioOfertado → ServicioSolicitado; OrdenCompra → Solicitud, Proveedor; Proveedor → HistorialProveedor (List); ProveedorBase → ItemSuministrable (List); SolicitudProveedor → EstadoSolicitud; ServicioProveedor → SolicitudProveedor; ServicioProveedor → ProveedorBase; ServicioProveedor → Proveedor; Contrato → EstadoContrato
+Asociación/Composición/Uso: Solicitud → ItemSolicitado (List); ProcesoAdquisicion → Solicitud (origen); ProcesoAdquisicion → OfertaProveedor (List); Contrato → Licitacion, Proveedor;OfertaProveedor → ItemOfertado (List); OfertaProveedor → Proveedor; PropuestaProveedor → Documento (List); MaterialSolicitado → Material; ServicioSolicitado → Servicio; MaterialOfertado → MaterialSolicitado; ServicioOfertado → ServicioSolicitado; OrdenCompra → Solicitud, Proveedor; Proveedor → HistorialProveedor (List); ProveedorBase → ItemSuministrable (List); SolicitudProveedor → EstadoSolicitud; ServicioProveedor → SolicitudProveedor; ServicioProveedor → ProveedorBase; ServicioProveedor → Proveedor; Contrato → EstadoContrato; SupervisorTecnico → Evaluacion; SupervisorEconomico → Evaluacion;  
