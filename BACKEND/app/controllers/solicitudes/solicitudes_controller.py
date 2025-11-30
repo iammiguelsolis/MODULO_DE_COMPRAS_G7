@@ -38,3 +38,21 @@ def obtener_solicitud(id):
     return jsonify(solicitud.to_dict()), 200
   except Exception as e:
     return jsonify({'error': 'Error al obtener la solicitud', 'detalle': str(e)}), 500
+  
+  
+@solicitudes_bp.route('/<int:id>/aprobar', methods=['PUT'])
+def aprobar_solicitud(id):
+  try:
+    solicitud = service.procesar_aprobacion(id)
+    return jsonify(solicitud.to_dict()), 200
+  except Exception as e:
+    return jsonify({'error': 'Error al aprobar la solicitud', 'detalle': str(e)}), 500
+  
+  
+@solicitudes_bp.route('/<int:id>/rechazar', methods=['PUT'])
+def rechazar_solicitud(id):
+  try:
+    solicitud = service.procesar_rechazo(id)
+    return jsonify(solicitud.to_dict()), 200
+  except Exception as e:
+    return jsonify({'error': 'Error al rechazar la solicitud', 'detalle': str(e)}), 500

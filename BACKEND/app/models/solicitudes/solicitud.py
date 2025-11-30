@@ -1,6 +1,6 @@
 from app.bdd import db
 from app.models.solicitudes.items import ItemSolicitado
-from app.models.solicitudes.estados import Borrador, Pendiente, Aprobada, Rechazada
+from app.models.solicitudes.estados import Pendiente, Aprobada, Rechazada
 
 class Solicitud(db.Model):
   
@@ -12,24 +12,23 @@ class Solicitud(db.Model):
   notas_adicionales = db.Column(db.Text)
   fecha_creacion = db.Column(db.DateTime, default=db.func.now())
   
-  _estado_str = db.Column('estado', db.String(20), nullable=False, default='BORRADOR')
+  _estado_str = db.Column('estado', db.String(20), nullable=False, default='PENDIENTE')
   
   items = db.relationship('ItemSolicitado', backref='solicitud', cascade="all, delete-orphan")
   
   def __init__(self, titulo, notas_adicionales=None):
     self.titulo = titulo
     self.notas_adicionales = notas_adicionales
-    self._estado_str = "BORRADOR"
+    self._estado_str = "PENDIENTE"
     
   @property
   def estado(self):
     mapeo = {
-      'BORRADOR': Borrador(),
       'PENDIENTE': Pendiente(),
       'APROBADA': Aprobada(),
       'RECHAZADA': Rechazada()
     }
-    return mapeo.get(self._estado_str, Borrador())
+    return mapeo.get(self._estado_str, Pendiente())
   
   def set_estado(self, nuevo_estado_obj):
     self._estado_str = nuevo_estado_obj.nombre()

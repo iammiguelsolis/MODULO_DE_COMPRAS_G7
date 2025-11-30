@@ -62,3 +62,14 @@ class SolicitudService:
     except Exception as e:
       db.session.rollback()
       raise e
+  
+  def procesar_rechazo(self, id_solicitud):
+    solicitud = self.obtener_por_id(id_solicitud)
+  
+    try:
+      solicitud.rechazar()
+      db.session.commit()
+      return solicitud
+    except Exception as e:
+      db.session.rollback()
+      raise e
