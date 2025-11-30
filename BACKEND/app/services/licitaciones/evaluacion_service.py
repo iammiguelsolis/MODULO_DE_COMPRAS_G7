@@ -104,6 +104,9 @@ class EvaluacionService:
                     else:
                         supervisor.rechazar_propuesta(propuesta, motivo)
             
+            # Asegurar que los cambios estén en la sesión antes de verificar
+            db.session.flush()
+            
             # Intentar avanzar estado (Si hay aprobadas -> EVALUACION_ECONOMIA)
             # El método siguiente() del estado EVALUACION_TECNICA hace esta validación
             licitacion.siguiente_estado()

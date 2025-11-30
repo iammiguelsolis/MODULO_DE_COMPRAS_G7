@@ -1,5 +1,6 @@
 from app.bdd import db
 from app.models.licitaciones.licitacion import Licitacion
+from app.models.licitaciones.propuesta import PropuestaProveedor
 
 class OrdenCompraIntegrationService:
     """
@@ -16,8 +17,12 @@ class OrdenCompraIntegrationService:
         if not licitacion:
             raise ValueError("Licitación no encontrada")
             
-        # Verificar que haya un ganador
-        propuesta_ganadora = licitacion.propuesta_ganadora
+        # Verificar que haya un ganador (cargar con relación proveedor)
+        from sqlalchemy.orm import joinedload
+        propuesta_ganadora = db.session.query(PropuestaProveedor).options(
+            joinedload(PropuestaProveedor.proveedor)
+        ).filter_by(id_propuesta=licitacion.propuesta_ganadora.id_propuesta).first() if licitacion.propuesta_ganadora else None
+        
         if not propuesta_ganadora:
             raise ValueError("La licitación no tiene una propuesta ganadora adjudicada")
             
@@ -74,14 +79,8 @@ class OrdenCompraIntegrationService:
             licitacion = Licitacion.query.get(id_licitacion)
             licitacion.contrato_generado = True
             
-            # Avanzar estado a CON_CONTRATO o FINALIZADA
-            # Asumimos que generar OC implica cerrar el proceso de licitación en este lado
-            # O moverlo a un estado de 'ESPERANDO_OC'. 
-            # Según diagrama: ADJUDICADA -> CON_CONTRATO
-            
-            # Forzamos cambio de estado si existe la transición
-            # licitacion.cambiar_estado(EstadoConContrato(licitacion)) 
-            # Por ahora usamos la lógica de estados existente si la hay, o solo marcamos el flag.
+            # Avanzar estado CON_CONTRATO -> FINALIZADA
+            licitacion.siguiente_estado()
             
             db.session.commit()
             

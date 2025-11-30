@@ -17,6 +17,10 @@ from app.enums.licitaciones.tipo_item import TipoItem
 def run_verification():
     app = create_app()
     
+    # Configurar para usar BD en memoria (no toca archivo ni MySQL)
+    app.config['TESTING'] = True
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///:memory:'
+    
     with app.app_context():
         print("--- INICIANDO VERIFICACIÓN INTEGRAL ---")
         

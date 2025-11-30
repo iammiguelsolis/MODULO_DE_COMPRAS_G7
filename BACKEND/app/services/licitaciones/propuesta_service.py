@@ -23,10 +23,19 @@ class PropuestaService:
             raise ValueError("El periodo de recepción de propuestas no está activo")
             
         try:
+            # Calcular monto_total desde los items (si viene en data_propuesta)
+            items_data = data_propuesta.get('items', [])
+            if isinstance(items_data, str):
+                import json
+                items_data = json.loads(items_data)
+            
+            # Calcular monto total sumando cantidad * precio de cada item
+            monto_total = sum(item.get('cantidad', 0) * item.get('precio', 0) for item in items_data)
+            
             propuesta = PropuestaProveedor(
                 licitacion_id=id_licitacion,
                 proveedor_id=data_propuesta.get('proveedor_id'),
-                monto_total=data_propuesta.get('monto_total'),
+                monto_total=monto_total,  # Calculado automáticamente
                 plazo_entrega_dias=data_propuesta.get('plazo_entrega'),
                 garantia_meses=data_propuesta.get('garantia'),
                 comentarios=data_propuesta.get('comentarios'),
