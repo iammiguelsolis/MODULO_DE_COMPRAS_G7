@@ -9,14 +9,16 @@ class Solicitud(db.Model):
   id = db.Column(db.Integer, primary_key=True)
   
   titulo = db.Column(db.String(100))
+  notas_adicionales = db.Column(db.Text)
   fecha_creacion = db.Column(db.DateTime, default=db.func.now())
   
   _estado_str = db.Column('estado', db.String(20), nullable=False, default='BORRADOR')
   
   items = db.relationship('ItemSolicitado', backref='solicitud', cascade="all, delete-orphan")
   
-  def __init__(self, titulo):
+  def __init__(self, titulo, notas_adicionales=None):
     self.titulo = titulo
+    self.notas_adicionales = notas_adicionales
     self._estado_str = "BORRADOR"
     
   @property
@@ -45,3 +47,6 @@ class Solicitud(db.Model):
     return sum(item.calcular_subtotal() for item in self.items)
 
   def obtener_tipo_solicitud(self):
+    if not self.items:
+      return None
+    return self.items[0].tipo_item
