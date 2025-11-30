@@ -9,9 +9,30 @@ def generar_contrato(id):
     """
     POST /api/licitaciones/{id}/contrato
     Genera el contrato para la licitación adjudicada.
+    Body (Multipart):
+      - supervisorId: int
+      - terminosAdicionales: string
+      - condicionesPago: string
+      - fechaFirma: date string
+      - archivoContrato: file (opcional)
     """
     try:
-        data = request.get_json()
+        # 1. Extraer datos del formulario
+        supervisor_id = request.form.get('supervisorId', type=int)
+        
+        if not supervisor_id:
+             return jsonify({'error': 'Falta supervisorId'}), 400
+
+        data = {
+            'supervisorId': supervisor_id
+        }
+
+        # 2. Manejar archivo (Simulado)
+        archivo = request.files.get('archivoContrato')
+        if archivo:
+            data['archivo_nombre'] = archivo.filename
+            # data['archivo_objeto'] = archivo 
+
         result = service.generar_contrato(id, data)
         return jsonify(result), 201
     except ValueError as e:

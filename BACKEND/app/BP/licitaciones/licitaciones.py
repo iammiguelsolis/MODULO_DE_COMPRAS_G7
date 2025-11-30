@@ -12,7 +12,17 @@ def listar_licitaciones():
     Lista todas las licitaciones.
     """
     try:
-        licitaciones = service.listar_todas()
+        filters = {
+            'estado': request.args.get('estado'),
+            'fechaDesde': request.args.get('fechaDesde'),
+            'fechaHasta': request.args.get('fechaHasta'),
+            'limiteMontoMin': request.args.get('limiteMontoMin', type=float),
+            'limiteMontoMax': request.args.get('limiteMontoMax', type=float)
+        }
+        # Eliminar filtros vacíos
+        filters = {k: v for k, v in filters.items() if v is not None}
+        
+        licitaciones = service.listar_todas(filters)
         response = [LicitacionResponseDTO.from_model(l) for l in licitaciones]
         return jsonify(response), 200
     except Exception as e:

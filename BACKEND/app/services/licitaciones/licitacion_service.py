@@ -15,11 +15,17 @@ class LicitacionService:
         Crea una nueva licitación en estado BORRADOR.
         """
         try:
+            from datetime import datetime
+            
+            fecha_limite = data.get('fecha_limite')
+            if isinstance(fecha_limite, str):
+                fecha_limite = datetime.strptime(fecha_limite, '%Y-%m-%d')
+
             # Crear instancia base
             licitacion = Licitacion(
                 nombre=data.get('nombre'),
                 presupuesto_maximo=data.get('presupuesto_maximo'),
-                fecha_limite=data.get('fecha_limite'),
+                fecha_limite=fecha_limite,
                 solicitud_id=data.get('solicitud_id'),
                 comprador_id=data.get('comprador_id')
             )
@@ -63,11 +69,25 @@ class LicitacionService:
         """
         return Licitacion.query.get(id_licitacion)
     
-    def listar_todas(self):
+    def listar_todas(self, filters=None):
         """
-        Lista todas las licitaciones.
+        Lista todas las licitaciones con filtros opcionales.
         """
-        return Licitacion.query.all()
+        query = Licitacion.query
+        
+        if filters:
+            if filters.get('estado'):
+                query = query.filter(Licitacion._estado_nombre == filters['estado'])
+            if filters.get('fechaDesde'):
+                query = query.filter(Licitacion.fecha_creacion >= filters['fechaDesde'])
+            if filters.get('fechaHasta'):
+                query = query.filter(Licitacion.fecha_creacion <= filters['fechaHasta'])
+            if filters.get('limiteMontoMin'):
+                query = query.filter(Licitacion.presupuesto_maximo >= filters['limiteMontoMin'])
+            if filters.get('limiteMontoMax'):
+                query = query.filter(Licitacion.presupuesto_maximo <= filters['limiteMontoMax'])
+                
+        return query.all()
     
     def avanzar_estado(self, id_licitacion):
         """

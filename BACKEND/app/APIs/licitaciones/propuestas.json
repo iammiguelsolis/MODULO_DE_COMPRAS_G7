@@ -31,13 +31,7 @@
             "multipart/form-data": {
               "schema": {
                 "type": "object",
-                "required": [
-                  "proveedorId",
-                  "items",
-                  "montoOfertado",
-                  "plazoEntrega",
-                  "garantiaMeses"
-                ],
+                "required": ["proveedorId", "items"],
                 "properties": {
                   "proveedorId": {
                     "type": "integer",
@@ -47,18 +41,7 @@
                     "type": "string",
                     "description": "JSON con itemsMaterial e itemsServicio ofertados"
                   },
-                  "montoOfertado": {
-                    "type": "number",
-                    "format": "float"
-                  },
-                  "plazoEntrega": {
-                    "type": "integer",
-                    "description": "Plazo de entrega en días"
-                  },
-                  "garantiaMeses": {
-                    "type": "integer",
-                    "description": "Garantía en meses"
-                  },
+
                   "documentosLegales": {
                     "type": "array",
                     "items": {

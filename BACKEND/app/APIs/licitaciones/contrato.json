@@ -41,19 +41,6 @@
                     "type": "string",
                     "format": "binary",
                     "description": "Archivo PDF del contrato firmado (opcional si se genera automáticamente)"
-                  },
-                  "terminosAdicionales": {
-                    "type": "string",
-                    "description": "Términos o cláusulas adicionales"
-                  },
-                  "condicionesPago": {
-                    "type": "string",
-                    "description": "Condiciones de pago acordadas"
-                  },
-                  "fechaFirma": {
-                    "type": "string",
-                    "format": "date",
-                    "description": "Fecha de firma del contrato"
                   }
                 }
               }

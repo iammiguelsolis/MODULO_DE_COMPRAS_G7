@@ -45,9 +45,9 @@
             }
           },
           {
-            "name": "presupuestoMin",
+            "name": "limiteMontoMin",
             "in": "query",
-            "description": "Presupuesto mínimo",
+            "description": "Límite de monto mínimo",
             "required": false,
             "schema": {
               "type": "number",
@@ -56,9 +56,9 @@
             }
           },
           {
-            "name": "presupuestoMax",
+            "name": "limiteMontoMax",
             "in": "query",
-            "description": "Presupuesto máximo",
+            "description": "Límite de monto máximo",
             "required": false,
             "schema": {
               "type": "number",
@@ -119,7 +119,7 @@
                       "nombre": "Compra de equipos de cómputo",
                       "estado": "NUEVA",
                       "fechaLimite": "2025-12-31",
-                      "presupuestoMaximo": 150000,
+                      "limiteMonto": 150000,
                       "cantidadPropuestas": 0
                     },
                     {
@@ -127,7 +127,7 @@
                       "nombre": "Servicio de limpieza anual",
                       "estado": "CON_PROPUESTAS",
                       "fechaLimite": "2025-11-30",
-                      "presupuestoMaximo": 80000,
+                      "limiteMonto": 80000,
                       "cantidadPropuestas": 3
                     }
                   ],
@@ -212,7 +212,7 @@
                   "estado": "CON_PROPUESTAS",
                   "fechaCreacion": "2025-11-13T10:30:00",
                   "fechaLimite": "2025-12-31T23:59:59",
-                  "presupuestoMaximo": 150000,
+                  "limiteMonto": 150000,
                   "comprador": {
                     "id": 5,
                     "nombre": "Samuel Luque",
@@ -321,7 +321,7 @@
             "type": "string",
             "format": "date"
           },
-          "presupuestoMaximo": {
+          "limiteMonto": {
             "type": "number",
             "format": "float"
           },
@@ -337,7 +337,7 @@
           "nombreSolicitud",
           "items",
           "fechaLimite",
-          "presupuestoMaximo",
+          "limiteMonto",
           "documentosRequeridos"
         ],
         "properties": {
@@ -370,7 +370,7 @@
             "type": "string",
             "format": "date-time"
           },
-          "presupuestoMaximo": {
+          "limiteMonto": {
             "type": "number",
             "format": "float"
           },
@@ -420,7 +420,7 @@
             "type": "string",
             "format": "date-time"
           },
-          "presupuestoMaximo": {
+          "limiteMonto": {
             "type": "number"
           },
           "mensaje": {
