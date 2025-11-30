@@ -39,7 +39,7 @@ const statusOrder: LicitacionStatus[] = [
     'CON_PROPUESTAS',
     'EVALUACION_TECNICA',
     'EVALUACION_ECONOMIA',
-    'ADJUDICADO',
+    'ADJUDICADA',
     'CON_CONTRATO',
     'FINALIZADA'
 ];
@@ -274,7 +274,7 @@ const LicitacionTimeline: React.FC<LicitacionTimelineProps> = ({
                     stepNumber={6}
                     title="En evaluación - Comité de Economía"
                     description={
-                        currentStatus === 'ADJUDICADO' || getStepStatus('EVALUACION_ECONOMIA') === 'completed'
+                        currentStatus === 'ADJUDICADA' || getStepStatus('EVALUACION_ECONOMIA') === 'completed'
                             ? `${propuestasAprobadasEconomicamente} de ${propuestasAprobadasTecnicamente} propuestas aprobadas económicamente`
                             : "Analizando los criterios económicos y financieros"
                     }
@@ -293,17 +293,17 @@ const LicitacionTimeline: React.FC<LicitacionTimelineProps> = ({
 
             <TimelineItem
                 stepNumber={7}
-                title="Adjudicado"
+                title="Adjudicada"
                 description={
-                    currentStatus === 'CON_CONTRATO' || getStepStatus('ADJUDICADO') === 'completed'
+                    currentStatus === 'CON_CONTRATO' || getStepStatus('ADJUDICADA') === 'completed'
                         ? "Contrato de adjudicación generado"
                         : "A la espera del contrato de adjudicación"
                 }
-                status={getStepStatus('ADJUDICADO')}
-                timestamp={timestamps['ADJUDICADO']}
-                statusText={getStatusText('ADJUDICADO')}
+                status={getStepStatus('ADJUDICADA')}
+                timestamp={timestamps['ADJUDICADA']}
+                statusText={getStatusText('ADJUDICADA')}
             >
-                {currentStatus === 'ADJUDICADO' && (
+                {currentStatus === 'ADJUDICADA' && (
                     <Button variant="primary" size="sm" onClick={onGenerarContrato}>
                         <FileText size={16} />
                         Generar contrato

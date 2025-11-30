@@ -93,19 +93,19 @@ const LicitacionDetailPage: React.FC = () => {
     };
 
     const handleIniciarEvaluacionEconomica = () => {
-        // Guardar timestamp de EVALUACION_ECONOMIA y cambiar a ADJUDICADO
+        // Guardar timestamp de EVALUACION_ECONOMIA y cambiar a ADJUDICADA
         setTimestamps(prev => ({
             ...prev,
             ['EVALUACION_ECONOMIA']: getCurrentTimestamp()
         }));
-        setCurrentStatus('ADJUDICADO');
+        setCurrentStatus('ADJUDICADA');
     };
 
     const handleGenerarContrato = () => {
-        // Guardar timestamp de ADJUDICADO y cambiar a CON_CONTRATO
+        // Guardar timestamp de ADJUDICADA y cambiar a CON_CONTRATO
         setTimestamps(prev => ({
             ...prev,
-            ['ADJUDICADO']: getCurrentTimestamp()
+            ['ADJUDICADA']: getCurrentTimestamp()
         }));
         setCurrentStatus('CON_CONTRATO');
     };
