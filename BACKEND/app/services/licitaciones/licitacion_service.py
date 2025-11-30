@@ -68,7 +68,7 @@ class LicitacionService:
                     'tipo': TipoDocumento.ECONOMICO,
                     'nombre': 'Propuesta Económica',
                     'ruta': 'https://xoghfokrptchamewjcrc.supabase.co/storage/v1/object/public/plantillas-licitaciones/financieros/Plantilla%20-%20Propuesta%20Economica.docx',
-                    'obligatorio': True  # ✓ ÚNICO DOCUMENTO SIEMPRE OBLIGATORIO (constants.ts línea 216)
+                    'obligatorio': True
                 }
             ]
 

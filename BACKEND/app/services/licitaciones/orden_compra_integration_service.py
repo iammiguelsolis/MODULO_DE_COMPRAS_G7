@@ -42,15 +42,26 @@ class OrdenCompraIntegrationService:
                 "email": proveedor.email
             },
             "detalles": {
-                "fecha_adjudicacion": str(licitacion.fecha_limite), # O fecha actual
-                "monto_total": float(propuesta_ganadora.monto_total),
-                "moneda": "PEN", # Default por ahora
-                "condiciones_pago": propuesta_ganadora.comentarios, # Usar comentarios como proxy
-                "plazo_entrega_dias": propuesta_ganadora.plazo_entrega_dias
+                "fecha_adjudicacion": str(licitacion.fecha_limite),
+                "monto_total": 0.0,  # Se calculará desde los items en Orden de Compra
+                "moneda": "PEN",
+                "condiciones_pago": None,
+                "plazo_entrega_dias": None
             },
             "items": []
         }
         
+        # Agregar contrato (Regla 4 línea 118: "contrato y documentos del proveedor")
+        from app.models.licitaciones.contrato import Contrato
+        contrato = Contrato.query.filter_by(licitacion_id=id_licitacion).first()
+        if contrato:
+            payload["contrato"] = {
+                "plantilla_url": contrato.plantilla_url,
+                "documento_firmado_url": contrato.documento_firmado_url,
+                "fecha_generacion": str(contrato.fecha_generacion_plantilla) if contrato.fecha_generacion_plantilla else None,
+                "fecha_firmado": str(contrato.fecha_carga_firmado) if contrato.fecha_carga_firmado else None,
+           }
+           
         # Agregar items (pueden ser los solicitados o los ofertados si hubiera detalle por item en oferta)
         # Por ahora usamos los solicitados que es lo que tenemos mapeado
         if hasattr(licitacion, 'items'):
@@ -60,7 +71,7 @@ class OrdenCompraIntegrationService:
                     "descripcion": item.nombre,
                     "cantidad": item.cantidad,
                     "unidad": item.unidad_medida,
-                    "precio_unitario": 0.0 # El precio unitario real vendría del detalle de oferta si existiera
+                    "precio_unitario": 0.0  # El precio unitario real vendría del detalle de oferta si existiera
                 })
                 
         return payload
