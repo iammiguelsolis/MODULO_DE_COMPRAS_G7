@@ -19,3 +19,22 @@ def crear():
     return jsonify({'error': str(e)}), 400
   except Exception as e:
     return jsonify({'error': 'Error al crear la solicitud', 'detalle': str(e)}), 500
+  
+@solicitudes_bp.route('', methods=['GET'])
+def obtener_solicitudes():
+  try:
+    lista_solicitudes = service.obtener_todas()
+    
+    datos_json = [solicitud.to_dict() for solicitud in lista_solicitudes]
+    
+    return jsonify(datos_json), 200
+  except Exception as e:
+    return jsonify({'error': 'Error al obtener las solicitudes', 'detalle': str(e)}), 500
+
+@solicitudes_bp.route('/<int:id>', methods=['GET'])
+def obtener_solicitud(id):
+  try:
+    solicitud = service.obtener_por_id(id)
+    return jsonify(solicitud.to_dict()), 200
+  except Exception as e:
+    return jsonify({'error': 'Error al obtener la solicitud', 'detalle': str(e)}), 500

@@ -1,41 +1,32 @@
-from flask import Flask, get_flashed_messages
-from app.bdd import db
+from flask import Flask
+from app.bdd import db, coneccion # Importamos db y la string de conexion
 from app.extensiones import bcrypt
 from flask_bcrypt import Bcrypt
-from app.bdd import coneccion
-# Lo de abajo es un ejemplo de como importar una BP
-#from app.BP.Colaborador import colaborador_bp
-from sqlalchemy.sql import text #permite ejecutar consultas sql puras 
 
+# Importamos el Blueprint
 from app.controllers.solicitudes.solicitudes_controller import solicitudes_bp
-
-bcrypt = Bcrypt()
 
 def create_app():
     app = Flask(__name__)
+    
+    # Configuraciones
     app.secret_key = '3zM8c.1Z9>@2_x$!;Y`:3u?5'
-    app.config["SQLALCHEMY_DATABASE_URI"]=coneccion #%40 es @ pero escapado
+    app.config["SQLALCHEMY_DATABASE_URI"] = coneccion 
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-    app.config["SECRET_KEY"]='_Cb15q&o~n81'
+    app.config["SECRET_KEY"] = '_Cb15q&o~n81'
 
+    # Inicializar Extensiones
     db.init_app(app)
     bcrypt.init_app(app)
 
-    # Registrar Blueprints
-    # ejemplo de restro, ahorita tira error si descomento
-    # app.register_blueprint(colaborador_bp, url_prefix='/colaborador')
-    
-    app.register_blueprint(solicitudes_bp, url_prefix='/solicitudes')
+    # Registro de Blueprints
+    app.register_blueprint(solicitudes_bp) 
 
-    # 🔴 Manejador de errores
+    with app.app_context():
+        from app.models.solicitudes.solicitud import Solicitud
+        from app.models.solicitudes.items import ItemSolicitado, MaterialSolicitado, ServicioSolicitado
+        
+        db.create_all()
+        print(">>> Base de datos conectada y tablas creadas (si no existían).")
 
-    #Eso de abajo es cuando se hace server side rendering todo en flask, ahorita se maneja por react
-    """
-    @app.errorhandler(404)
-    def pagina_no_encontrada(error):
-        from flask import render_template
-        return render_template("error/404.html"), 404
-    """
-    
     return app
-

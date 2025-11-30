@@ -50,3 +50,14 @@ class Solicitud(db.Model):
     if not self.items:
       return None
     return self.items[0].tipo_item
+  
+  def to_dict(self):
+    return {
+      'id': self.id,
+      'titulo': self.titulo,
+      'notas_adicionales': self.notas_adicionales,
+      'fecha_creacion': self.fecha_creacion.isoformat() if self.fecha_creacion else None,
+      'estado': self._estado_str,
+      'items': [item.to_dict() for item in self.items],
+      'total': self.calcular_total()
+    }
