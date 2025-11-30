@@ -31,7 +31,7 @@ export type LicitacionStatus =
   | "CON_PROPUESTAS"
   | "EVALUACION_TECNICA"
   | "EVALUACION_ECONOMIA"
-  | "ADJUDICADO"
+  | "ADJUDICADA"
   | "CON_CONTRATO"
   | "FINALIZADA"
   | "CANCELADA";
@@ -90,6 +90,7 @@ export interface LicitacionDetail {
   timestamps: Partial<Record<LicitacionStatus, string>>;
   estimatedAmount: number;
   presupuestoMaximo: number;
+  fechaLimite?: string; // Fecha límite para recibir propuestas
   items: Item[];
   requiredDocuments: Documento[];
   providers?: Provider[];

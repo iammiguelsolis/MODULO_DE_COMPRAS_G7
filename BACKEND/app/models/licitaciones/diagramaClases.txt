@@ -1,0 +1,239 @@
+ProcesoAdquisicion (Abstract)
+
+Atributos: estado: EstadoProceso, solicitudOrigen: Solicitud, ofertasRecibidas: List<OfertaProveedor>, propuestaGanadora: OfertaProveedor, notificador: NotificadorProveedor
+
+Procedimientos: registrarPropuesta(oferta: OfertaProveedor): void, seleccionarGanador(ganador: OfertaProveedor): void, cambiarEstado(), invitarProveedores(listaProveedores: List<Proveedor>): void
+
+Licitacion
+
+Atributos: idLicitacion: int, estado: EstadoLicitacion, limiteMonto: float, fechaLimite: Date
+
+Procedimientos: cambiarEstado(nuevoEstado: EstadoLicitacion): void
+
+Compra
+
+Atributos: idCompra: int, estado: EstadoCompra
+
+Procedimientos: cambiarEstado(nuevoEstado: EstadoCompra), iniciarComparacionSimple()
+
+Contrato
+
+Atributos: idContrato: int, proveedorGanador: Proveedor, fechaGeneracion: Date, solicitudLicitacion: Licitacion, documento: string
+
+Solicitud <T extends ItemSolicitado>
+
+Atributos: idSolicitud: int, titulo: String, fechaCreacion: Date, comprador: Comprador, comentarios: String, estado: EstadoSolicitud, items: List<T>
+
+Procedimientos: calcularTotal(): float, setEstado(nuevoEstado: EstadoSolicitud): void, agregarItems(item: T): void, evaluarTipoCompra(umbral: int): TipoCompra, crearOrdenCompra(NotificadorInventario): OrdenCompra
+
+Usuario
+
+Atributos: nombre: String, email: String, salario: float, contrasenia: String
+
+Procedimientos: cambiarContrasenia()
+
+Comprador
+
+Atributos: idComprador: int
+
+Procedimientos: realizarSolicitud()
+
+Supervisor (Abstract)
+
+Atributos: idSupervisor: int, tipo: TipoSupervisor
+
+Procedimientos: procesar(aprobar: bool)
+
+SupervisorCompra
+
+Procedimientos: aprobar(), rechazar()
+
+SupervisorTecnico
+
+Procedimientos: aprobarDocumento(), rechazarDocumento(), aprobarPropuesta(), rechazarPropuesta()
+
+SupervisorEconomico
+
+Procedimientos: aprobar(), rechazar(), puntuar()
+
+ProveedorBase
+
+Atributos: nombre: String, ruc: String, direccion: String, telefono: String, email: String, materialesProporcionados: List<ItemSuministrable>
+
+Proveedor
+
+Atributos: id: String, estado: EstadoProveedor, historialCambios: List<HistorialProveedor>
+
+Procedimientos: editar(): void, confirmar(): void, desactivar(): void
+
+SolicitudProveedor
+
+Atributos: id: String, estado: EstadoSolicitud, solicitudPor: String, revisionPor: String, fechaSolicitud: String, fechaRevision: String
+
+Procedimientos: aprobar(): Proveedor, rechazar(): void
+
+ServicioProveedor
+
+Procedimientos: registrarSolicitud(ProveedorBase): SolicitudProveedor, aprobarSolicitud(idSolicitud: String, supervisorId: String): Proveedor, rechazarSolicitud(idSolicitud: String): void, listarProveedores(): List
+
+HistorialProveedor
+
+Atributos: fecha: String, campoModificado: String, valorAnterior: String, valorPosterior: String
+
+OfertaProveedor <T extends ItemOfertado> (Abstract)
+
+Atributos: idOferta: int, proveedor: Proveedor, itemsOfertados: List<T>
+
+Procedimientos: calcularMontoTotal(): float, agregarItemOfertado(item: T): void
+
+PropuestaProveedor
+
+Atributos: documentos: List<Documento>, evaluacionTecnica: EvaluacionTecnica, evaluacionEconomica: EvaluacionEconomica
+
+Procedimientos: estaTecAprobado(): Boolean, estaEcoAprobado(): Boolean
+
+Documento
+
+Atributos: idDocumento: int, tipo: TipoDocumento, fechaSubida: date, observaciones: string, documento: string, validado: boolean
+
+DocumentoRequerido
+
+Atributos: idRequerido: int, tipo: TipoDocumento, obligatorio: boolean, documento: string
+
+Evaluacion
+
+Atributos: idEvaluacion: int, observaciones: string, fecha: date, tipo: TipoEvaluacion
+
+ItemSuministrable
+
+Atributos: id: int, nombre: String, unidadMedida: String, unidad: String
+
+Procedimientos: getTipoItem(): TipoItem
+
+Material
+
+Atributos: descripcion: String
+
+Procedimientos: getTipoItem(): TipoItem
+
+Servicio
+
+Atributos: descripcion: String
+
+Procedimientos: getTipoItem(): TipoItem
+
+ItemSolicitado (Abstract)
+
+Atributos: comentario: String, fechaEntrega: Date
+
+Procedimientos: getTipo(): TipoItem, getCantidad(): float, getPrecioUnitario(): float, getSubTotal(): float
+
+MaterialSolicitado
+
+Atributos: material: Material, cantidad: int, precioUnitario: float
+
+ServicioSolicitado
+
+Atributos: servicio: Servicio, horas: float, tarifaHora: float
+
+ItemOfertado (Abstract)
+
+Atributos: precioOfertado: float, descripcionProveedor: String, fechaEntrega: Date
+
+Procedimientos: calcularSubtotal(): float, getTipo(): TipoItem
+
+MaterialOfertado
+
+Atributos: materialSolicitado: MaterialSolicitado, cantidadOfertado: int, fechaServicio: Date
+
+ServicioOfertado
+
+Atributos: servicioSolicitado: ServicioSolicitado, fechaEntrega: Date
+
+OrdenCompra
+
+Atributos: idOrdenCompra: int, fechaCreacion: Date, estado: EstadoOC, proveedor: Proveedor, tipoOrigen: TipoOrigen, numeroReferencia: int, moneda: Moneda, solicitud: Solicitud, condicionesPago: CondicionesPago, terminosEntrega: TerminosEntrega
+
+Procedimientos: agregarLinea(Linea: LineaOC)
+
+NotificadorProveedorCorreo
+
+Procedimientos: enviar(evento, correo): void
+
+NotificadorProveedorWhatsapp
+
+Procedimientos: enviar(evento, numeroWsp): void
+
+NotificadorInventarioHTTP
+
+Procedimientos: enviar(evento): void
+
+---------------------------------
+
+<<interface>> Aprobable
+
+Procedimientos: aprobar(), rechazar()
+
+<<interface>> AprobableDocumento
+
+Procedimientos: aprobarDocumento(), rechazarDocumento()
+
+<<interface>> AprobablePropuesta
+
+Procedimientos: aprobarPropuesta(), rechazarPropuesta()
+
+<<interface>> Puntuar
+
+Procedimientos: puntuar()
+
+<<interface>> NotificadorProveedor
+
+Procedimientos: enviar(destinatario: String, mensaje: String): void
+
+<<interface>> NotificadorInventario
+
+Procedimientos: enviar(evento): void
+
+---------------------------------
+
+<<enumeration>> TipoSupervisor
+
+COMPRA, TECNICO, ECONOMICO
+
+<<enumeration>> EstadoCompra
+
+NUEVA, EN_INVITACION, CON_OFERTAS, PROVEEDOR_GANADOR, CERRADA, CANCELADA
+
+<<enumeration>> EstadoLicitacion
+
+BORRADOR, NUEVA, EN_INVITACION, CON_PROPUESTAS, EN_EVALUACION, ADJUDICADA, CON_CONTRATO, FINALIZADA, CANCELADA
+
+<<enumeration>> TipoItem
+
+MATERIAL, SERVICIO
+
+<<enumeration>> TipoDocumento
+
+LEGAL, TECNICO, ECONOMICO
+
+<<enumeration>> EstadoSolicitud
+
+PENDIENTE, APROBADA, RECHAZADA, EN_LICITACION
+
+<<enumeration>> EstadoProveedor
+
+PENDIENTE, ACTIVO, INACTIVO
+
+<<enumeration>> TipoCompra
+
+COMPRA, LICITACION
+
+----------------------------------
+
+Conexiones
+
+Herencia (Extends): Licitacion y Compra → ProcesoAdquisicion; Comprador y Supervisor → Usuario; SupervisorCompra, SupervisorTecnico, SupervisorEconomico → Supervisor; Material y Servicio → ItemSuministrable; MaterialSolicitado y ServicioSolicitado → ItemSolicitado; MaterialOfertado y ServicioOfertado → ItemOfertado; Proveedor → ProveedorBase.
+
+Implementación (Implements): SupervisorCompra → Aprobable; SupervisorTecnico → AprobableDocumento, AprobablePropuesta; SupervisorEconomico → Puntuar; NotificadorProveedorCorreo, NotificadorProveedorWhatsapp → NotificadorProveedor; NotificadorInventarioHTTP → NotificadorInventario.
+
+Asociación/Composición/Uso: Solicitud → ItemSolicitado (List); ProcesoAdquisicion → Solicitud (origen); ProcesoAdquisicion → OfertaProveedor (List); Contrato → Licitacion, Proveedor;OfertaProveedor → ItemOfertado (List); OfertaProveedor → Proveedor; PropuestaProveedor → Documento (List); MaterialSolicitado → Material; ServicioSolicitado → Servicio; MaterialOfertado → MaterialSolicitado; ServicioOfertado → ServicioSolicitado; OrdenCompra → Solicitud, Proveedor; Proveedor → HistorialProveedor (List); ProveedorBase → ItemSuministrable (List); SolicitudProveedor → EstadoSolicitud; ServicioProveedor → SolicitudProveedor; ServicioProveedor → ProveedorBase; ServicioProveedor → Proveedor.
