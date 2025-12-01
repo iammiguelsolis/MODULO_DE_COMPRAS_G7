@@ -43,7 +43,6 @@ class Supervisor(ABC):
                 return True
         else:
             # Rechazado, romper cadena
-            # Nota: Asumimos que licitacion tiene método cancelar()
             if hasattr(licitacion, 'cancelar'):
                 licitacion.cancelar()
             return False

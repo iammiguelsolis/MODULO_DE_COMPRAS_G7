@@ -10,7 +10,6 @@ class EstadoEnInvitacion(EstadoLicitacionState):
         Si hay propuestas registradas -> CON_PROPUESTAS
         Si no hay propuestas -> CANCELADA
         """
-        # Nota: Asumimos que licitacion.propuestas es una lista o relación
         if getattr(self.licitacion, 'propuestas', []) and len(self.licitacion.propuestas) > 0:
             from app.models.licitaciones.estados.estado_con_propuestas import EstadoConPropuestas
             return EstadoConPropuestas(self.licitacion)
