@@ -1,4 +1,3 @@
-import React from "react";
 import InputText from "../atoms/InputTextA";
 import Button from "../atoms/Button";
 
@@ -26,9 +25,6 @@ export default function GeneralSection({
     supplier,
     onChangeField,
     editMode,
-    onEdit,
-    onSave,
-    onCancel,
 }: GeneralSectionProps) {
     return (
         <div className="grid grid-cols-2 gap-6">
@@ -88,24 +84,6 @@ export default function GeneralSection({
                     fullWidth
                     disabled={!editMode}
                 />
-
-                {/* Aquí puedes añadir más campos editables si quieres */}
-
-                {!editMode && (
-                    <Button variant="primary" onClick={onEdit}>
-                        Editar
-                    </Button>
-                )}
-                {editMode && (
-                    <div className="flex gap-2">
-                        <Button variant="primary" onClick={onSave}>
-                            Guardar
-                        </Button>
-                        <Button variant="secondary" onClick={onCancel}>
-                            Cancelar
-                        </Button>
-                    </div>
-                )}
             </div>
         </div>
     );

@@ -131,7 +131,6 @@ export default function ProveedorDetailPage() {
                     <EstadoSection
                         supplier={supplier}
                         onChangeState={(newState, motivo, fechaInicio, fechaFin) => {
-                            // Aquí puedes abrir un modal de confirmación (o alert simple)
                             const confirm = window.confirm(
                                 `¿Confirmas cambiar el estado a "${newState}"?`
                             );
