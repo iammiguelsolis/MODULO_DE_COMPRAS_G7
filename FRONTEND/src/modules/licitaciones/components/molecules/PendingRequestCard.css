@@ -124,12 +124,6 @@
   border-radius: 0.5rem;
   border: 1px solid #e2e8f0;
   font-size: 0.875rem;
-  transition: all 0.2s;
-}
-
-.item-row:hover,
-.doc-row:hover {
-  border-color: #cbd5e1;
 }
 
 .item-qty {
