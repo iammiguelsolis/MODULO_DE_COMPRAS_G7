@@ -20,6 +20,7 @@ interface LicitacionesListTemplateProps {
     totalItems: number;
     itemsPerPage: number;
     onPageChange: (page: number) => void;
+    onOpenPendingRequests: () => void;
 }
 
 const LicitacionesListTemplate = ({
@@ -38,6 +39,7 @@ const LicitacionesListTemplate = ({
     totalItems,
     itemsPerPage,
     onPageChange,
+    onOpenPendingRequests,
 }: LicitacionesListTemplateProps) => {
     return (
         <div className="min-h-screen bg-gray-50 p-8">
@@ -46,6 +48,16 @@ const LicitacionesListTemplate = ({
                     title="Gestión de Licitaciones"
                     description="Consulte el estado y avance de todos los procesos de licitación."
                     className="mb-8"
+                    action={
+                        <div className="flex gap-2">
+                            <button
+                                className="btn btn-primary btn-sm flex items-center gap-2"
+                                onClick={onOpenPendingRequests}
+                            >
+                                <span>Solicitudes pendientes</span>
+                            </button>
+                        </div>
+                    }
                 />
                 <div className="flex flex-col gap-6">
                     <FilterPanel
