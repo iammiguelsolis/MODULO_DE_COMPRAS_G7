@@ -12,13 +12,7 @@ def listar_propuestas(id):
     Lista las propuestas de una licitación.
     """
     try:
-        # Obtener licitación para verificar existencia (opcional pero recomendado)
-        # O simplemente buscar propuestas por licitacion_id
-        
-        # Aquí asumimos que el servicio tiene un método para listar o usamos el modelo directo
-        # Para mantener capas, deberíamos agregar listar_por_licitacion en PropuestaService
         propuestas = service.listar_por_licitacion(id)
-        
         response = [PropuestaResponseDTO.from_model(p) for p in propuestas]
         return jsonify(response), 200
     except Exception as e:
@@ -69,9 +63,7 @@ def subir_documento_propuesta(id, propuesta_id):
         if not all(k in data for k in ("nombre", "url_archivo", "tipo")):
             return jsonify({'error': 'Faltan datos (nombre, url_archivo, tipo)'}), 400
             
-        # Llamar a servicio para agregar documento (necesitamos un método específico en service o usar el de registro)
-        # Por ahora, asumimos que el servicio tiene un método para agregar documento a propuesta existente
-        # O instanciamos el modelo directamente aquí si el servicio no lo expone
+        # Llamar a servicio para agregar documento
         from app.models.licitaciones.documentos import Documento
         from app.enums.licitaciones.tipo_documento import TipoDocumento
         from app.bdd import db
@@ -93,10 +85,10 @@ def subir_documento_propuesta(id, propuesta_id):
         db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
-@propuestas_bp.route('/<int:id>/finalizarRegistro', methods=['PUT'])
+@propuestas_bp.route('/<int:id>/finalizar-registro-propuestas', methods=['POST'])
 def finalizar_registro(id):
     """
-    PUT /api/licitaciones/{id}/finalizarRegistro
+    POST /api/licitaciones/{id}/finalizar-registro-propuestas
     Finaliza el periodo de registro de propuestas.
     """
     try:

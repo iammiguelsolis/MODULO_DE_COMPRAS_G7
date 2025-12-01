@@ -63,27 +63,42 @@ class LicitacionService:
         Obtiene una licitación por su ID.
         """
         return Licitacion.query.get(id_licitacion)
-    
-    def listar_todas(self, filters=None):
+
+    def listar_todas(self, filtros=None, page=1, per_page=10):
         """
-        Lista todas las licitaciones con filtros opcionales.
+        Lista todas las licitaciones con filtros opcionales y paginación.
         """
         query = Licitacion.query
         
-        if filters:
-            if filters.get('estado'):
-                query = query.filter(Licitacion._estado_nombre == filters['estado'])
-            if filters.get('fechaDesde'):
-                query = query.filter(Licitacion.fecha_creacion >= filters['fechaDesde'])
-            if filters.get('fechaHasta'):
-                query = query.filter(Licitacion.fecha_creacion <= filters['fechaHasta'])
-            if filters.get('limiteMontoMin'):
-                query = query.filter(Licitacion.presupuesto_max >= filters['limiteMontoMin'])
-            if filters.get('limiteMontoMax'):
-                query = query.filter(Licitacion.presupuesto_max <= filters['limiteMontoMax'])
+        if filtros:
+            if 'estado' in filtros:
+                query = query.filter(Licitacion._estado_nombre == filtros['estado'])
+            
+            if 'titulo' in filtros:
+                query = query.filter(Licitacion.titulo.ilike(f"%{filtros['titulo']}%"))
+
+            if 'id' in filtros:
+                query = query.filter(Licitacion.id_licitacion == filtros['id'])
                 
-        return query.all()
-    
+            if 'fechaDesde' in filtros:
+                query = query.filter(Licitacion.fecha_creacion >= filtros['fechaDesde'])
+                
+            if 'fechaHasta' in filtros:
+                query = query.filter(Licitacion.fecha_creacion <= filtros['fechaHasta'])
+                
+            if 'limiteMontoMin' in filtros:
+                query = query.filter(Licitacion.presupuesto_max >= filtros['limiteMontoMin'])
+                
+            if 'limiteMontoMax' in filtros:
+                query = query.filter(Licitacion.presupuesto_max <= filtros['limiteMontoMax'])
+        
+        # Ordenar por fecha de creación descendente
+        query = query.order_by(Licitacion.fecha_creacion.desc())
+        
+        # Paginación
+        pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+        return pagination.items
+
     def avanzar_estado(self, id_licitacion):
         """
         Intenta avanzar al siguiente estado de la licitación.

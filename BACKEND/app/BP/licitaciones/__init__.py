@@ -11,12 +11,3 @@ def register_licitaciones_blueprints(app):
     from .orden_compra import orden_compra_bp
     
     app.register_blueprint(licitaciones_bp)
-    app.register_blueprint(aprobacion_bp)
-    app.register_blueprint(invitaciones_bp)
-    app.register_blueprint(propuestas_bp)
-    app.register_blueprint(evaluaciones_bp)
-    app.register_blueprint(contrato_bp)
-    app.register_blueprint(orden_compra_bp)
-    
-    from .documentos import documentos_bp
-    app.register_blueprint(documentos_bp)
