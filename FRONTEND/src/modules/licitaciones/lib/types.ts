@@ -8,6 +8,7 @@ export interface Item {
   price?: number;
   estimatedHours?: number;
   hourlyRate?: number;
+  total?: number;
 }
 
 /**

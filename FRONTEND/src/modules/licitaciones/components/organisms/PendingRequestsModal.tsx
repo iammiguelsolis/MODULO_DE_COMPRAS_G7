@@ -53,6 +53,12 @@ const PendingRequestsModal: React.FC<PendingRequestsModalProps> = ({
 
     const selectedSolicitud = solicitudes.find(s => s.id === selectedId);
 
+    // Calculate total estimated amount from items
+    const totalEstimatedAmount = selectedSolicitud?.items.reduce((sum, item) => {
+        const itemTotal = item.total ?? ((item.quantity || 0) * (item.price || 0));
+        return sum + itemTotal;
+    }, 0) || 0;
+
     return (
         <>
             <WideModal
@@ -92,7 +98,7 @@ const PendingRequestsModal: React.FC<PendingRequestsModalProps> = ({
                     onConfirm={handleConfirm}
                     licitacionId={selectedSolicitud.id}
                     buyer={selectedSolicitud.solicitante}
-                    estimatedAmount={selectedSolicitud.presupuestoMaximo} // Usamos presupuesto como estimado
+                    estimatedAmount={totalEstimatedAmount}
                     maxBudget={selectedSolicitud.presupuestoMaximo}
                 />
             )}
@@ -105,7 +111,7 @@ const PendingRequestsModal: React.FC<PendingRequestsModalProps> = ({
                     onConfirm={handleConfirm}
                     licitacionId={selectedSolicitud.id}
                     buyer={selectedSolicitud.solicitante}
-                    estimatedAmount={selectedSolicitud.presupuestoMaximo}
+                    estimatedAmount={totalEstimatedAmount}
                     maxBudget={selectedSolicitud.presupuestoMaximo}
                 />
             )}

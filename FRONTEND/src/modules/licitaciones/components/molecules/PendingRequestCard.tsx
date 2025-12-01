@@ -82,14 +82,37 @@ const PendingRequestCard: React.FC<PendingRequestCardProps> = ({
                     <div className="details-grid">
                         <div className="details-column">
                             <h4><Package size={16} /> Ítems ({solicitud.items.length})</h4>
-                            <div className="items-list">
-                                {solicitud.items.map((item) => (
-                                    <div key={item.id} className="item-row">
-                                        <span className="item-qty">{item.quantity}x</span>
-                                        <span className="item-desc">{item.description}</span>
-                                        <span className="item-price">S/. {item.price?.toLocaleString()}</span>
-                                    </div>
-                                ))}
+                            <div className="items-table-container">
+                                <table className="items-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Tipo</th>
+                                            <th>Descripción</th>
+                                            <th className="text-center">Cantidad / Horas</th>
+                                            <th className="text-right">Precio Uni. / Tarifa</th>
+                                            <th className="text-right">Total Item</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {solicitud.items.map((item) => {
+                                            // Use pre-calculated total from mock data, or fallback to calculation if missing
+                                            const total = item.total ?? ((item.quantity || 0) * (item.price || 0));
+                                            return (
+                                                <tr key={item.id}>
+                                                    <td>
+                                                        <span className="item-type-badge">
+                                                            {item.type}
+                                                        </span>
+                                                    </td>
+                                                    <td className="item-desc-cell">{item.description}</td>
+                                                    <td className="text-center">{item.quantity}</td>
+                                                    <td className="text-right">S/. {item.price?.toLocaleString()}</td>
+                                                    <td className="text-right item-total">S/. {total.toLocaleString()}</td>
+                                                </tr>
+                                            );
+                                        })}
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
 

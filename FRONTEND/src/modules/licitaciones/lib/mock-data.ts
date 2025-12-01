@@ -29,6 +29,7 @@ export const mockSolicitudesPendientes: SolicitudPendiente[] = [
         description: "Server Dell PowerEdge R750",
         quantity: 5,
         price: 8000,
+        total: 40000,
       },
     ],
     presupuestoMaximo: 45000,
@@ -51,15 +52,16 @@ export const mockSolicitudesPendientes: SolicitudPendiente[] = [
   },
   {
     id: "2025002",
-    nombre: "Renovación de Licencias Office 365",
-    notas: "Renovación anual para 50 usuarios.",
+    nombre: "Instalación de Redes 2025",
+    notas: "Instalación de redes en todas las oficinas.",
     items: [
       {
         id: "1",
         type: "Servicio",
-        description: "Licencia Office 365 Business Standard",
+        description: "Instalación de redes",
         quantity: 50,
         price: 450,
+        total: 22500,
       },
     ],
     presupuestoMaximo: 25000,
