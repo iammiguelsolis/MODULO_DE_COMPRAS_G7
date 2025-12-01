@@ -30,50 +30,29 @@ class OrdenCompraIntegrationService:
         if not proveedor:
             raise ValueError("La propuesta ganadora no tiene un proveedor asociado")
             
-        # Construir payload
+        # La Orden de Compra puede obtener los items a partir del id_solicitud
         payload = {
             "origen": "LICITACION",
             "id_origen": licitacion.id_licitacion,
+            "id_solicitud": licitacion.solicitud_id,
             "proveedor": {
-                "id_externo": proveedor.id_proveedor,
+                "id": proveedor.id_proveedor,
                 "nombre": proveedor.nombre,
                 "ruc": proveedor.ruc,
-                "direccion": proveedor.direccion,
                 "email": proveedor.email
             },
-            "detalles": {
-                "fecha_adjudicacion": str(licitacion.fecha_limite),
-                "monto_total": 0.0,  # Se calculará desde los items en Orden de Compra
-                "moneda": "PEN",
-                "condiciones_pago": None,
-                "plazo_entrega_dias": None
-            },
-            "items": []
+            "contrato": {
+                "url": None,
+                "fecha_firmado": None
+            }
         }
         
-        # Agregar contrato
+        # Agregar datos del contrato si existe
         from app.models.licitaciones.contrato import Contrato
         contrato = Contrato.query.filter_by(licitacion_id=id_licitacion).first()
         if contrato:
-            payload["contrato"] = {
-                "plantilla_url": contrato.plantilla_url,
-                "documento_firmado_url": contrato.documento_firmado_url,
-                "fecha_generacion": str(contrato.fecha_generacion_plantilla) if contrato.fecha_generacion_plantilla else None,
-                "fecha_firmado": str(contrato.fecha_carga_firmado) if contrato.fecha_carga_firmado else None,
-           }
-           
-        # Agregar items desde solicitud_origen
-        if licitacion.solicitud_origen and hasattr(licitacion.solicitud_origen, 'items'):
-            for item in licitacion.solicitud_origen.items:
-                # Determinar cantidad según tipo (asumiendo estructura común)
-                cantidad = getattr(item, 'cantidad', 0)
-                
-                payload["items"].append({
-                    "codigo": getattr(item, 'codigo', 'SIN_CODIGO'),
-                    "descripcion": getattr(item, 'nombre', 'Sin descripción'),
-                    "cantidad": cantidad,
-                    "precio_unitario": getattr(item, 'precio_unitario', 0.0)
-                })
+            payload["contrato"]["url"] = contrato.documento_firmado_url
+            payload["contrato"]["fecha_firmado"] = str(contrato.fecha_carga_firmado) if contrato.fecha_carga_firmado else None
                 
         return payload
 
@@ -85,20 +64,33 @@ class OrdenCompraIntegrationService:
             datos = self.generar_datos_orden_compra(id_licitacion)
             
             # AQUÍ SE HARÍA LA LLAMADA AL OTRO MÓDULO (HTTP POST, Event Bus, etc.)
+            # import requests
+            # response = requests.post("http://localhost:5000/api/ordenes-compra/externa", json=datos)
             print(f"--- ENVIANDO DATOS A MÓDULO ORDEN DE COMPRA ---\n{datos}\n-----------------------------------------------")
             
             # Actualizar estado local
             licitacion = Licitacion.query.get(id_licitacion)
+            propuesta_ganadora = PropuestaProveedor.query.filter_by(
+                licitacion_id=id_licitacion,
+                es_ganadora=True
+            ).first()
+            
+            # Obtener contrato
+            from app.models.licitaciones.contrato import Contrato
+            contrato = Contrato.query.filter_by(licitacion_id=id_licitacion).first()
             
             # Avanzar estado CON_CONTRATO -> FINALIZADA
             licitacion.siguiente_estado()
             
             db.session.commit()
             
+            # Response según la especificación de la API
             return {
-                "success": True,
-                "mensaje": "Datos enviados al módulo de Orden de Compra exitosamente",
-                "payload_enviado": datos
+                "id_licitacion": licitacion.id_licitacion,
+                "estado": licitacion.estado.value if hasattr(licitacion.estado, 'value') else str(licitacion.estado),
+                "proveedor_adjudicado_id": propuesta_ganadora.proveedor_id if propuesta_ganadora else None,
+                "contrato_id": contrato.id_contrato if contrato else None,
+                "orden_compra_generada": True
             }
             
         except Exception as e:
