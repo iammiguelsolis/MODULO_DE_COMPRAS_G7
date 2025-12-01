@@ -1,187 +1,41 @@
 {
-  "openapi": "3.0.0",
-  "info": {
-    "title": "API de Orden de Compra",
-    "version": "1.0.0",
-    "description": "Endpoint para enviar licitación al módulo de órdenes de compra y finalizar el proceso"
-  },
-  "paths": {
-    "/licitaciones/{id}/orden-compra": {
-      "post": {
-        "tags": ["Orden de Compra"],
-        "summary": "Enviar a módulo de orden de compra",
-        "description": "Crea la orden de compra asociada al contrato de licitación y cambia el estado de CON_CONTRATO a FINALIZADA. Esta es la última etapa del flujo de licitación.",
-        "operationId": "enviarOrdenCompra",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID de la licitación",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "example": 456
-            }
-          }
-        ],
-        "requestBody": {
+  "endpoints": [
+    {
+      "method": "POST",
+      "url": "/api/licitaciones/{id}/finalizar",
+      "summary": "Finalizar Licitación (Integración OC)",
+      "description": "Usuario confirma el envío de la licitación, proveedor adjudicado y contrato de adjudicación al módulo de Órdenes de Compra. El backend obtiene automáticamente: (1) Datos completos de la licitación, (2) Proveedor ganador (propuesta con es_ganadora=TRUE), (3) Contrato firmado. Cambia estado a FINALIZADA.",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
           "required": true,
+          "schema": { "type": "integer" }
+        }
+      ],
+      "requestBody": {
+        "description": "No requiere body. El backend obtiene toda la información necesaria.",
+        "required": false
+      },
+      "responses": {
+        "200": {
+          "description": "Licitación finalizada e integrada. Datos enviados al módulo OC.",
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["compradorId"],
                 "properties": {
-                  "compradorId": {
-                    "type": "integer",
-                    "description": "ID del comprador que envía a orden de compra"
-                  },
-                  "condicionesPago": {
-                    "type": "object",
-                    "properties": {
-                      "formaPago": {
-                        "type": "string",
-                        "enum": [
-                          "CONTADO",
-                          "CREDITO_30",
-                          "CREDITO_60",
-                          "CREDITO_90"
-                        ]
-                      },
-                      "adelanto": {
-                        "type": "number",
-                        "description": "Porcentaje de adelanto (0-100)"
-                      }
-                    }
-                  },
-                  "terminosEntrega": {
-                    "type": "object",
-                    "properties": {
-                      "direccion": {
-                        "type": "string"
-                      },
-                      "fechaEstimada": {
-                        "type": "string",
-                        "format": "date"
-                      },
-                      "responsable": {
-                        "type": "string"
-                      }
-                    }
-                  },
-                  "notas": {
-                    "type": "string",
-                    "description": "Notas o instrucciones especiales"
-                  }
-                }
-              },
-              "example": {
-                "compradorId": 5,
-                "condicionesPago": {
-                  "formaPago": "CREDITO_30",
-                  "adelanto": 30
-                },
-                "terminosEntrega": {
-                  "direccion": "Av. Principal 123, Lima",
-                  "fechaEstimada": "2026-01-15",
-                  "responsable": "Juan Pérez"
-                },
-                "notas": "Entregar en horario de oficina (8am - 5pm)"
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Orden de compra creada y licitación finalizada",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "idOrdenCompra": {
-                      "type": "integer"
-                    },
-                    "idLicitacion": {
-                      "type": "integer"
-                    },
-                    "estadoLicitacion": {
-                      "type": "string",
-                      "enum": ["FINALIZADA"]
-                    },
-                    "numeroOrdenCompra": {
-                      "type": "string"
-                    },
-                    "proveedor": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "integer"
-                        },
-                        "nombre": {
-                          "type": "string"
-                        },
-                        "ruc": {
-                          "type": "string"
-                        }
-                      }
-                    },
-                    "montoTotal": {
-                      "type": "number"
-                    },
-                    "fechaCreacion": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "estadoOrdenCompra": {
-                      "type": "string",
-                      "enum": [
-                        "PENDIENTE",
-                        "EN_PROCESO",
-                        "ENTREGADA",
-                        "CANCELADA"
-                      ]
-                    },
-                    "urlOrdenCompra": {
-                      "type": "string",
-                      "description": "URL para ver/descargar la orden de compra"
-                    },
-                    "mensaje": {
-                      "type": "string"
-                    }
-                  }
-                },
-                "example": {
-                  "idOrdenCompra": 789,
-                  "idLicitacion": 456,
-                  "estadoLicitacion": "FINALIZADA",
-                  "numeroOrdenCompra": "OC-2025-789",
-                  "proveedor": {
-                    "id": 789,
-                    "nombre": "TechSupply S.A.C.",
-                    "ruc": "20123456789"
-                  },
-                  "montoTotal": 145000,
-                  "fechaCreacion": "2025-11-26T09:00:00",
-                  "estadoOrdenCompra": "PENDIENTE",
-                  "urlOrdenCompra": "/ordenes-compra/789",
-                  "mensaje": "Orden de compra creada exitosamente. La licitación ha sido finalizada."
+                  "id_licitacion": { "type": "integer" },
+                  "estado": { "type": "string", "example": "FINALIZADA" },
+                  "proveedor_adjudicado_id": { "type": "integer" },
+                  "contrato_id": { "type": "integer" },
+                  "orden_compra_generada": { "type": "boolean" }
                 }
               }
             }
-          },
-          "400": {
-            "description": "Estado inválido (licitación no está CON_CONTRATO) o datos incorrectos"
-          },
-          "404": {
-            "description": "Licitación o contrato no encontrado"
-          },
-          "500": {
-            "description": "Error interno del servidor o error al comunicarse con módulo de órdenes de compra"
           }
         }
       }
     }
-  }
+  ]
 }
