@@ -4,8 +4,8 @@ from app.extensiones import bcrypt
 from flask_bcrypt import Bcrypt
 
 # Importamos el Blueprint
-from app.controllers.solicitudes.solicitudes_controller import solicitudes_bp
-from app.controllers.adquisiciones.adquisiciones_controller import adquisiciones_bp
+from app.BP.solicitudes.solicitudes_controller import solicitudes_bp
+from app.BP.adquisiciones.adquisiciones_controller import adquisiciones_bp
 
 def create_app():
     app = Flask(__name__)
@@ -15,6 +15,7 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = coneccion 
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
     app.config["SECRET_KEY"] = '_Cb15q&o~n81'
+    app.json.sort_keys = False
 
     # Inicializar Extensiones
     db.init_app(app)

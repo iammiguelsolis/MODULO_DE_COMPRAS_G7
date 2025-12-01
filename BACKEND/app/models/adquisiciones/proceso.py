@@ -67,7 +67,7 @@ class Compra(ProcesoAdquisicion):
     id = db.Column(db.Integer, db.ForeignKey('procesos_adquisicion.id'), primary_key=True)
 
     __mapper_args__ = {
-        'polymorphic_identity': 'COMPRA_DIRECTA',
+        'polymorphic_identity': 'COMPRA',
     }
 
     def iniciar_comparacion_simple(self):

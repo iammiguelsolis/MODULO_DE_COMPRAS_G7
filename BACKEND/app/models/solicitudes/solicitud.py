@@ -1,6 +1,7 @@
 from app.bdd import db
 from app.models.solicitudes.items import ItemSolicitado
 from app.models.solicitudes.estados import Pendiente, Aprobada, Rechazada
+from app.patrones.clasificadores import ClasificadorPorMonto
 
 class Solicitud(db.Model):
   
@@ -51,12 +52,18 @@ class Solicitud(db.Model):
     return self.items[0].tipo_item
   
   def to_dict(self):
+    
+    clasificador = ClasificadorPorMonto()
+    
+    tipo_sugerido = clasificador.determinar_tipo(self)
+    
     return {
-      'id': self.id,
-      'titulo': self.titulo,
-      'notas_adicionales': self.notas_adicionales,
-      'fecha_creacion': self.fecha_creacion.isoformat() if self.fecha_creacion else None,
-      'estado': self._estado_str,
-      'items': [item.to_dict() for item in self.items],
-      'total': self.calcular_total()
+        'id': self.id,
+        'titulo': self.titulo,
+        'notas_adicionales': self.notas_adicionales,
+        'fecha_creacion': self.fecha_creacion.isoformat() if self.fecha_creacion else None,
+        'estado': self._estado_str,
+        'total': self.calcular_total(),
+        'tipo_adquisicion': tipo_sugerido,
+        'items': [item.to_dict() for item in self.items]
     }

@@ -83,8 +83,6 @@ def adjudicar_compra(id_compra):
         
         return jsonify({
             'mensaje': 'Compra adjudicada y cerrada correctamente',
-            'ganador_id': compra_cerrada.oferta_ganadora_id,
-            'estado': compra_cerrada.estado,
             'compra': compra_cerrada.to_dict()
         }), 200
 
