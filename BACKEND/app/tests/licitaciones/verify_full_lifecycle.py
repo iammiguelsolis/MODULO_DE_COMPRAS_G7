@@ -3,7 +3,6 @@ import os
 import json
 import io
 
-# Add the backend directory to sys.path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../../../')))
 
 from app import create_app, db
@@ -13,7 +12,7 @@ def verify_full_lifecycle():
     client = app.test_client()
     
     with app.app_context():
-        # Limpiar y recrear todas las tablas (elimina datos previos)
+        # Elimina datos previos
         db.drop_all()
         db.create_all()
         
@@ -21,7 +20,7 @@ def verify_full_lifecycle():
         print("VERIFICACIÓN COMPLETA DEL CICLO DE VIDA - LICITACIONES")
         print("=" * 80)
         
-        # 0. CREAR SOLICITUD (SIMULACIÓN)
+        # Crear solicitud (SIMULACIÓN)
         print("\n[0/10] CREAR SOLICITUD (SIMULACIÓN)...")
         from app.models.licitaciones.solicitud import Solicitud
         from app.enums.licitaciones.estado_solicitud import EstadoSolicitud
@@ -83,7 +82,7 @@ def verify_full_lifecycle():
         id_licitacion = res.json['id_licitacion']
         print(f"   ✓ Licitación creada. ID: {id_licitacion}, Estado: BORRADOR")
         
-        # 1.1 VERIFICAR DOCUMENTOS REQUERIDOS (NUEVO)
+        # 1.1 VERIFICAR DOCUMENTOS REQUERIDOS
         print("   -> Verificando documentos requeridos por defecto...")
         res_docs = client.get(f'/api/licitaciones/{id_licitacion}/documentos-requeridos')
         assert res_docs.status_code == 200, f"Failed getting docs: {res_docs.data}"
@@ -151,16 +150,14 @@ def verify_full_lifecycle():
             }
             
             data_files = {
-                # 'documentosLegales': (io.BytesIO(b"dummy legal"), f'legal_{i}.pdf'),
-                # 'documentosTecnicos': (io.BytesIO(b"dummy tech"), f'tech_{i}.pdf'),
                 'documentosEconomicos': (io.BytesIO(b"dummy eco"), f'eco_{i}.pdf')
             }
             
             data_post = {**data_propuesta, **data_files}
             
             res = client.post(f'/api/licitaciones/{id_licitacion}/propuestas', 
-                              data=data_post, 
-                              content_type='multipart/form-data')
+                            data=data_post, 
+                            content_type='multipart/form-data')
             assert res.status_code == 201, f"Failed propuesta {i}: {res.data}"
             print(f"   ✓ Propuesta {i} registrada. ID: {res.json['id_propuesta']}")
         
@@ -193,7 +190,7 @@ def verify_full_lifecycle():
         }
         
         res = client.post(f'/api/licitaciones/{id_licitacion}/evaluacion-tecnica', 
-                          json=data_eval_tec)
+                        json=data_eval_tec)
         
         print(f"   DEBUG: Response status: {res.status_code}")
         print(f"   DEBUG: Response body: {res.data}")
@@ -218,7 +215,7 @@ def verify_full_lifecycle():
         }
         
         res = client.post(f'/api/licitaciones/{id_licitacion}/evaluacion-economica', 
-                          json=data_eval_eco)
+                        json=data_eval_eco)
         assert res.status_code == 200, f"Failed: {res.data}"
         
         licitacion = service.obtener_por_id(id_licitacion)
@@ -242,8 +239,8 @@ def verify_full_lifecycle():
             "archivoContrato": (io.BytesIO(b"%PDF-1.4 content"), 'contrato_firmado.pdf')
         }
         res = client.post(f'/api/licitaciones/{id_licitacion}/contrato', 
-                         data=data_contrato, 
-                         content_type='multipart/form-data')
+                        data=data_contrato, 
+                        content_type='multipart/form-data')
         assert res.status_code == 201, f"Failed Upload: {res.data}"
         
         licitacion = service.obtener_por_id(id_licitacion)

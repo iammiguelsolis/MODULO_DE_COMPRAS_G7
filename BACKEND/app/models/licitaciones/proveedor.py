@@ -2,9 +2,8 @@ from app.bdd import db
 
 class Proveedor(db.Model):
     """
-    Modelo que representa a un Proveedor.
-    Actúa como espejo local de la gestión de proveedores externa.
-    Basado en el diagrama de clases: ProveedorBase + Proveedor.
+    Modelo que representa a un Proveedor (Simulación doma))
+
     """
     __tablename__ = 'proveedores'
     

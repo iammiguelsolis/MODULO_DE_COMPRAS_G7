@@ -10,7 +10,6 @@ class ServicioSolicitado(ItemSolicitado):
     
     id_item = db.Column(db.Integer, db.ForeignKey('items_solicitados.id_item'), primary_key=True)
     
-    # Atributos específicos de ServicioSolicitado (Diagrama)
     horas = db.Column(db.Numeric(10, 2)) # float en diagrama
     tarifa_hora = db.Column(db.Numeric(10, 2)) # float en diagrama
     

@@ -14,21 +14,19 @@ class Licitacion(ProcesoAdquisicion):
     """
     __tablename__ = 'licitaciones'
     
-    # Atributos propios de Licitacion (diagrama línea 9)
     id_licitacion = db.Column(db.Integer, primary_key=True)
     limite_monto = db.Column(db.Numeric(10, 2))
     fecha_limite = db.Column(db.DateTime)
     
-    # Persistencia del nombre del estado en BD
     _estado_nombre = db.Column('estado', db.String(50), nullable=False, default='BORRADOR')
     
-    # Atributos heredados de ProcesoAdquisicion (Implementación)
+    # Atributos heredados de ProcesoAdquisicion
     solicitud_id = db.Column(db.Integer, db.ForeignKey('solicitudes.id_solicitud'), nullable=False)
     
     # Relaciones
     solicitud_origen = db.relationship('Solicitud', backref='licitaciones')
     
-    # Supervisor (Usuario) - Se mantiene aquí porque es específico de la licitación (quién la supervisa)
+    # Supervisor (Usuario)
     supervisor_id = db.Column(db.Integer, nullable=True) 
     
     # Campos de control para lógica de estados
@@ -49,7 +47,6 @@ class Licitacion(ProcesoAdquisicion):
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # Inicializa el estado en memoria
         self._estado_actual = EstadoBorrador(self)
         self._estado_nombre = self._estado_actual.get_nombre()
     

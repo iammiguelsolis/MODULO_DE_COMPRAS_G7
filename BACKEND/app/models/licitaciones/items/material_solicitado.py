@@ -10,7 +10,6 @@ class MaterialSolicitado(ItemSolicitado):
     
     id_item = db.Column(db.Integer, db.ForeignKey('items_solicitados.id_item'), primary_key=True)
     
-    # Atributos específicos de MaterialSolicitado (Diagrama)
     cantidad = db.Column(db.Integer)
     precio_unitario = db.Column(db.Numeric(10, 2)) # float en diagrama, Numeric en BD
     

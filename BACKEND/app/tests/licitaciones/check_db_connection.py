@@ -1,12 +1,11 @@
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import SQLAlchemyError
 
-# Configuration
 user = 'pizarro'
 password = 'TuPass123*'
 host = 'compras.cjme8uwesdzz.us-east-2.rds.amazonaws.com'
 port = '3306'
-database = 'solicitud' # Trying one of the known schemas
+database = 'solicitud'
 
 connection_string = f"mysql+mysqlconnector://{user}:{password}@{host}:{port}/{database}"
 

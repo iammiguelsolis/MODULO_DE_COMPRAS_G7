@@ -15,8 +15,6 @@ class ItemSolicitado(db.Model):
     comentario = db.Column(db.Text)
     fecha_entrega = db.Column(db.Date)
     
-    # Atributos de "Material" o "Servicio" referenciado (Simulación de la relación)
-    # En el diagrama: material: Material / servicio: Servicio
     # Aquí guardamos los datos básicos del objeto referenciado
     codigo = db.Column(db.String(50))
     nombre = db.Column(db.String(255))

@@ -20,8 +20,7 @@ class Solicitud(db.Model):
     estado = db.Column(db.Enum(EstadoSolicitud), default=EstadoSolicitud.PENDIENTE)
     
     # Simulación de items (para cálculo de total)
-    # En producción esto sería una relación real. Aquí usaremos un campo temporal o método.
-    # Para la simulación, asumiremos que se pueden asignar items.
+    # En producción esto sería una relación real. Aquí usaremos un campo temporal
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
