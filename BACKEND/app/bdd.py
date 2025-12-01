@@ -10,3 +10,5 @@ from flask_sqlalchemy import SQLAlchemy
 
 coneccion="mysql+mysqlconnector://admin:myservergod@compras.cjme8uwesdzz.us-east-2.rds.amazonaws.com:3306/modulo_de_compras" 
 db = SQLAlchemy()
+
+
