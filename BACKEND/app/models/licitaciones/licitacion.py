@@ -2,10 +2,7 @@ from app.bdd import db
 from app.models.licitaciones.estados.estado_borrador import EstadoBorrador
 from app.models.licitaciones.estados.estado_nueva import EstadoNueva
 from app.models.licitaciones.estados.estado_cancelada import EstadoCancelada
-# Importar otros estados aquí a medida que se creen, o usar importación dinámica/local en _reconstruir_estado
-
-from app.models.licitaciones.proceso_adquisicion import ProcesoAdquisicion
-from app.models.licitaciones.solicitud import Solicitud
+from app.models.adquisiciones.proceso import ProcesoAdquisicion
 
 class Licitacion(ProcesoAdquisicion):
     """
@@ -14,31 +11,24 @@ class Licitacion(ProcesoAdquisicion):
     """
     __tablename__ = 'licitaciones'
     
-    id_licitacion = db.Column(db.Integer, primary_key=True)
+    id = db.Column(db.Integer, db.ForeignKey('procesos_adquisicion.id'), primary_key=True)
+    
+    __mapper_args__ = {
+        'polymorphic_identity': 'LICITACION',
+    }
+    
     presupuesto_max = db.Column(db.Numeric(10, 2))
     fecha_limite = db.Column(db.DateTime)
     
-    _estado_nombre = db.Column('estado', db.String(50), nullable=False, default='BORRADOR')
+    _estado_nombre = db.Column('estado_licitacion', db.String(50), nullable=False, default='BORRADOR')
     
-    # Atributos heredados de ProcesoAdquisicion
-    solicitud_id = db.Column(db.Integer, db.ForeignKey('solicitudes.id_solicitud'), nullable=False)
-    
-    # Relaciones
-    solicitud_origen = db.relationship('Solicitud', backref='licitaciones')
-    
-    # Supervisor (Usuario)
     supervisor_id = db.Column(db.Integer, nullable=True) 
-    
-    # Campos de control para lógica de estados
     aprobada_por_supervisor = db.Column(db.Boolean, default=False)
     invitaciones_enviadas = db.Column(db.Boolean, default=False)
     motivo_rechazo = db.Column(db.Text, nullable=True)
     
     # Relaciones
     propuestas = db.relationship('PropuestaProveedor', backref='licitacion', lazy=True)
-    propuesta_ganadora = db.relationship('PropuestaProveedor', 
-                                    primaryjoin="and_(Licitacion.id_licitacion==PropuestaProveedor.licitacion_id, PropuestaProveedor.es_ganadora==True)",
-                                    uselist=False, viewonly=True)
     
     # Items se obtienen via solicitud_origen.items (JOIN)
     
