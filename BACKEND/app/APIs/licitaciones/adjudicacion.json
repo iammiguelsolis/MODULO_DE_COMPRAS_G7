@@ -10,7 +10,7 @@
       "post": {
         "tags": ["Adjudicación"],
         "summary": "Adjudicar licitación a proveedor ganador",
-        "description": "NOTA: Este endpoint está deprecado. La adjudicación ahora se realiza automáticamente al completar la evaluación económica. Se mantiene por compatibilidad.",
+        "description": "NOTA: Este endpoint está deprecado xddd ni llega a produción y lo deprecas?. La adjudicación ahora se realiza automáticamente al completar la evaluación económica. Se mantiene por compatibilidad.",
         "deprecated": true,
         "operationId": "adjudicarLicitacion",
         "parameters": [
