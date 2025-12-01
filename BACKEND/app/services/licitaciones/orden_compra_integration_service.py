@@ -51,7 +51,7 @@ class OrdenCompraIntegrationService:
             "items": []
         }
         
-        # Agregar contrato (Regla 4 línea 118: "contrato y documentos del proveedor")
+        # Agregar contrato
         from app.models.licitaciones.contrato import Contrato
         contrato = Contrato.query.filter_by(licitacion_id=id_licitacion).first()
         if contrato:
@@ -62,8 +62,7 @@ class OrdenCompraIntegrationService:
                 "fecha_firmado": str(contrato.fecha_carga_firmado) if contrato.fecha_carga_firmado else None,
            }
            
-        # Agregar items (pueden ser los solicitados o los ofertados si hubiera detalle por item en oferta)
-        # Por ahora usamos los solicitados que es lo que tenemos mapeado
+        # Agregar items
         if hasattr(licitacion, 'items'):
             for item in licitacion.items:
                 # Determinar cantidad según tipo
@@ -77,7 +76,7 @@ class OrdenCompraIntegrationService:
                     "codigo": item.codigo,
                     "descripcion": item.nombre,
                     "cantidad": cantidad,
-                    "precio_unitario": 0.0  # El precio unitario real vendría del detalle de oferta si existiera
+                    "precio_unitario": 0.0
                 })
                 
         return payload

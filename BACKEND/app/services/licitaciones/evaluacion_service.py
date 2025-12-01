@@ -7,7 +7,7 @@ from app.models.licitaciones.supervisores.supervisor_economico import Supervisor
 class EvaluacionService:
     """
     Servicio encargado de orquestar el proceso de evaluación de licitaciones.
-    Configura y ejecuta la Cadena de Responsabilidad (Chain of Responsibility) de supervisores.
+    Configura y ejecuta la Cadena de Responsabilidad de supervisores.
     """
     
     def configurar_cadena(self, id_sup_compra, id_sup_tecnico, id_sup_economico):

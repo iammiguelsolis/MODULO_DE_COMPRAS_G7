@@ -23,7 +23,6 @@ class InvitacionService:
             # y enviar correos electrónicos reales.
             # Por ahora, simulamos actualizando el flag en la licitación.
             
-            # Simulación de envío
             print(f"Enviando correos a proveedores: {ids_proveedores}")
             
             licitacion.invitaciones_enviadas = True
@@ -44,5 +43,4 @@ class InvitacionService:
         Fuerza el cierre del periodo de invitación si es necesario.
         """
         # En nuestro flujo actual, el envío de invitaciones ya transiciona el estado.
-        # Este método podría usarse si hubiera un paso intermedio explícito.
         pass

@@ -10,7 +10,7 @@ from app.models.licitaciones.solicitud import Solicitud
 class Licitacion(ProcesoAdquisicion):
     """
     Modelo de Licitación que actúa como Contexto del patrón State.
-    Hereda de ProcesoAdquisicion según diagramaClases.txt.
+
     """
     __tablename__ = 'licitaciones'
     
@@ -39,8 +39,8 @@ class Licitacion(ProcesoAdquisicion):
     # Relaciones
     propuestas = db.relationship('PropuestaProveedor', backref='licitacion', lazy=True)
     propuesta_ganadora = db.relationship('PropuestaProveedor', 
-                                       primaryjoin="and_(Licitacion.id_licitacion==PropuestaProveedor.licitacion_id, PropuestaProveedor.es_ganadora==True)",
-                                       uselist=False, viewonly=True)
+                                    primaryjoin="and_(Licitacion.id_licitacion==PropuestaProveedor.licitacion_id, PropuestaProveedor.es_ganadora==True)",
+                                    uselist=False, viewonly=True)
     
     # Relación con Items Solicitados
     items = db.relationship('ItemSolicitado', backref='licitacion', lazy=True, cascade="all, delete-orphan")
@@ -54,7 +54,7 @@ class Licitacion(ProcesoAdquisicion):
     def estado_actual(self):
         """
         Retorna la instancia del estado actual (Objeto State).
-        Si no está en memoria, lo reconstruye a partir del nombre guardado en BD.
+        
         """
         if not hasattr(self, '_estado_actual') or self._estado_actual is None:
             self._estado_actual = self._reconstruir_estado()
@@ -82,7 +82,7 @@ class Licitacion(ProcesoAdquisicion):
         
     def _reconstruir_estado(self):
         """
-        Factory method que instancia la clase de estado correcta según _estado_nombre.
+        Instancia la clase de estado correcta según _estado_nombre.
         """
         nombre = self._estado_nombre
         

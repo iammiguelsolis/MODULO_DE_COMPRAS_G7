@@ -11,8 +11,6 @@ class EstadoBorrador(EstadoLicitacionState):
         Si el supervisor aprobó -> NUEVA
         Si rechazó -> CANCELADA
         """
-        # Nota: Asumimos que la licitación tiene un atributo 'aprobada_por_supervisor'
-        # que se setea antes de llamar a siguiente()
         if getattr(self.licitacion, 'aprobada_por_supervisor', False):
             from app.models.licitaciones.estados.estado_nueva import EstadoNueva
             return EstadoNueva(self.licitacion)

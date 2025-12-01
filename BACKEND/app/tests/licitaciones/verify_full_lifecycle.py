@@ -90,15 +90,16 @@ def verify_full_lifecycle():
         # 2. APROBAR (BORRADOR → NUEVA)
         print("\n[2/10] APROBAR LICITACIÓN (BORRADOR → NUEVA)...")
         from app.services.licitaciones.licitacion_service import LicitacionService
+        from app.services.licitaciones.aprobacion_service import AprobacionService
+        
         service = LicitacionService()
+        aprobacion_service = AprobacionService()
         
         licitacion = service.obtener_por_id(id_licitacion)
         print(f"   ✓ Estado inicial: {licitacion.estado_actual.get_nombre()}")
         
-        licitacion.aprobada_por_supervisor = True
-        db.session.commit()
+        aprobacion_service.aprobar_licitacion(id_licitacion, id_supervisor=1, comentarios="Aprobado para simulación")
         
-        service.avanzar_estado(id_licitacion)
         licitacion = service.obtener_por_id(id_licitacion)
         assert licitacion.estado_actual.get_nombre() == "NUEVA"
         print(f"   ✓ Estado: {licitacion.estado_actual.get_nombre()}")
