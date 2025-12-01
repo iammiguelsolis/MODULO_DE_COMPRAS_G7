@@ -9,6 +9,7 @@
 
 """
 
+"""
 from abc import ABC, abstractmethod
 from app.bdd import db
 from .enums import Dias_Semana
@@ -39,20 +40,25 @@ class EvaluacionRendimiento(ABC):
 # de 150 es decir que nos entrego 150 items (entre iguales y diferentes) en esas 10 ordenes 
 # de compra, recodardando que cada item tiene una cantidad pedida que definitivamente es mayor a 150
 
-class EvaluacionCumplimientoPlazoEntrega(EvaluacionRendimiento, db.Model):
-    """
-    idProveedor: int
-    idEvaluacionPlazo: int
-    cantidadCalculo: int este es el unico que no tiene CCP
-    promedioDiasRetraso: float
+"""
 
-    calcularCantidadPositivas()    SAME
-    calcularCantidadNegativas()    SAME
-    calcularPromedioDias()
-    asignarCalificacion(Proveedor p)     SAME
-    entregaParcialFueCompleta() retorna boolean
-    entregaFinalFueCompleta() retorna boolean
-    """
+"""
+class EvaluacionCumplimientoPlazoEntrega(EvaluacionRendimiento, db.Model):
+    
+    
+    #No recuerdo pa que era esto pero es importante, luego lo checo
+    #idProveedor: int
+    #idEvaluacionPlazo: int
+    #cantidadCalculo: int este es el unico que no tiene CCP
+    #promedioDiasRetraso: float
+
+    #calcularCantidadPositivas()    SAME
+    #calcularCantidadNegativas()    SAME
+    #calcularPromedioDias()
+    #asignarCalificacion(Proveedor p)     SAME
+    #entregaParcialFueCompleta() retorna boolean
+    #entregaFinalFueCompleta() retorna boolean
+    
 
     id_proveedor = db.Column(db.Integer, primary_key=True)
     id_evaluacion_plazo = db.Column(db.Integer, primary_key=True)
@@ -72,3 +78,4 @@ class EvaluacionCumplimientoCondicionesPago(EvaluacionRendimiento, db.Model):
         pass
     def asignar_calificacion_proveedor():
         pass
+"""

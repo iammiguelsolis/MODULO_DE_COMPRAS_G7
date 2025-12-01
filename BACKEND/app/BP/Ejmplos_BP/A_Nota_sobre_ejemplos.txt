@@ -1,0 +1,3 @@
+Si no estuvieran en este sub directorio y en su
+lugar estuvieran en BP, la importacion seria directa
+asi como se muestra en el ejemplo comentado que dejo en init
