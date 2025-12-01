@@ -3,11 +3,6 @@ from app.models.licitaciones.licitacion import Licitacion
 from app.models.licitaciones.propuesta import PropuestaProveedor
 
 class OrdenCompraIntegrationService:
-    """
-    Servicio encargado de preparar y enviar los datos necesarios al módulo de Orden de Compra
-    una vez que una licitación ha sido adjudicada.
-    """
-    
     def generar_datos_orden_compra(self, id_licitacion):
         """
         Recopila todos los datos necesarios para generar una Orden de Compra.
@@ -19,10 +14,17 @@ class OrdenCompraIntegrationService:
             
         # Verificar que haya un ganador (cargar con relación proveedor)
         from sqlalchemy.orm import joinedload
-        propuesta_ganadora = db.session.query(PropuestaProveedor).options(
-            joinedload(PropuestaProveedor.proveedor)
-        ).filter_by(id_propuesta=licitacion.propuesta_ganadora.id_propuesta).first() if licitacion.propuesta_ganadora else None
         
+        # CAMBIO: Usamos licitacion.id en lugar de id_licitacion
+        if not licitacion.propuesta_ganadora:
+             # Intento de fallback por si la relación no cargó (aunque debería)
+             propuesta_ganadora = PropuestaProveedor.query.filter_by(
+                licitacion_id=licitacion.id, 
+                es_ganadora=True
+             ).first()
+        else:
+             propuesta_ganadora = licitacion.propuesta_ganadora
+
         if not propuesta_ganadora:
             raise ValueError("La licitación no tiene una propuesta ganadora adjudicada")
             
@@ -33,7 +35,7 @@ class OrdenCompraIntegrationService:
         # La Orden de Compra puede obtener los items a partir del id_solicitud
         payload = {
             "origen": "LICITACION",
-            "id_origen": licitacion.id_licitacion,
+            "id_origen": licitacion.id, # CAMBIO: .id
             "id_solicitud": licitacion.solicitud_id,
             "proveedor": {
                 "id": proveedor.id_proveedor,
@@ -49,7 +51,9 @@ class OrdenCompraIntegrationService:
         
         # Agregar datos del contrato si existe
         from app.models.licitaciones.contrato import Contrato
-        contrato = Contrato.query.filter_by(licitacion_id=id_licitacion).first()
+        # CAMBIO: Usamos licitacion.id para filtrar
+        contrato = Contrato.query.filter_by(licitacion_id=licitacion.id).first()
+        
         if contrato:
             payload["contrato"]["url"] = contrato.documento_firmado_url
             payload["contrato"]["fecha_firmado"] = str(contrato.fecha_carga_firmado) if contrato.fecha_carga_firmado else None
@@ -64,20 +68,20 @@ class OrdenCompraIntegrationService:
             datos = self.generar_datos_orden_compra(id_licitacion)
             
             # AQUÍ SE HARÍA LA LLAMADA AL OTRO MÓDULO (HTTP POST, Event Bus, etc.)
-            # import requests
-            # response = requests.post("http://localhost:5000/api/ordenes-compra/externa", json=datos)
             print(f"--- ENVIANDO DATOS A MÓDULO ORDEN DE COMPRA ---\n{datos}\n-----------------------------------------------")
             
             # Actualizar estado local
             licitacion = Licitacion.query.get(id_licitacion)
+            
+            # CAMBIO: Usamos licitacion.id
             propuesta_ganadora = PropuestaProveedor.query.filter_by(
-                licitacion_id=id_licitacion,
+                licitacion_id=licitacion.id,
                 es_ganadora=True
             ).first()
             
             # Obtener contrato
             from app.models.licitaciones.contrato import Contrato
-            contrato = Contrato.query.filter_by(licitacion_id=id_licitacion).first()
+            contrato = Contrato.query.filter_by(licitacion_id=licitacion.id).first()
             
             # Avanzar estado CON_CONTRATO -> FINALIZADA
             licitacion.siguiente_estado()
@@ -86,8 +90,8 @@ class OrdenCompraIntegrationService:
             
             # Response según la especificación de la API
             return {
-                "id_licitacion": licitacion.id_licitacion,
-                "estado": licitacion.estado.value if hasattr(licitacion.estado, 'value') else str(licitacion.estado),
+                "id_licitacion": licitacion.id, # CAMBIO: .id
+                "estado": licitacion.estado_actual.get_nombre(),
                 "proveedor_adjudicado_id": propuesta_ganadora.proveedor_id if propuesta_ganadora else None,
                 "contrato_id": contrato.id_contrato if contrato else None,
                 "orden_compra_generada": True

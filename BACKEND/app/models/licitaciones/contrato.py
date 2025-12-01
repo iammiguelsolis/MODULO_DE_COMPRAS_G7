@@ -12,7 +12,7 @@ class Contrato(db.Model):
     __tablename__ = 'contratos'
     
     id_contrato = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    licitacion_id = db.Column(db.Integer, db.ForeignKey('licitaciones.id_licitacion'), nullable=False)
+    licitacion_id = db.Column(db.Integer, db.ForeignKey('licitaciones.id'), nullable=False)
     proveedor_id = db.Column(db.Integer, db.ForeignKey('proveedores.id_proveedor'), nullable=False)
     
     # Paso 1: Plantilla

@@ -17,6 +17,8 @@ class ProcesoAdquisicion(db.Model):
     estado = db.Column(db.String(50), default=EstadoProceso.NUEVO)
     
 
+    solicitud_origen = db.relationship('Solicitud', backref=db.backref('proceso_adquisicion', uselist=False))
+    
     tipo_proceso = db.Column(db.String(50))
 
     # Oferta Ganadora (ID)
@@ -78,20 +80,4 @@ class Compra(ProcesoAdquisicion):
     def to_dict(self):
         d = super().to_dict()
         d['ofertas'] = [o.to_dict() for o in self.ofertas]
-        return d
-
-
-class Licitacion(ProcesoAdquisicion):
-    __tablename__ = 'licitaciones'
-    id = db.Column(db.Integer, db.ForeignKey('procesos_adquisicion.id'), primary_key=True)
-
-    bases_legales = db.Column(db.Text)
-
-    __mapper_args__ = {
-        'polymorphic_identity': 'LICITACION',
-    }
-
-    def to_dict(self):
-        d = super().to_dict()
-        d['bases_legales'] = self.bases_legales
         return d

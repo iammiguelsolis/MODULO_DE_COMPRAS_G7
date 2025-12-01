@@ -7,7 +7,7 @@ class PropuestaProveedor(db.Model):
     __tablename__ = 'propuestas'
     
     id_propuesta = db.Column(db.Integer, primary_key=True)
-    licitacion_id = db.Column(db.Integer, db.ForeignKey('licitaciones.id_licitacion'), nullable=False)
+    licitacion_id = db.Column(db.Integer, db.ForeignKey('licitaciones.id'), nullable=False)
     proveedor_id = db.Column(db.Integer, db.ForeignKey('proveedores.id_proveedor'), nullable=False)
     
     # Relación con Proveedor
