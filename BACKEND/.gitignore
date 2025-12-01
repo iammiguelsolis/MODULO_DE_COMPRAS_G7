@@ -45,3 +45,4 @@ __pypackages__/
 # Para que no se suba el .env
 .env
 *.env
+*.python_version

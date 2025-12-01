@@ -12,14 +12,14 @@ interface InputProps {
   disabled?: boolean;
 }
 
-const Input: React.FC<InputProps> = ({ 
-  label, 
-  value, 
-  onChange, 
-  placeholder, 
-  required, 
+const Input: React.FC<InputProps> = ({
+  label,
+  value,
+  onChange,
+  placeholder,
+  required,
   type = "text",
-  disabled = false 
+  disabled = false
 }) => (
   <div className="flex flex-col gap-1.5">
     {label && (
@@ -47,13 +47,13 @@ interface SelectProps {
   placeholder?: string;
 }
 
-const Select: React.FC<SelectProps> = ({ 
-  label, 
-  value, 
-  onChange, 
-  options, 
+const Select: React.FC<SelectProps> = ({
+  label,
+  value,
+  onChange,
+  options,
   required,
-  placeholder 
+  placeholder
 }) => (
   <div className="flex flex-col gap-1.5 ">
     {label && (
@@ -83,9 +83,9 @@ interface ButtonProps {
   fullWidth?: boolean;
 }
 
-const Button: React.FC<ButtonProps> = ({ 
-  children, 
-  onClick, 
+const Button: React.FC<ButtonProps> = ({
+  children,
+  onClick,
   variant = 'primary',
   type = 'button',
   icon: Icon,
@@ -97,7 +97,7 @@ const Button: React.FC<ButtonProps> = ({
     outline: 'bg-white text-blue-600 hover:bg-blue-50 shadow-sm',
     ghost: 'text-gray-600 hover:bg-gray-100'
   };
-  
+
   return (
     <button
       type={type}
@@ -122,7 +122,7 @@ const Badge: React.FC<BadgeProps> = ({ children, variant = 'pendiente' }) => {
     observada: 'bg-orange-100 text-orange-700',
     aprobada: 'bg-blue-100 text-blue-700'
   };
-  
+
   return (
     <span className={`px-3 py-1 rounded-full text-xs font-medium ${variants[variant]}`}>
       {children}
@@ -139,11 +139,10 @@ interface TabProps {
 const Tab: React.FC<TabProps> = ({ active, onClick, children }) => (
   <button
     onClick={onClick}
-    className={`px-5 py-3 text-sm font-medium transition-all border border-gray-300 rounded-lg cursor-pointer ${
-      active 
-        ? 'bg-blue-600 text-white shadow-sm' 
-        : 'text-gray-600 hover:bg-gray-100'
-    }`}
+    className={`px-5 py-3 text-sm font-medium transition-all border border-gray-300 rounded-lg cursor-pointer ${active
+      ? 'bg-blue-600 text-white shadow-sm'
+      : 'text-gray-600 hover:bg-gray-100'
+      }`}
   >
     {children}
   </button>
@@ -168,7 +167,7 @@ interface InvoiceRowProps {
 }
 
 const InvoiceRow: React.FC<InvoiceRowProps> = ({ factura, onClick }) => (
-  <tr 
+  <tr
     className="hover:bg-gray-50 cursor-pointer transition-colors group"
     onClick={onClick}
   >
@@ -178,7 +177,7 @@ const InvoiceRow: React.FC<InvoiceRowProps> = ({ factura, onClick }) => (
     <td className="px-6 py-4 text-sm text-gray-700">{factura.proveedor}</td>
     <td className="px-6 py-4 text-sm text-gray-600">{factura.fecha}</td>
     <td className="px-6 py-4 text-sm text-gray-600">{factura.moneda}</td>
-    <td className="px-6 py-4 text-sm font-medium text-gray-900">{factura.monto.toLocaleString('es-PE', {minimumFractionDigits: 2})}</td>
+    <td className="px-6 py-4 text-sm font-medium text-gray-900">{factura.monto.toLocaleString('es-PE', { minimumFractionDigits: 2 })}</td>
     <td className="px-6 py-4">
       <Badge variant={factura.estado.toLowerCase() as any}>{factura.estado}</Badge>
     </td>
@@ -260,7 +259,7 @@ const RegistrarFacturaForm: React.FC<RegistrarFacturaFormProps> = ({ onClose, on
               <X size={20} className="text-gray-500" />
             </button>
           </div>
-          
+
           {/* Bento Box Layout */}
           <div className="grid grid-cols-12 gap-6">
             {/* Fila 1 */}
@@ -268,7 +267,7 @@ const RegistrarFacturaForm: React.FC<RegistrarFacturaFormProps> = ({ onClose, on
               <Select
                 label="Proveedor"
                 value={formData.proveedor}
-                onChange={(e) => setFormData({...formData, proveedor: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, proveedor: e.target.value })}
                 options={[
                   { value: 'tecnologias', label: 'Tecnologías Andinas' },
                   { value: 'logico', label: 'Lógico SAC' }
@@ -281,14 +280,14 @@ const RegistrarFacturaForm: React.FC<RegistrarFacturaFormProps> = ({ onClose, on
               <Input
                 label="RUC"
                 value={formData.ruc}
-                onChange={(e) => setFormData({...formData, ruc: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, ruc: e.target.value })}
               />
             </div>
             <div className="col-span-3">
               <Select
                 label="Moneda"
                 value={formData.moneda}
-                onChange={(e) => setFormData({...formData, moneda: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, moneda: e.target.value })}
                 options={[
                   { value: 'PEN', label: 'PEN' },
                   { value: 'USD', label: 'USD' }
@@ -300,7 +299,7 @@ const RegistrarFacturaForm: React.FC<RegistrarFacturaFormProps> = ({ onClose, on
               <Input
                 label="OC (opcional)"
                 value={formData.oc}
-                onChange={(e) => setFormData({...formData, oc: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, oc: e.target.value })}
                 placeholder="Buscar por #"
               />
             </div>
@@ -310,7 +309,7 @@ const RegistrarFacturaForm: React.FC<RegistrarFacturaFormProps> = ({ onClose, on
               <Input
                 label="Serie"
                 value={formData.serie}
-                onChange={(e) => setFormData({...formData, serie: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, serie: e.target.value })}
                 required
               />
             </div>
@@ -318,7 +317,7 @@ const RegistrarFacturaForm: React.FC<RegistrarFacturaFormProps> = ({ onClose, on
               <Input
                 label="Número"
                 value={formData.numero}
-                onChange={(e) => setFormData({...formData, numero: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, numero: e.target.value })}
                 required
               />
             </div>
@@ -327,7 +326,7 @@ const RegistrarFacturaForm: React.FC<RegistrarFacturaFormProps> = ({ onClose, on
                 label="Fecha Emisión"
                 type="date"
                 value={formData.fechaEmision}
-                onChange={(e) => setFormData({...formData, fechaEmision: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, fechaEmision: e.target.value })}
                 required
               />
             </div>
@@ -336,7 +335,7 @@ const RegistrarFacturaForm: React.FC<RegistrarFacturaFormProps> = ({ onClose, on
                 label="Fecha Vencimiento"
                 type="date"
                 value={formData.fechaVencimiento}
-                onChange={(e) => setFormData({...formData, fechaVencimiento: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, fechaVencimiento: e.target.value })}
                 required
               />
             </div>
@@ -346,21 +345,21 @@ const RegistrarFacturaForm: React.FC<RegistrarFacturaFormProps> = ({ onClose, on
               <Input
                 label="Sub Total"
                 value={formData.subTotal}
-                onChange={(e) => setFormData({...formData, subTotal: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, subTotal: e.target.value })}
               />
             </div>
             <div className="col-span-4">
               <Input
                 label="IGV"
                 value={formData.igv}
-                onChange={(e) => setFormData({...formData, igv: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, igv: e.target.value })}
               />
             </div>
             <div className="col-span-4">
               <Input
                 label="Total"
                 value={formData.total}
-                onChange={(e) => setFormData({...formData, total: e.target.value})}
+                onChange={(e) => setFormData({ ...formData, total: e.target.value })}
               />
             </div>
 
@@ -398,7 +397,7 @@ const ListaFacturas: React.FC<ListaFacturasProps> = ({ facturas, onFacturaClick,
 
   const filteredFacturas = facturas.filter(f => {
     const matchesTab = f.estado.toLowerCase() === activeTab;
-    const matchesSearch = searchTerm === '' || 
+    const matchesSearch = searchTerm === '' ||
       f.numero.toLowerCase().includes(searchTerm.toLowerCase()) ||
       f.proveedor.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesTab && matchesSearch;
@@ -413,7 +412,7 @@ const ListaFacturas: React.FC<ListaFacturasProps> = ({ facturas, onFacturaClick,
             <h1 className="text-3xl font-bold text-gray-900">Facturas</h1>
             <Button icon={FileText} onClick={onNuevaFactura}>Nueva factura</Button>
           </div>
-          
+
           {/* Filters Grid */}
           <div className="grid grid-cols-12 gap-4 ">
             <div className="col-span-4">
@@ -483,10 +482,10 @@ const ListaFacturas: React.FC<ListaFacturasProps> = ({ facturas, onFacturaClick,
               </thead>
               <tbody className="divide-y divide-gray-100">
                 {filteredFacturas.map(factura => (
-                  <InvoiceRow 
-                    key={factura.numero} 
-                    factura={factura} 
-                    onClick={() => onFacturaClick(factura)} 
+                  <InvoiceRow
+                    key={factura.numero}
+                    factura={factura}
+                    onClick={() => onFacturaClick(factura)}
                   />
                 ))}
               </tbody>
@@ -524,40 +523,40 @@ const DetalleFactura: React.FC<DetalleFacturaProps> = ({ factura, onClose }) => 
             {/* Detalle Card */}
             <div className="bg-white rounded-2xl shadow-sm p-6">
               <h2 className="text-xl font-bold mb-6 text-gray-900">Detalle de factura</h2>
-              
+
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
                   <Input
                     label="Proveedor"
                     value={factura.proveedor}
-                    onChange={() => {}}
+                    onChange={() => { }}
                     disabled
                   />
                 </div>
-                
+
                 <Input
                   label="Serie-Número"
                   value={factura.numero}
-                  onChange={() => {}}
+                  onChange={() => { }}
                   disabled
                 />
                 <Input
                   label="Fecha Emisión"
                   value={factura.fecha}
-                  onChange={() => {}}
+                  onChange={() => { }}
                   disabled
                 />
 
                 <Input
                   label="Moneda"
                   value={factura.moneda}
-                  onChange={() => {}}
+                  onChange={() => { }}
                   disabled
                 />
                 <Input
                   label="Monto"
                   value={factura.monto.toFixed(2)}
-                  onChange={() => {}}
+                  onChange={() => { }}
                   disabled
                 />
 
@@ -565,7 +564,7 @@ const DetalleFactura: React.FC<DetalleFacturaProps> = ({ factura, onClose }) => 
                   <Input
                     label="OC vinculada"
                     value={factura.origen}
-                    onChange={() => {}}
+                    onChange={() => { }}
                     disabled
                   />
                 </div>
@@ -698,7 +697,7 @@ export default function FacturacionApp() {
   return (
     <>
       {view === 'list' && (
-        <ListaFacturas 
+        <ListaFacturas
           facturas={facturas}
           onFacturaClick={handleFacturaClick}
           onNuevaFactura={() => setShowRegistrar(true)}
@@ -706,7 +705,7 @@ export default function FacturacionApp() {
       )}
 
       {view === 'detail' && selectedFactura && (
-        <DetalleFactura 
+        <DetalleFactura
           factura={selectedFactura}
           onClose={() => setView('list')}
         />
