@@ -66,11 +66,17 @@ class OrdenCompraIntegrationService:
         # Por ahora usamos los solicitados que es lo que tenemos mapeado
         if hasattr(licitacion, 'items'):
             for item in licitacion.items:
+                # Determinar cantidad según tipo
+                cantidad = 0
+                if item.tipo == 'MATERIAL':
+                    cantidad = item.cantidad
+                elif item.tipo == 'SERVICIO':
+                    cantidad = float(item.horas) if item.horas else 0.0
+
                 payload["items"].append({
                     "codigo": item.codigo,
                     "descripcion": item.nombre,
-                    "cantidad": item.cantidad,
-                    "unidad": item.unidad_medida,
+                    "cantidad": cantidad,
                     "precio_unitario": 0.0  # El precio unitario real vendría del detalle de oferta si existiera
                 })
                 

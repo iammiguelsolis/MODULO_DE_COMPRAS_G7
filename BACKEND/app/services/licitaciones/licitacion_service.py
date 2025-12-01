@@ -23,40 +23,46 @@ class LicitacionService:
 
             # Crear instancia base
             licitacion = Licitacion(
-                nombre=data.get('nombre'),
-                presupuesto_maximo=data.get('presupuesto_maximo'),
+                limite_monto=data.get('limiteMonto'),
                 fecha_limite=fecha_limite,
-                solicitud_id=data.get('solicitud_id'),
-                comprador_id=data.get('comprador_id')
+                solicitud_id=data.get('solicitud_id')
             )
-            
+            db.session.add(licitacion)
+            db.session.flush() # Obtener ID
+
             # Agregar items si existen
             items_data = data.get('items', [])
             for item in items_data:
-                if item.get('tipo') == TipoItem.MATERIAL.value:
+                tipo = item.get('tipo')
+                
+                # Parsear fecha de entrega si es string
+                fecha_entrega = item.get('fecha_entrega')
+                if isinstance(fecha_entrega, str):
+                    fecha_entrega = datetime.strptime(fecha_entrega, '%Y-%m-%d').date()
+                
+                if tipo == TipoItem.MATERIAL.value:
                     nuevo_item = MaterialSolicitado(
                         codigo=item.get('codigo'),
                         nombre=item.get('nombre'),
                         cantidad=item.get('cantidad'),
-                        unidad_medida=item.get('unidad_medida'),
+                        precio_unitario=item.get('precio_unitario'),
                         comentario=item.get('comentario'),
-                        fecha_entrega=item.get('fecha_entrega')
+                        fecha_entrega=fecha_entrega
                     )
-                else:
+                elif tipo == TipoItem.SERVICIO.value:
                     nuevo_item = ServicioSolicitado(
                         codigo=item.get('codigo'),
                         nombre=item.get('nombre'),
-                        cantidad=item.get('cantidad'),
-                        unidad_medida=item.get('unidad_medida'),
+                        horas=item.get('horas'),
+                        tarifa_hora=item.get('tarifa_hora'),
                         comentario=item.get('comentario'),
-                        fecha_entrega=item.get('fecha_entrega')
+                        fecha_entrega=fecha_entrega
                     )
-                # Relacionar item con licitación (asumiendo relación definida)
-                # nuevo_item.licitacion = licitacion
+                else:
+                    continue
+                    
+                nuevo_item.licitacion_id = licitacion.id_licitacion
                 db.session.add(nuevo_item)
-            
-            db.session.add(licitacion)
-            db.session.flush() # Obtener ID
 
             # Crear documento requerido por defecto (Propuesta Económica SIEMPRE es obligatoria)
             # Los demás documentos requeridos se agregarán dinámicamente según la selección del comprador
@@ -109,9 +115,9 @@ class LicitacionService:
             if filters.get('fechaHasta'):
                 query = query.filter(Licitacion.fecha_creacion <= filters['fechaHasta'])
             if filters.get('limiteMontoMin'):
-                query = query.filter(Licitacion.presupuesto_maximo >= filters['limiteMontoMin'])
+                query = query.filter(Licitacion.limite_monto >= filters['limiteMontoMin'])
             if filters.get('limiteMontoMax'):
-                query = query.filter(Licitacion.presupuesto_maximo <= filters['limiteMontoMax'])
+                query = query.filter(Licitacion.limite_monto <= filters['limiteMontoMax'])
                 
         return query.all()
     

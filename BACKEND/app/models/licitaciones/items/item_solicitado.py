@@ -11,12 +11,15 @@ class ItemSolicitado(db.Model):
     licitacion_id = db.Column(db.Integer, db.ForeignKey('licitaciones.id_licitacion'))
     tipo = db.Column(db.String(50))  # Discriminador para polimorfismo
     
-    codigo = db.Column(db.String(50))
-    nombre = db.Column(db.String(255))
-    unidad_medida = db.Column(db.String(50))
-    cantidad = db.Column(db.Integer)
+    # Atributos comunes según diagrama (Abstracto)
     comentario = db.Column(db.Text)
     fecha_entrega = db.Column(db.Date)
+    
+    # Atributos de "Material" o "Servicio" referenciado (Simulación de la relación)
+    # En el diagrama: material: Material / servicio: Servicio
+    # Aquí guardamos los datos básicos del objeto referenciado
+    codigo = db.Column(db.String(50))
+    nombre = db.Column(db.String(255))
     
     __mapper_args__ = {
         'polymorphic_identity': 'item_solicitado',

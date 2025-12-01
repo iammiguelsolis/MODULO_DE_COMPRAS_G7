@@ -1,10 +1,6 @@
 from app.bdd import db
 from datetime import datetime
-import enum
-
-class EstadoContrato(enum.Enum):
-    PLANTILLA_GENERADA = "PLANTILLA_GENERADA"
-    FIRMADO_CARGADO = "FIRMADO_CARGADO"
+from app.enums.licitaciones.estado_contrato import EstadoContrato
 
 class Contrato(db.Model):
     """

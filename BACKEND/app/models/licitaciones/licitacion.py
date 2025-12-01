@@ -4,30 +4,32 @@ from app.models.licitaciones.estados.estado_nueva import EstadoNueva
 from app.models.licitaciones.estados.estado_cancelada import EstadoCancelada
 # Importar otros estados aquí a medida que se creen, o usar importación dinámica/local en _reconstruir_estado
 
-class Licitacion(db.Model):
+from app.models.licitaciones.proceso_adquisicion import ProcesoAdquisicion
+from app.models.licitaciones.solicitud import Solicitud
+
+class Licitacion(ProcesoAdquisicion):
     """
     Modelo de Licitación que actúa como Contexto del patrón State.
-    Almacena el estado actual y delega el comportamiento a la instancia del estado.
+    Hereda de ProcesoAdquisicion según diagramaClases.txt.
     """
     __tablename__ = 'licitaciones'
     
+    # Atributos propios de Licitacion (diagrama línea 9)
     id_licitacion = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(255), nullable=False)
-    presupuesto_maximo = db.Column(db.Numeric(10, 2))
+    limite_monto = db.Column(db.Numeric(10, 2))
     fecha_limite = db.Column(db.DateTime)
-    fecha_creacion = db.Column(db.DateTime)
     
     # Persistencia del nombre del estado en BD
     _estado_nombre = db.Column('estado', db.String(50), nullable=False, default='BORRADOR')
     
-    # Relaciones (Foreign Keys)
-    # Nota: Asumimos que existen las tablas 'solicitudes' y 'usuarios' o se crearán.
-    # Si no existen aún, estas FKs podrían fallar al crear las tablas si no se definen los modelos.
-    # Por ahora definimos las columnas como Integer simples si los modelos externos no están listos,
-    # o ForeignKey si ya existen. Seguiremos el plan usando ForeignKey asumiendo que existirán.
-    solicitud_id = db.Column(db.Integer, nullable=True) # db.ForeignKey('solicitudes.id_solicitud')
-    comprador_id = db.Column(db.Integer, nullable=True) # db.ForeignKey('usuarios.id_usuario')
-    supervisor_id = db.Column(db.Integer, nullable=True) # db.ForeignKey('usuarios.id_usuario')
+    # Atributos heredados de ProcesoAdquisicion (Implementación)
+    solicitud_id = db.Column(db.Integer, db.ForeignKey('solicitudes.id_solicitud'), nullable=False)
+    
+    # Relaciones
+    solicitud_origen = db.relationship('Solicitud', backref='licitaciones')
+    
+    # Supervisor (Usuario) - Se mantiene aquí porque es específico de la licitación (quién la supervisa)
+    supervisor_id = db.Column(db.Integer, nullable=True) 
     
     # Campos de control para lógica de estados
     aprobada_por_supervisor = db.Column(db.Boolean, default=False)
@@ -43,7 +45,7 @@ class Licitacion(db.Model):
                                        uselist=False, viewonly=True)
     
     # Relación con Items Solicitados
-    items = db.relationship('ItemSolicitado', backref='licitacion', lazy=True)
+    items = db.relationship('ItemSolicitado', backref='licitacion', lazy=True, cascade="all, delete-orphan")
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

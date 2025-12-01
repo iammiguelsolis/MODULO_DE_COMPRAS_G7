@@ -6,7 +6,6 @@ class ItemDTO:
     codigo: str
     nombre: str
     cantidad: int
-    unidad_medida: str
     tipo: str  # MATERIAL o SERVICIO
     comentario: Optional[str] = None
     fecha_entrega: Optional[str] = None
@@ -14,8 +13,7 @@ class ItemDTO:
 @dataclass
 class CrearLicitacionDTO:
     solicitud_id: int
-    nombre: str
-    presupuesto_maximo: float
+    limite_monto: float
     fecha_limite: str
     comprador_id: int
     items: List[Dict[str, Any]]
@@ -23,10 +21,8 @@ class CrearLicitacionDTO:
 @dataclass
 class LicitacionResponseDTO:
     id_licitacion: int
-    nombre: str
     estado: str
-    presupuesto_maximo: float
-    fecha_creacion: str
+    limite_monto: float
     fecha_limite: str
     
     items: List[ItemDTO]
@@ -37,11 +33,17 @@ class LicitacionResponseDTO:
         items_dto = []
         if hasattr(licitacion, 'items'):
             for item in licitacion.items:
+                # Determinar cantidad según tipo
+                cantidad = 0
+                if item.tipo == 'MATERIAL':
+                    cantidad = item.cantidad
+                elif item.tipo == 'SERVICIO':
+                    cantidad = int(item.horas) if item.horas else 0
+
                 items_dto.append(ItemDTO(
                     codigo=item.codigo,
                     nombre=item.nombre,
-                    cantidad=item.cantidad,
-                    unidad_medida=item.unidad_medida,
+                    cantidad=cantidad,
                     tipo=item.tipo,
                     comentario=item.comentario,
                     fecha_entrega=str(item.fecha_entrega) if item.fecha_entrega else None
@@ -49,10 +51,8 @@ class LicitacionResponseDTO:
         
         return LicitacionResponseDTO(
             id_licitacion=licitacion.id_licitacion,
-            nombre=licitacion.nombre,
             estado=licitacion.estado_actual.get_nombre(),
-            presupuesto_maximo=float(licitacion.presupuesto_maximo) if licitacion.presupuesto_maximo else 0.0,
-            fecha_creacion=str(licitacion.fecha_creacion) if licitacion.fecha_creacion else "",
+            limite_monto=float(licitacion.limite_monto) if licitacion.limite_monto else 0.0,
             fecha_limite=str(licitacion.fecha_limite) if licitacion.fecha_limite else "",
             items=items_dto
         )
