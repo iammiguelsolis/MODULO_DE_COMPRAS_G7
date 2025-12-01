@@ -5,6 +5,7 @@ import FacturacionApp from "./modules/facturación/page/FacturacionApp";
 import LicitacionesListPage from "./modules/licitaciones/pages/LicitacionesListPage";
 import LicitacionDetailPage from "./modules/licitaciones/pages/LicitacionDetailPage";
 import LicitacionPage from "./modules/licitaciones/pages/LicitacionPage";
+import GenerarOrdenCompraPage from "./modules/ordenCompra/pages/GenerarOrdenCompra";
 
 function App() {
   return (
@@ -26,7 +27,7 @@ function App() {
           <Route path="/licitacion/detail" element={<LicitacionDetailPage />} />
           <Route path="/licitaciones/crear" element={<LicitacionPage />} />
 
-          <Route path="/ordenes" element={<h1>ordenes</h1>} />
+          <Route path="/ordenes" element={<GenerarOrdenCompraPage/>} />
           <Route path="/facturacion" element={<FacturacionApp />} />
           <Route path="/comparacion" element={<h1>reportes</h1>} />
           <Route path="/analisis" element={<h1>analisis de Proveedores</h1>} />
