@@ -19,16 +19,20 @@ class LicitacionService:
                 fecha_limite = datetime.strptime(fecha_limite, '%Y-%m-%d')
 
             # Crear instancia base
+            # NOTA: Al heredar de ProcesoAdquisicion, el ID se genera automáticamente 
+            # en la tabla padre 'procesos_adquisicion'.
             licitacion = Licitacion(
                 presupuesto_max=data.get('presupuesto_max'),
                 fecha_limite=fecha_limite,
                 solicitud_id=data.get('solicitud_id')
             )
             db.session.add(licitacion)
-            db.session.flush() # Obtener ID
+            
+            # flush() es crucial aquí: envía el INSERT a la BD para obtener el 'id' generado
+            # antes de hacer el commit final.
+            db.session.flush() 
 
             # Crear documento requerido por defecto (Propuesta Económica SIEMPRE es obligatoria)
-            # Los demás documentos requeridos se agregarán dinámicamente según la selección del comprador
             from app.models.licitaciones.documentos import DocumentoRequerido
             from app.enums.licitaciones.tipo_documento import TipoDocumento
             
@@ -43,7 +47,9 @@ class LicitacionService:
 
             for doc in docs_default:
                 nuevo_doc = DocumentoRequerido(
-                    licitacion_id=licitacion.id_licitacion,
+                    # CAMBIO IMPORTANTE: Usamos 'id' en lugar de 'id_licitacion'
+                    # debido a la herencia de ProcesoAdquisicion.
+                    licitacion_id=licitacion.id, 
                     tipo=doc['tipo'],
                     nombre=doc['nombre'],
                     ruta_plantilla=doc['ruta'],
@@ -75,10 +81,13 @@ class LicitacionService:
                 query = query.filter(Licitacion._estado_nombre == filtros['estado'])
             
             if 'titulo' in filtros:
+                # Nota: Si el título está en la tabla Solicitud, aquí podrías necesitar un join.
+                # Asumimos que Licitacion tiene acceso al título o propiedad proxy.
                 query = query.filter(Licitacion.titulo.ilike(f"%{filtros['titulo']}%"))
 
             if 'id' in filtros:
-                query = query.filter(Licitacion.id_licitacion == filtros['id'])
+                # CAMBIO: Filtramos por 'id' heredado
+                query = query.filter(Licitacion.id == filtros['id'])
                 
             if 'fechaDesde' in filtros:
                 query = query.filter(Licitacion.fecha_creacion >= filtros['fechaDesde'])
@@ -92,7 +101,7 @@ class LicitacionService:
             if 'limiteMontoMax' in filtros:
                 query = query.filter(Licitacion.presupuesto_max <= filtros['limiteMontoMax'])
         
-        # Ordenar por fecha de creación descendente
+        # Ordenar por fecha de creación descendente (campo heredado de ProcesoAdquisicion)
         query = query.order_by(Licitacion.fecha_creacion.desc())
         
         # Paginación
