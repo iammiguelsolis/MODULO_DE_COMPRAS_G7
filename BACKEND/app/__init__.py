@@ -22,9 +22,6 @@ def create_app():
     # Registrar Blueprints
     # ejemplo de restro, ahorita tira error si descomento
     # app.register_blueprint(colaborador_bp, url_prefix='/colaborador')
-    
-    from app.BP.licitaciones import register_licitaciones_blueprints
-    register_licitaciones_blueprints(app)
 
     # 🔴 Manejador de errores
 
@@ -37,4 +34,3 @@ def create_app():
     """
     
     return app
-
