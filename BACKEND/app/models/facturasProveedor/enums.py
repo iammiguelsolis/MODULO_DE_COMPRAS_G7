@@ -1,0 +1,37 @@
+import enum
+
+class EstadoFactura(enum.Enum):
+    BORRADOR = "BORRADOR"
+    REGISTRADA = "REGISTRADA"
+    EN_CONCILIACION = "EN_CONCILIACION"
+    APROBADA = "APROBADA"
+    RECHAZADA = "RECHAZADA"
+    ANULADA = "ANULADA"
+    ENVIADA_CXP = "ENVIADA_CXP"
+
+class Moneda(enum.Enum):
+    PEN = "PEN"
+    USD = "USD"
+
+class DocTipo(enum.Enum):
+    PDF = "PDF"
+    XML = "XML"
+
+class MotivoObservacion(enum.Enum):
+    F_EMISION_INCORRECTA = "F_EMISION_INCORRECTA"
+    F_VENCIMIENTO_INCORRECTA = "F_VENCIMIENTO_INCORRECTA"
+    METODO_PAGO_INCORRECTO = "METODO_PAGO_INCORRECTO"
+    CANTIDADES_INCORRECTAS = "CANTIDADES_INCORRECTAS"
+    PRECIOS_INCORRECTOS = "PRECIOS_INCORRECTOS"
+    NO_FUE_OBSERVADA = "NO_FUE_OBSERVADA"
+
+class EstadoPago(enum.Enum):
+    # Deducido de ObligacionPago en el diagrama
+    PENDIENTE = "PENDIENTE"
+    PAGADO = "PAGADO"
+
+class EstadoConciliacion(enum.Enum):
+    PENDIENTE = "PENDIENTE"
+    EN_PROCESO = "EN_PROCESO"
+    CONCILIADA = "CONCILIADA"
+    CON_DISCREPANCIA = "CON_DISCREPANCIA"
