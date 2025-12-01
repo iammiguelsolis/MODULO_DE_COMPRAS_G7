@@ -3,11 +3,15 @@ from app.models.solicitudes.solicitud import Solicitud
 from app.models.adquisiciones.proceso import Compra, ProcesoAdquisicion, EstadoProceso
 from app.models.adquisiciones.oferta import OfertaProveedor, MaterialOfertado, ServicioOfertado
 from app.patrones.notificadores import WhatsappFactory, CorreoFactory
+from app.patrones.clasificadores import ClasificadorPorMonto
+from app.services.licitaciones.licitacion_service import LicitacionService
 
 class AdquisicionService:
     
-    UMBRAL_LICITACION = 10000.00
-
+    def __init__(self):
+        self.clasificador = ClasificadorPorMonto()
+        self.licitacion_service = LicitacionService()
+        
     def generar_proceso_compra(self, id_solicitud):
 
         solicitud = Solicitud.query.get(id_solicitud)
@@ -16,36 +20,65 @@ class AdquisicionService:
 
         total = solicitud.calcular_total() 
         
-        
+from app.bdd import db
+from app.models.solicitudes.solicitud import Solicitud
+from app.models.adquisiciones.proceso import Compra, ProcesoAdquisicion, EstadoProceso
+from app.patrones.clasificadores import ClasificadorPorMonto
+
+# IMPORTAMOS EL NUEVO SERVICIO
+from app.services.licitaciones.licitacion_service import LicitacionService
+
+class AdquisicionService:
+    
+    def __init__(self):
+        self.clasificador = ClasificadorPorMonto()
+        # Instanciamos el servicio de licitaciones
+        self.licitacion_service = LicitacionService() 
+
+    def generar_proceso_compra(self, id_solicitud):
+        solicitud = Solicitud.query.get(id_solicitud)
+        if not solicitud:
+            raise Exception("Solicitud no encontrada")
+
         proceso_existente = ProcesoAdquisicion.query.filter_by(solicitud_id=id_solicitud).first()
         if proceso_existente:
-          return {
-              "tipo": proceso_existente.tipo_proceso,
-              "mensaje": "La solicitud ya tiene un proceso de adquisición.",
-              "data": proceso_existente
-          }
+             return {
+                  "tipo": proceso_existente.tipo_proceso,
+                  "mensaje": "La solicitud ya tiene un proceso asociado.",
+                  "data": proceso_existente
+             }
 
-        if total >= self.UMBRAL_LICITACION:
+        tipo_proceso = self.clasificador.determinar_tipo(solicitud)
 
+        if tipo_proceso == "LICITACION":
+
+            data_para_licitacion = {
+                'solicitud_id': solicitud.id,
+                'presupuesto_max': solicitud.calcular_total(),
+                'fecha_limite': None
+            }
+            
+            nueva_licitacion = self.licitacion_service.crear_licitacion(data_para_licitacion)
+            
             return {
                 "tipo": "LICITACION",
-                "mensaje": "El monto supera los 10,000. Se requiere proceso de Licitación. (Módulo Próximamente)",
-                "data": None
+                "mensaje": "Se ha generado una Licitación en estado BORRADOR con documentos por defecto.",
+                "data": nueva_licitacion
             }
 
-        nueva_compra = Compra(
-            solicitud_id=solicitud.id,
-            estado=EstadoProceso.NUEVO
-        )
-        
-        db.session.add(nueva_compra)
-        db.session.commit()
-        
-        return {
-            "tipo": "COMPRA",
-            "mensaje": "Proceso de Compra Directa iniciado exitosamente.",
-            "data": nueva_compra
-        }
+        else:
+            nueva_compra = Compra(
+                solicitud_id=solicitud.id,
+                estado=EstadoProceso.NUEVO
+            )
+            db.session.add(nueva_compra)
+            db.session.commit()
+            
+            return {
+                "tipo": "COMPRA",
+                "mensaje": "Proceso de Compra Directa iniciado exitosamente.",
+                "data": nueva_compra
+            }
 
     def invitar_proveedores(self, id_compra, lista_proveedores, tipo_canal='EMAIL'):
 
