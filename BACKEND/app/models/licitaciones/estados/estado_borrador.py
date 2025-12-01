@@ -7,15 +7,16 @@ class EstadoBorrador(EstadoLicitacionState):
     """
     
     def siguiente(self):
-        """
-        Si el supervisor aprobó -> NUEVA
-        Si rechazó -> CANCELADA
-        """
-        if getattr(self.licitacion, 'aprobada_por_supervisor', False):
+        # BORRADOR -> NUEVA (Si fue aprobada por supervisor)
+        if self.licitacion.aprobada_por_supervisor:
             from app.models.licitaciones.estados.estado_nueva import EstadoNueva
             return EstadoNueva(self.licitacion)
-        else:
-            return self.cancelar()
-    
-    def get_nombre(self):
+        return self
+        
+    def cancelar(self):
+        # BORRADOR -> CANCELADA (Rechazo o cancelación manual)
+        from app.models.licitaciones.estados.estado_cancelada import EstadoCancelada
+        self.licitacion.cambiar_estado(EstadoCancelada(self.licitacion))
+        
+    def get_nombre(self) -> str:
         return "BORRADOR"

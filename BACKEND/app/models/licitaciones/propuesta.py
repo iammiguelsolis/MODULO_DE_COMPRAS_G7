@@ -7,13 +7,13 @@ class PropuestaProveedor(db.Model):
     __tablename__ = 'propuestas'
     
     id_propuesta = db.Column(db.Integer, primary_key=True)
-    licitacion_id = db.Column(db.Integer, db.ForeignKey('licitaciones.id_licitacion'))
-    proveedor_id = db.Column(db.Integer, db.ForeignKey('proveedores.id_proveedor'))
+    licitacion_id = db.Column(db.Integer, db.ForeignKey('licitaciones.id_licitacion'), nullable=False)
+    proveedor_id = db.Column(db.Integer, db.ForeignKey('proveedores.id_proveedor'), nullable=False)
     
     # Relación con Proveedor
     proveedor = db.relationship('Proveedor', backref='propuestas')
     
-    fecha_presentacion = db.Column(db.DateTime)
+    fecha_presentacion = db.Column(db.DateTime, default=db.func.current_timestamp())
     
     # Estado de evaluaciones
     aprobada_tecnicamente = db.Column(db.Boolean, default=False)
@@ -28,3 +28,4 @@ class PropuestaProveedor(db.Model):
     
     # Relaciones
     documentos = db.relationship('Documento', backref='propuesta', lazy=True)
+

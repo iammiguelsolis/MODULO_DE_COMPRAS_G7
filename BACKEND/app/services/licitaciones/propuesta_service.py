@@ -36,6 +36,7 @@ class PropuestaService:
             for doc_data in documentos_data:
                 documento = Documento(
                     propuesta_id=propuesta.id_propuesta,
+                    documento_requerido_id=doc_data.get('documento_requerido_id'),
                     nombre=doc_data.get('nombre'),
                     url_archivo=doc_data.get('url'),
                     tipo=TipoDocumento(doc_data.get('tipo', 'TECNICO')), # Default a TECNICO

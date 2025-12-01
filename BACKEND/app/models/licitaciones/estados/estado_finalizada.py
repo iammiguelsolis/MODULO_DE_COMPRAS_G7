@@ -2,12 +2,14 @@ from app.models.licitaciones.estados.estado_licitacion_state import EstadoLicita
 
 class EstadoFinalizada(EstadoLicitacionState):
     """
-    Estado final exitoso del proceso de licitación.
-    El proceso ha concluido con una orden de compra generada.
+    Estado final exitoso.
     """
     
     def siguiente(self):
         return self
-    
-    def get_nombre(self):
+        
+    def cancelar(self):
+        return self # No se puede cancelar una finalizada
+        
+    def get_nombre(self) -> str:
         return "FINALIZADA"

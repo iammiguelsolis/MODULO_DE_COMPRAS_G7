@@ -28,69 +28,69 @@ def listar_propuestas(id):
 def registrar_propuesta(id):
     """
     POST /api/licitaciones/{id}/propuestas
-    Registra una propuesta de proveedor.
-    Body (Multipart): 
-      - proveedorId: int
-      - montoOfertado: float
-      - plazoEntrega: int
-      - garantiaMeses: int
-      - items: json string
-      - documentosLegales: files[]
-      - documentosTecnicos: files[]
-      - documentosEconomicos: files[]
+    Registra una propuesta de proveedor (Metadata).
+    Body: { "proveedor_id": int }
     """
     try:
-        # 1. Extraer datos del formulario
-        proveedor_id = request.form.get('proveedorId', type=int)
-        items_json = request.form.get('items')
+        data = request.get_json()
+        proveedor_id = data.get('proveedor_id')
 
-        if not all([proveedor_id, items_json]):
-             return jsonify({'error': 'Faltan datos obligatorios (proveedorId, items)'}), 400
+        if not proveedor_id:
+             return jsonify({'error': 'Falta proveedor_id'}), 400
 
-        import json
-        items_data = json.loads(items_json)
+        # Datos básicos para crear la propuesta
+        propuesta_data = {'proveedor_id': proveedor_id}
+        # Documentos se suben en endpoint separado, pasamos lista vacía inicial
+        documentos_data = [] 
 
-        # 2. Construir diccionario de datos para el servicio
-        data = {
-            'proveedor_id': proveedor_id,
-            'items': items_data
-        }
-
-        # 3. Manejar archivos (Simulado por ahora, el servicio debería recibir los objetos file storage o sus rutas)
-        # En una implementación real, aquí se guardarían los archivos y se pasarían las rutas/metadata
-        # Por ahora, pasamos los nombres de archivos para simular el registro
+        propuesta = service.registrar_propuesta(id, propuesta_data, documentos_data)
         
-        documentos = []
-        
-        # Helper para procesar listas de archivos
-        def procesar_archivos(key, tipo):
-            files = request.files.getlist(key)
-            for file in files:
-                if file and file.filename:
-                    # Aquí se guardaría el archivo
-                    documentos.append({
-                        'tipo': tipo,
-                        'nombre': file.filename,
-                        'archivo': file # Opcional: pasar el objeto file si el servicio lo maneja
-                    })
-
-        procesar_archivos('documentosLegales', 'LEGAL')
-        procesar_archivos('documentosTecnicos', 'TECNICO')
-        procesar_archivos('documentosEconomicos', 'ECONOMICO')
-
-        # 4. Llamar al servicio
-        propuesta = service.registrar_propuesta(id, data, documentos)
-        
-        # Retornar ID de propuesta creada
         return jsonify({
             "success": True, 
             "id_propuesta": propuesta.id_propuesta,
-            "mensaje": "Propuesta registrada exitosamente"
+            "mensaje": "Propuesta creada. Ahora suba los documentos."
         }), 201
         
     except ValueError as e:
         return jsonify({'error': str(e)}), 400
     except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@propuestas_bp.route('/<int:id>/propuestas/<int:propuesta_id>/documentos', methods=['POST'])
+def subir_documento_propuesta(id, propuesta_id):
+    """
+    POST /api/licitaciones/{id}/propuestas/{propuesta_id}/documentos
+    Sube un documento a la propuesta.
+    Body: { "nombre": str, "url_archivo": str, "tipo": str, "documento_requerido_id": int }
+    """
+    try:
+        data = request.get_json()
+        # Validar datos mínimos
+        if not all(k in data for k in ("nombre", "url_archivo", "tipo")):
+            return jsonify({'error': 'Faltan datos (nombre, url_archivo, tipo)'}), 400
+            
+        # Llamar a servicio para agregar documento (necesitamos un método específico en service o usar el de registro)
+        # Por ahora, asumimos que el servicio tiene un método para agregar documento a propuesta existente
+        # O instanciamos el modelo directamente aquí si el servicio no lo expone
+        from app.models.licitaciones.documentos import Documento
+        from app.enums.licitaciones.tipo_documento import TipoDocumento
+        from app.bdd import db
+        
+        nuevo_doc = Documento(
+            propuesta_id=propuesta_id,
+            documento_requerido_id=data.get('documento_requerido_id'),
+            nombre=data.get('nombre'),
+            url_archivo=data.get('url_archivo'),
+            tipo=TipoDocumento(data.get('tipo')),
+            validado=False
+        )
+        db.session.add(nuevo_doc)
+        db.session.commit()
+        
+        return jsonify({"id_documento": nuevo_doc.id_documento}), 201
+        
+    except Exception as e:
+        db.session.rollback()
         return jsonify({'error': str(e)}), 500
 
 @propuestas_bp.route('/<int:id>/finalizarRegistro', methods=['PUT'])

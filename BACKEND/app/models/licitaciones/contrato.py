@@ -26,7 +26,6 @@ class Contrato(db.Model):
     # Estado y Auditoría
     estado = db.Column(db.Enum(EstadoContrato), default=EstadoContrato.PLANTILLA_GENERADA, nullable=False)
     generado_por = db.Column(db.Integer)  # ID del supervisor
-    observaciones = db.Column(db.Text)
     
     # Relaciones
     licitacion = db.relationship('Licitacion', backref=db.backref('contrato', uselist=False))

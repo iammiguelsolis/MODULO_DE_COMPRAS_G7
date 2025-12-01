@@ -15,7 +15,7 @@ class Licitacion(ProcesoAdquisicion):
     __tablename__ = 'licitaciones'
     
     id_licitacion = db.Column(db.Integer, primary_key=True)
-    limite_monto = db.Column(db.Numeric(10, 2))
+    presupuesto_max = db.Column(db.Numeric(10, 2))
     fecha_limite = db.Column(db.DateTime)
     
     _estado_nombre = db.Column('estado', db.String(50), nullable=False, default='BORRADOR')
@@ -32,8 +32,6 @@ class Licitacion(ProcesoAdquisicion):
     # Campos de control para lógica de estados
     aprobada_por_supervisor = db.Column(db.Boolean, default=False)
     invitaciones_enviadas = db.Column(db.Boolean, default=False)
-    contrato_generado = db.Column(db.Boolean, default=False)
-    comentarios_supervisor = db.Column(db.Text, nullable=True)
     motivo_rechazo = db.Column(db.Text, nullable=True)
     
     # Relaciones
@@ -42,8 +40,7 @@ class Licitacion(ProcesoAdquisicion):
                                     primaryjoin="and_(Licitacion.id_licitacion==PropuestaProveedor.licitacion_id, PropuestaProveedor.es_ganadora==True)",
                                     uselist=False, viewonly=True)
     
-    # Relación con Items Solicitados
-    items = db.relationship('ItemSolicitado', backref='licitacion', lazy=True, cascade="all, delete-orphan")
+    # Items se obtienen via solicitud_origen.items (JOIN)
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)

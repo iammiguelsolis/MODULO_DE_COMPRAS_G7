@@ -4,16 +4,20 @@ from app.services.licitaciones.evaluacion_service import EvaluacionService
 evaluaciones_bp = Blueprint('evaluaciones', __name__, url_prefix='/api/licitaciones')
 service = EvaluacionService()
 
-@evaluaciones_bp.route('/<int:id>/enviarEvaluacion', methods=['PUT'])
+@evaluaciones_bp.route('/<int:id>/enviar-a-evaluacion', methods=['POST'])
 def enviar_a_evaluacion(id):
     """
-    PUT /api/licitaciones/{id}/enviarEvaluacion
-    Envía la licitación a evaluación técnica (cierra recepción de propuestas).
+    POST /api/licitaciones/{id}/enviar-a-evaluacion
+    Iniciar Evaluación Técnica.
     """
-    # Esta lógica podría estar en PropuestaService.finalizar_registro_propuestas
-    # o ser un paso explícito. Asumimos que finalizar registro ya hace la transición.
-    # Si este endpoint es para iniciar la evaluación explícitamente:
-    return jsonify({'mensaje': 'Endpoint redundante si finalizarRegistro ya avanza estado'}), 200
+    # Aquí deberíamos llamar a un servicio que haga la transición explícita
+    # Por ahora, si el servicio no lo tiene, podemos hacerlo manualmente o asumir que ya está
+    # Si usamos EvaluacionService, podríamos agregar un método iniciar_evaluacion()
+    try:
+        service.iniciar_evaluacion_tecnica(id)
+        return jsonify({'mensaje': 'Estado actualizado a EVALUACION_TECNICA'}), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
 
 @evaluaciones_bp.route('/<int:id>/evaluacion-tecnica', methods=['POST'])
 def registrar_evaluacion_tecnica(id):

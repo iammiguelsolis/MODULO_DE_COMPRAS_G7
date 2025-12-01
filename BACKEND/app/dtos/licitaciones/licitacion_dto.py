@@ -13,46 +13,42 @@ class ItemDTO:
 @dataclass
 class CrearLicitacionDTO:
     solicitud_id: int
-    limite_monto: float
+    presupuesto_max: float
     fecha_limite: str
     comprador_id: int
-    items: List[Dict[str, Any]]
+    # items removido, se heredan de solicitud
 
 @dataclass
 class LicitacionResponseDTO:
     id_licitacion: int
     estado: str
-    limite_monto: float
+    presupuesto_max: float
     fecha_limite: str
     
     items: List[ItemDTO]
     
     @staticmethod
     def from_model(licitacion):
-        # Mapear items solicitados
+        # Mapear items desde solicitud_origen
         items_dto = []
-        if hasattr(licitacion, 'items'):
-            for item in licitacion.items:
-                # Determinar cantidad según tipo
-                cantidad = 0
-                if item.tipo == 'MATERIAL':
-                    cantidad = item.cantidad
-                elif item.tipo == 'SERVICIO':
-                    cantidad = int(item.horas) if item.horas else 0
+        if licitacion.solicitud_origen and hasattr(licitacion.solicitud_origen, 'items'):
+            for item in licitacion.solicitud_origen.items:
+                # Determinar cantidad según tipo (asumiendo estructura común)
+                cantidad = getattr(item, 'cantidad', 0)
 
                 items_dto.append(ItemDTO(
-                    codigo=item.codigo,
-                    nombre=item.nombre,
+                    codigo=getattr(item, 'codigo', 'SIN_CODIGO'),
+                    nombre=getattr(item, 'nombre', 'Sin nombre'),
                     cantidad=cantidad,
-                    tipo=item.tipo,
-                    comentario=item.comentario,
-                    fecha_entrega=str(item.fecha_entrega) if item.fecha_entrega else None
+                    tipo=getattr(item, 'tipo', 'MATERIAL'),
+                    comentario=getattr(item, 'comentario', None),
+                    fecha_entrega=str(getattr(item, 'fecha_entrega', None)) if getattr(item, 'fecha_entrega', None) else None
                 ))
         
         return LicitacionResponseDTO(
             id_licitacion=licitacion.id_licitacion,
             estado=licitacion.estado_actual.get_nombre(),
-            limite_monto=float(licitacion.limite_monto) if licitacion.limite_monto else 0.0,
+            presupuesto_max=float(licitacion.presupuesto_max) if licitacion.presupuesto_max else 0.0,
             fecha_limite=str(licitacion.fecha_limite) if licitacion.fecha_limite else "",
             items=items_dto
         )

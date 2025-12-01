@@ -62,21 +62,17 @@ class OrdenCompraIntegrationService:
                 "fecha_firmado": str(contrato.fecha_carga_firmado) if contrato.fecha_carga_firmado else None,
            }
            
-        # Agregar items
-        if hasattr(licitacion, 'items'):
-            for item in licitacion.items:
-                # Determinar cantidad según tipo
-                cantidad = 0
-                if item.tipo == 'MATERIAL':
-                    cantidad = item.cantidad
-                elif item.tipo == 'SERVICIO':
-                    cantidad = float(item.horas) if item.horas else 0.0
-
+        # Agregar items desde solicitud_origen
+        if licitacion.solicitud_origen and hasattr(licitacion.solicitud_origen, 'items'):
+            for item in licitacion.solicitud_origen.items:
+                # Determinar cantidad según tipo (asumiendo estructura común)
+                cantidad = getattr(item, 'cantidad', 0)
+                
                 payload["items"].append({
-                    "codigo": item.codigo,
-                    "descripcion": item.nombre,
+                    "codigo": getattr(item, 'codigo', 'SIN_CODIGO'),
+                    "descripcion": getattr(item, 'nombre', 'Sin descripción'),
                     "cantidad": cantidad,
-                    "precio_unitario": 0.0
+                    "precio_unitario": getattr(item, 'precio_unitario', 0.0)
                 })
                 
         return payload
@@ -93,7 +89,6 @@ class OrdenCompraIntegrationService:
             
             # Actualizar estado local
             licitacion = Licitacion.query.get(id_licitacion)
-            licitacion.contrato_generado = True
             
             # Avanzar estado CON_CONTRATO -> FINALIZADA
             licitacion.siguiente_estado()

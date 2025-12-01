@@ -33,7 +33,6 @@ class SupervisorCompra(Supervisor):
         """
         licitacion.supervisor_id = self.id_supervisor
         licitacion.aprobada_por_supervisor = True
-        licitacion.comentarios_supervisor = comentarios
         return self.procesar(licitacion)
     
     def rechazar(self, licitacion, motivo):

@@ -1,0 +1,83 @@
+CREATE TABLE licitaciones (
+    id_licitacion INT AUTO_INCREMENT PRIMARY KEY,
+    solicitud_id INT NOT NULL,
+    titulo VARCHAR(255) NOT NULL,
+    comentarios TEXT,
+    fecha_limite DATETIME NOT NULL,
+    presupuesto_max DECIMAL(10, 2) NOT NULL,
+    estado VARCHAR(50) NOT NULL DEFAULT 'BORRADOR',
+    supervisor_id INT,
+    aprobada_por_supervisor BOOLEAN DEFAULT FALSE,
+    motivo_rechazo TEXT,
+    invitaciones_enviadas BOOLEAN DEFAULT FALSE,
+    fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    fecha_actualizacion DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (solicitud_id) REFERENCES solicitudes(id_solicitud),
+    INDEX idx_estado (estado),
+    INDEX idx_fecha_creacion (fecha_creacion),
+    INDEX idx_titulo (titulo)
+);
+
+CREATE TABLE documentos_requeridos (
+    id_requerido INT AUTO_INCREMENT PRIMARY KEY,
+    licitacion_id INT NOT NULL,
+    nombre VARCHAR(255) NOT NULL,
+    tipo VARCHAR(50) NOT NULL,
+    obligatorio BOOLEAN DEFAULT TRUE,
+    ruta_plantilla VARCHAR(500) NOT NULL,
+    FOREIGN KEY (licitacion_id) REFERENCES licitaciones(id_licitacion) ON DELETE CASCADE
+);
+
+CREATE TABLE invitaciones_proveedores (
+    id_invitacion INT AUTO_INCREMENT PRIMARY KEY,
+    licitacion_id INT NOT NULL,
+    proveedor_id INT NOT NULL,
+    fecha_invitacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (licitacion_id) REFERENCES licitaciones(id_licitacion) ON DELETE CASCADE,
+    UNIQUE KEY unique_invitacion (licitacion_id, proveedor_id)
+);
+
+CREATE TABLE propuestas (
+    id_propuesta INT AUTO_INCREMENT PRIMARY KEY,
+    licitacion_id INT NOT NULL,
+    proveedor_id INT NOT NULL,
+    fecha_presentacion DATETIME DEFAULT CURRENT_TIMESTAMP,
+    aprobada_tecnicamente BOOLEAN DEFAULT FALSE,
+    motivo_rechazo_tecnico TEXT,
+    aprobada_economicamente BOOLEAN DEFAULT FALSE,
+    puntuacion_economica DECIMAL(5, 2),
+    justificacion_economica TEXT,
+    motivo_rechazo_economico TEXT,
+    es_ganadora BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (licitacion_id) REFERENCES licitaciones(id_licitacion) ON DELETE CASCADE,
+    UNIQUE KEY unique_propuesta (licitacion_id, proveedor_id)
+);
+
+CREATE TABLE documentos_licitacion (
+    id_documento INT AUTO_INCREMENT PRIMARY KEY,
+    propuesta_id INT NOT NULL,
+    documento_requerido_id INT,
+    nombre VARCHAR(255) NOT NULL,
+    url_archivo VARCHAR(500) NOT NULL,
+    tipo VARCHAR(50) NOT NULL,
+    validado BOOLEAN DEFAULT FALSE,
+    fecha_subida DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (propuesta_id) REFERENCES propuestas(id_propuesta) ON DELETE CASCADE,
+    FOREIGN KEY (documento_requerido_id) REFERENCES documentos_requeridos(id_requerido)
+);
+
+CREATE TABLE contratos (
+    id_contrato INT AUTO_INCREMENT PRIMARY KEY,
+    licitacion_id INT NOT NULL,
+    proveedor_id INT NOT NULL,
+    fecha_generacion_plantilla DATETIME DEFAULT CURRENT_TIMESTAMP,
+    plantilla_url VARCHAR(500),
+    fecha_carga_firmado DATETIME,
+    documento_firmado_url VARCHAR(500),
+    estado VARCHAR(50) DEFAULT 'PLANTILLA_GENERADA',
+    generado_por INT,
+    FOREIGN KEY (licitacion_id) REFERENCES licitaciones(id_licitacion) ON DELETE CASCADE
+);
+
+
+//consultar sobre los ítems solicitados, se debería crear una tabla aparte o que se haga join para obtener de solicitud?
