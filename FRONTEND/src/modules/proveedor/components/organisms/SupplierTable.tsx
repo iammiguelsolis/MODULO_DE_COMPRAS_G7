@@ -1,7 +1,9 @@
 import Button from "../atoms/Button";
 import { Star } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 interface Supplier {
+    id: number;
     proveedor: string;
     ruc: string;
     rubro: string;
@@ -16,9 +18,11 @@ interface SupplierTableProps {
 }
 
 export default function SupplierTable({ suppliers }: SupplierTableProps) {
+    const navigate = useNavigate();
+
     const renderStars = (value: number) => {
         const stars = [];
-        const rounded = Math.floor(value); // número entero 0–5
+        const rounded = Math.floor(value);
         for (let i = 0; i < 5; i++) {
             stars.push(
                 <Star
@@ -36,29 +40,42 @@ export default function SupplierTable({ suppliers }: SupplierTableProps) {
             <table className="min-w-full table-auto">
                 <thead>
                     <tr className="bg-blue-500 text-white uppercase text-sm">
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Proveedor</th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">RUC</th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Rubro</th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">País</th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Clasificación</th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Estado</th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Homologación</th>
-                        <th className="px-6 py-4 text-left text-xs font-semibold text-white uppercase tracking-wider">Acciones</th>
+                        <th className="px-6 py-4">Proveedor</th>
+                        <th className="px-6 py-4">RUC</th>
+                        <th className="px-6 py-4">Rubro</th>
+                        <th className="px-6 py-4">País</th>
+                        <th className="px-6 py-4">Clasificación</th>
+                        <th className="px-6 py-4">Estado</th>
+                        <th className="px-6 py-4">Homologación</th>
+                        <th className="px-6 py-4">Acciones</th>
                     </tr>
                 </thead>
+
                 <tbody>
-                    {suppliers.map((s, i) => (
-                        <tr key={i} className="border-b border-gray-200 hover:bg-gray-50">
-                            <td className="px-6 py-4text-sm font-medium text-gray-900">{s.proveedor}</td>
-                            <td className="px-6 py-4 text-sm text-gray-700">{s.ruc}</td>
-                            <td className="px-6 py-4 text-sm text-gray-700">{s.rubro}</td>
-                            <td className="px-6 py-4 text-sm text-gray-700">{s.pais}</td>
-                            <td className="px-4 py-3">{renderStars(s.clasificacion)}</td>
-                            <td className="px-6 py-4 text-sm text-gray-700">{s.estado}</td>
-                            <td className="px-6 py-4 text-sm text-gray-700">{s.homologacion}</td>
-                            <td className="px-4 py-3 flex gap-2">
-                                <Button variant="primary" onClick={() => alert(`Ver ${s.proveedor}`)}>Ver</Button>
-                                <Button variant="secondary" onClick={() => alert(`Editar ${s.proveedor}`)}>Editar</Button>
+                    {suppliers.map((s) => (
+                        <tr key={s.id} className="border-b border-gray-200 hover:bg-gray-50">
+                            <td className="px-6 py-4 text-sm font-medium text-gray-900">{s.proveedor}</td>
+                            <td className="px-6 py-4 text-sm">{s.ruc}</td>
+                            <td className="px-6 py-4 text-sm">{s.rubro}</td>
+                            <td className="px-6 py-4 text-sm">{s.pais}</td>
+                            <td className="px-6 py-4">{renderStars(s.clasificacion)}</td>
+                            <td className="px-6 py-4 text-sm">{s.estado}</td>
+                            <td className="px-6 py-4 text-sm">{s.homologacion}</td>
+
+                            <td className="px-6 py-4 flex gap-2">
+                                <Button
+                                    variant="primary"
+                                    onClick={() => navigate(`/proveedores/${s.id}?tab=general`)}
+                                >
+                                    Ver
+                                </Button>
+
+                                <Button
+                                    variant="secondary"
+                                    onClick={() => navigate(`/proveedores/${s.id}?tab=historial`)}
+                                >
+                                    Editar
+                                </Button>
                             </td>
                         </tr>
                     ))}
