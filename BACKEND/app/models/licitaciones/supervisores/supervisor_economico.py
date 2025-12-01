@@ -34,7 +34,6 @@ class SupervisorEconomico(Supervisor):
         if ganador:
             ganador.es_ganadora = True
             # Avanzar estado a ADJUDICADA
-            # Nota: Esto podría hacerse en el servicio, pero el patrón sugiere que el handler actúa
             licitacion.siguiente_estado() 
             return True
         

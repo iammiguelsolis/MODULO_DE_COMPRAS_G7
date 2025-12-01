@@ -1,184 +1,84 @@
 {
-  "openapi": "3.0.0",
-  "info": {
-    "title": "API de Generación de Contratos",
-    "version": "1.0.0",
-    "description": "Endpoint para generar contrato de adjudicación"
-  },
-  "paths": {
-    "/licitaciones/{id}/contrato": {
-      "post": {
-        "tags": ["Contratos"],
-        "summary": "Generar contrato de adjudicación",
-        "description": "Genera automáticamente el contrato formal para el proveedor adjudicado. Cambia el estado de ADJUDICADA a CON_CONTRATO.",
-        "operationId": "generarContrato",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID de la licitación",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64",
-              "example": 456
-            }
-          }
-        ],
-        "requestBody": {
+  "endpoints": [
+    {
+      "method": "POST",
+      "url": "/api/licitaciones/{id}/contrato/generar",
+      "summary": "Generar Plantilla de Contrato",
+      "description": "Genera un documento Word (docx) usando 'docxtpl'. Rellena variables ({{...}}) con datos de la licitación y del proveedor ganador. Guarda el registro en la tabla 'contratos' con estado 'PLANTILLA_GENERADA'.",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
           "required": true,
+          "schema": { "type": "integer" }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Plantilla generada exitosamente",
           "content": {
-            "multipart/form-data": {
+            "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["supervisorId"],
                 "properties": {
-                  "supervisorId": {
-                    "type": "integer",
-                    "description": "ID del supervisor que genera el contrato"
-                  },
-                  "archivoContrato": {
+                  "id_contrato": { "type": "integer" },
+                  "url_documento": {
                     "type": "string",
-                    "format": "binary",
-                    "description": "Archivo PDF del contrato firmado (opcional si se genera automáticamente)"
-                  },
-                  "terminosAdicionales": {
-                    "type": "string",
-                    "description": "Términos o cláusulas adicionales"
-                  },
-                  "condicionesPago": {
-                    "type": "string",
-                    "description": "Condiciones de pago acordadas"
-                  },
-                  "fechaFirma": {
-                    "type": "string",
-                    "format": "date",
-                    "description": "Fecha de firma del contrato"
+                    "description": "URL temporal o de descarga del contrato generado"
                   }
                 }
               }
             }
           }
-        },
-        "responses": {
-          "201": {
-            "description": "Contrato generado exitosamente",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "idContrato": {
-                      "type": "integer"
-                    },
-                    "idLicitacion": {
-                      "type": "integer"
-                    },
-                    "estado": {
-                      "type": "string",
-                      "enum": ["CON_CONTRATO"]
-                    },
-                    "proveedor": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "integer"
-                        },
-                        "nombre": {
-                          "type": "string"
-                        },
-                        "ruc": {
-                          "type": "string"
-                        }
-                      }
-                    },
-                    "montoContrato": {
-                      "type": "number"
-                    },
-                    "fechaGeneracion": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "fechaFirma": {
-                      "type": "string",
-                      "format": "date"
-                    },
-                    "urlDocumento": {
-                      "type": "string",
-                      "description": "URL para descargar el contrato PDF"
-                    },
-                    "numeroContrato": {
-                      "type": "string",
-                      "description": "Número único del contrato"
-                    },
-                    "mensaje": {
-                      "type": "string"
-                    }
-                  }
-                },
-                "example": {
-                  "idContrato": 5001,
-                  "idLicitacion": 456,
-                  "estado": "CON_CONTRATO",
-                  "proveedor": {
-                    "id": 789,
-                    "nombre": "TechSupply S.A.C.",
-                    "ruc": "20123456789"
-                  },
-                  "montoContrato": 145000,
-                  "fechaGeneracion": "2025-11-25T10:00:00",
-                  "fechaFirma": "2025-11-25",
-                  "urlDocumento": "/contratos/5001/documento.pdf",
-                  "numeroContrato": "CONT-2025-5001",
-                  "mensaje": "Contrato generado exitosamente. Puede proceder a enviar a orden de compra."
+        }
+      }
+    },
+    {
+      "method": "POST",
+      "url": "/api/licitaciones/{id}/contrato/cargar-firmado",
+      "summary": "Cargar Contrato Firmado",
+      "description": "Sube el contrato firmado por ambas partes. Actualiza la tabla 'contratos' con la URL final y cambia estado a 'FIRMADO_CARGADO'. También actualiza 'licitaciones' a estado 'CON_CONTRATO'.",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "integer" }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "url_archivo": {
+                  "type": "string",
+                  "description": "URL del contrato firmado en Supabase"
                 }
-              }
+              },
+              "required": ["url_archivo"]
             }
-          },
-          "400": {
-            "description": "Estado inválido (licitación no está ADJUDICADA) o datos incorrectos"
-          },
-          "404": {
-            "description": "Licitación no encontrada"
-          },
-          "500": {
-            "description": "Error interno del servidor"
           }
         }
       },
-      "get": {
-        "tags": ["Contratos"],
-        "summary": "Obtener información del contrato",
-        "description": "Obtiene la información y documento del contrato generado",
-        "operationId": "obtenerContrato",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID de la licitación",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Información del contrato",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object"
+      "responses": {
+        "200": {
+          "description": "Contrato cargado. Estado: CON_CONTRATO.",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id_licitacion": { "type": "integer" },
+                  "estado": { "type": "string", "example": "CON_CONTRATO" }
                 }
               }
             }
-          },
-          "404": {
-            "description": "Contrato no encontrado"
           }
         }
       }
     }
-  }
+  ]
 }

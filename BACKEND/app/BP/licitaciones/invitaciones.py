@@ -13,12 +13,12 @@ def enviar_invitaciones(id):
     """
     try:
         data = request.get_json()
-        proveedores_ids = data.get('proveedores_ids', [])
+        proveedores = data.get('proveedores', [])
         
-        if not proveedores_ids:
+        if not proveedores:
             return jsonify({'error': 'Debe proporcionar una lista de proveedores'}), 400
             
-        result = service.enviar_invitaciones(id, proveedores_ids)
+        result = service.enviar_invitaciones(id, proveedores)
         return jsonify(result), 200
         
     except ValueError as e:
@@ -26,11 +26,11 @@ def enviar_invitaciones(id):
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
-@invitaciones_bp.route('/<int:id>/finalizarInvitacion', methods=['PUT'])
+@invitaciones_bp.route('/<int:id>/finalizar-invitacion', methods=['POST'])
 def finalizar_invitacion(id):
     """
-    PUT /api/licitaciones/{id}/finalizarInvitacion
-    Finaliza el periodo de invitación manualmente (si aplica).
+    POST /api/licitaciones/{id}/finalizar-invitacion
+    Finaliza el periodo de invitación manualmente.
     """
     try:
         result = service.finalizar_periodo_invitacion(id)

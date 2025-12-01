@@ -6,15 +6,15 @@ from app.services.licitaciones.orden_compra_integration_service import OrdenComp
 orden_compra_bp = Blueprint('orden_compra', __name__, url_prefix='/api/licitaciones')
 service = OrdenCompraIntegrationService()
 
-@orden_compra_bp.route('/<int:id>/orden-compra', methods=['POST'])
-def crear_orden_compra(id):
+@orden_compra_bp.route('/<int:id>/finalizar', methods=['POST'])
+def finalizar_licitacion(id):
     """
-    POST /api/licitaciones/{id}/orden-compra
-    Genera la orden de compra (envía datos al módulo externo).
+    POST /api/licitaciones/{id}/finalizar
+    Finaliza la licitación e integra con OC.
     """
     try:
         result = service.notificar_generacion_orden_compra(id)
-        return jsonify(result), 201
+        return jsonify(result), 200
     except ValueError as e:
         return jsonify({'error': str(e)}), 400
     except Exception as e:
