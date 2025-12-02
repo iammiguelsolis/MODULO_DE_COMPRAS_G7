@@ -1,5 +1,4 @@
 from app.bdd import db
-from app.models.licitaciones.estados.estado_borrador import EstadoBorrador
 from app.models.licitaciones.estados.estado_nueva import EstadoNueva
 from app.models.licitaciones.estados.estado_cancelada import EstadoCancelada
 from app.models.adquisiciones.proceso import ProcesoAdquisicion
@@ -16,7 +15,7 @@ class Licitacion(ProcesoAdquisicion):
     presupuesto_max = db.Column(db.Numeric(10, 2))
     fecha_limite = db.Column(db.DateTime)
     
-    _estado_nombre = db.Column('estado_licitacion', db.String(50), nullable=False, default='BORRADOR')
+    _estado_nombre = db.Column('estado_licitacion', db.String(50), nullable=False, default='NUEVA')
     
     supervisor_id = db.Column(db.Integer, nullable=True) 
     aprobada_por_supervisor = db.Column(db.Boolean, default=False)
@@ -39,7 +38,7 @@ class Licitacion(ProcesoAdquisicion):
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self._estado_actual = EstadoBorrador(self)
+        self._estado_actual = EstadoNueva(self)
         self._estado_nombre = self._estado_actual.get_nombre()
     
     @property
@@ -69,7 +68,6 @@ class Licitacion(ProcesoAdquisicion):
         nombre = self._estado_nombre
         
         # Imports locales para evitar ciclos
-        from app.models.licitaciones.estados.estado_borrador import EstadoBorrador
         from app.models.licitaciones.estados.estado_nueva import EstadoNueva
         from app.models.licitaciones.estados.estado_en_invitacion import EstadoEnInvitacion
         from app.models.licitaciones.estados.estado_con_propuestas import EstadoConPropuestas
@@ -81,7 +79,6 @@ class Licitacion(ProcesoAdquisicion):
         from app.models.licitaciones.estados.estado_cancelada import EstadoCancelada
         
         estados_map = {
-            "BORRADOR": EstadoBorrador,
             "NUEVA": EstadoNueva,
             "EN_INVITACION": EstadoEnInvitacion,
             "CON_PROPUESTAS": EstadoConPropuestas,
@@ -93,5 +90,5 @@ class Licitacion(ProcesoAdquisicion):
             "CANCELADA": EstadoCancelada
         }
         
-        clase_estado = estados_map.get(nombre, EstadoBorrador)
+        clase_estado = estados_map.get(nombre, EstadoNueva)
         return clase_estado(self)

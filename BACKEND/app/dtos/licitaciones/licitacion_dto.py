@@ -1,27 +1,7 @@
 from dataclasses import dataclass
 from typing import List, Optional, Dict, Any
-
-@dataclass
-class ItemDTO:
-    codigo: str
-    nombre: str
-    cantidad: int
-    tipo: str  # MATERIAL o SERVICIO
-    comentario: Optional[str] = None
-    fecha_entrega: Optional[str] = None
-from dataclasses import dataclass
-from typing import List, Optional, Dict, Any
 from app.dtos.licitaciones.item_dto import ItemDTO
 from app.dtos.licitaciones.documento_dto import DocumentoRequeridoDTO
-
-@dataclass
-class ItemDTO:
-    codigo: str
-    nombre: str
-    cantidad: int
-    tipo: str  # MATERIAL o SERVICIO
-    comentario: Optional[str] = None
-    fecha_entrega: Optional[str] = None
 
 @dataclass
 class CrearLicitacionDTO:

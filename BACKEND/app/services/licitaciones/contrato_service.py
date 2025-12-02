@@ -27,7 +27,7 @@ class ContratoService:
             # Lógica simulada de generación de documento (docxtpl)
             # En producción: usare docxtpl para llenar template y guardar en S3/Local
             # nombre_archivo = f"contrato_plantilla_{id_licitacion}.docx"
-            url_plantilla = "https://xoghfokrptchamewjcrc.supabase.co/storage/v1/object/public/plantillas-licitaciones/contrato/Plantilla%20-%20Contrato%20Adjudicacion.docx"
+            url_plantilla = "contrato-adjudicacion"
             
             # Verificar si ya existe contrato previo para actualizar o crear nuevo
             contrato = Contrato.query.filter_by(licitacion_id=id_licitacion).first()

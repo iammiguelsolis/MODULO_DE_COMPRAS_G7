@@ -62,7 +62,7 @@ class AdquisicionService:
             
             return {
                 "tipo": "LICITACION",
-                "mensaje": "Se ha generado una Licitación en estado BORRADOR con documentos por defecto.",
+                "mensaje": "Se ha generado una Licitación en estado NUEVA con documentos por defecto.",
                 "data": nueva_licitacion
             }
 

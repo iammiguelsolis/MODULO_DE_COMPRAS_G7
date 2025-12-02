@@ -1,22 +1,68 @@
-# Documentación de API - Sistema de Licitaciones
+# Guía de APIs - Flujo Completo de Licitación
 
-**Esta documentación detalla los endpoints necesarios para completar el flujo de una licitación, desde la solicitud inicial hasta la generación de la orden de compra**
+Esta guía documenta todos los endpoints del sistema, organizados por flujo de negocio. Puedes usar esta documentación para hacer pruebas end-to-end.
 
-**Base URL** : `{{host}}/api`
+**NOTA:** Reemplaza `{{host}}` con tu URL base (ej: `http://localhost:5000`).
 
-## 1. Módulo de Solicitudes
+---
 
-### 1.1 Crear Solicitud de Alto Valor
+## � FASE 0: Consulta de Licitaciones
 
-Crea una nueva solicitud de requerimiento. **Si el monto total supera el umbral (ej. > 10,000), el sistema sugerirá un proceso de "LICITACION**.
+Endpoints para ver licitaciones existentes antes de empezar el flujo.
 
-- **Método:** `POST`
-- **Endpoint:**`<span class="citation-108">/solicitudes</span>`^^
-- **Cuerpo de la Petición (JSON):**
+### 1. Listar Todas las Licitaciones
 
-**JSON**
+Obtén una lista paginada de licitaciones con filtros opcionales.
+
+- **Método:** `GET`
+- **URL:** `{{host}}/api/licitaciones`
+- **Query Params (Opcionales):**
+  - `page=1` - Número de página
+  - `per_page=10` - Items por página
+  - `estado=NUEVA` - Filtrar por estado (NUEVA, EN_INVITACION, etc.)
+  - `titulo=Servidores` - Búsqueda parcial por título
+  - `fechaDesde=2024-01-01` - Fecha inicio
+  - `fechaHasta=2024-12-31` - Fecha fin
+  - `limiteMontoMin=5000` - Monto mínimo
+  - `limiteMontoMax=50000` - Monto máximo
+  - `id=5` - Buscar por ID exacto
+
+**Ejemplo Completo:**
 
 ```
+GET {{host}}/api/licitaciones
+```
+
+### 2. Ver Detalle de una Licitación
+
+Obtén toda la información de una licitación específica.
+
+- **Método:** `GET`
+- **URL:** `{{host}}/api/licitaciones/{id_licitacion}`
+
+**Ejemplo:**
+
+```
+GET {{host}}/api/licitaciones/5
+```
+
+**Respuesta:** Retorna el objeto completo con items, propuestas, documentos, etc.
+
+---
+
+## 🚀 FASE 1: El Disparador (Solicitud > 10,000)
+
+Para activar una licitación, necesitamos una solicitud que supere el umbral de monto.
+
+### 1. Crear Solicitud de Alto Valor
+
+Vamos a pedir Servidores. 2 unidades a $8,000 c/u = $16,000 (Mayor a 10k → Licitación).
+
+- **Método:** `POST`
+- **URL:** `{{host}}/api/solicitudes`
+- **Body (JSON):**
+
+```json
 {
   "titulo": "Adquisición Servidores Data Center",
   "notas_adicionales": "Urgente para migración a nube híbrida.",
@@ -25,189 +71,203 @@ Crea una nueva solicitud de requerimiento. **Si el monto total supera el umbral 
       "tipo": "MATERIAL",
       "nombre": "Servidor Rack Dell PowerEdge",
       "cantidad": 2,
-      "precio_unitario": 8000.00,
+      "precio_unitario": 8000.0,
       "comentario": "Incluir rieles de montaje"
     }
   ]
 }
 ```
 
-> **Nota:** La respuesta incluirá un `<span class="citation-107">id</span>` (id_solicitud) que debes guardar para el siguiente paso.
+**Nota:** Guarda el `id` de la respuesta (ej: `id_solicitud: 2`). Verás que `tipo_proceso_sugerido` dice "LICITACION".
 
-### 1.2 Aprobar Solicitud
+### 2. Aprobar la Solicitud
 
-**Aprueba la solicitud creada para permitir que avance hacia el proceso de adquisición**^^.
+El supervisor aprueba la solicitud para que pueda convertirse en licitación.
 
 - **Método:** `PUT`
-- **Endpoint:**`<span class="citation-105">/solicitudes/{id_solicitud}/aprobar</span>`^^
+- **URL:** `{{host}}/api/solicitudes/{id_solicitud}/aprobar`
+
+**Ejemplo:**
+
+```
+PUT {{host}}/api/solicitudes/2/aprobar
+```
 
 ---
 
-## 2. Módulo de Adquisiciones (Generación del Proceso)
+## ⚙️ FASE 2: Generación del Proceso
 
-### 2.1 Generar Proceso de Licitación
+Aquí es donde el `AdquisicionService` detecta el monto e invoca al `LicitacionService`.
 
-**El servicio de adquisiciones detecta el monto y genera la licitación en estado **`<span class="citation-104">BORRADOR</span>`.
+### 3. Generar el Proceso (El sistema decide)
 
 - **Método:** `POST`
-- **Endpoint:**`<span class="citation-103">/adquisiciones/generar</span>`^^
-- **Cuerpo de la Petición (JSON):**
+- **URL:** `{{host}}/api/adquisiciones/generar`
+- **Body (JSON):**
 
-**JSON**
-
-```
+```json
 {
   "id_solicitud": 2
 }
 ```
 
-- **Respuesta Exitosa (Ejemplo):**
-  **Devuelve el **`<span class="citation-102">id</span>` de la licitación (`<span class="citation-102">id_licitacion</span>`) necesario para los pasos subsiguientes^^.
+**Respuesta Esperada:**
 
-**JSON**
-
-```
+```json
 {
   "tipo": "LICITACION",
-  "mensaje": "Se ha generado una Licitación en estado BORRADOR...",
-  "data": { "id": 5, "estado": "BORRADOR" }
+  "mensaje": "Se ha generado una Licitación en estado NUEVA...",
+  "data": {
+    "id": 5,
+    "estado": "NUEVA",
+    ...
+  }
 }
 ```
+
+**IMPORTANTE:** Guarda el `id` devuelto en `data`. Este será tu `{id_licitacion}` para el resto de pasos.
 
 ---
 
-## 3. Gestión de Licitaciones (Supervisor)
+## 👥 FASE 3: Invitación a Proveedores
 
-### 3.1 Aprobar Licitación (Publicar)
+La licitación nace en **NUEVA**. Procedemos a invitar proveedores.
 
-**Cambia el estado de la licitación de **`<span class="citation-101">BORRADOR</span>` a `<span class="citation-101">NUEVA</span>` para hacerla pública^^.
-
-- **Método:** `POST`
-- **Endpoint:**`<span class="citation-100">/licitaciones/{id_licitacion}/aprobar</span>`^^
-- **Cuerpo de la Petición (JSON):**
-
-**JSON**
-
-```
-{
-  "supervisor_id": 1,
-  "comentarios": "Presupuesto verificado. Proceder con invitaciones."
-}
-```
-
-### 3.2 Invitar Proveedores
-
-Envía invitaciones a una lista de proveedores. **El estado cambia a **`<span class="citation-99">EN_INVITACION</span>`^^^^^^^^.
+### 4. Invitar Proveedores
 
 - **Método:** `POST`
-- **Endpoint:**`<span class="citation-98">/licitaciones/{id_licitacion}/invitaciones</span>`^^
-- **Cuerpo de la Petición (JSON):**
+- **URL:** `{{host}}/api/licitaciones/{id_licitacion}/invitaciones`
+- **Body (JSON):**
 
-**JSON**
-
-```
+```json
 {
   "proveedores": [1, 2, 3]
 }
 ```
 
-### 3.3 Cerrar Recepción de Propuestas
-
-Finaliza la etapa de recepción de ofertas. Nadie más puede postular. **El estado cambia a **`<span class="citation-97">CON_PROPUESTAS</span>`^^^^^^^^.
-
-- **Método:** `POST`
-- **Endpoint:**`<span class="citation-96">/licitaciones/{id_licitacion}/finalizar-registro-propuestas</span>`^^
-
-### 3.4 Iniciar Evaluación Técnica
-
-**Cambia el estado de la licitación a **`<span class="citation-95">EVALUACION_TECNICA</span>` para permitir la calificación de propuestas^^^^^^^^.
-
-- **Método:** `POST`
-- **Endpoint:**`<span class="citation-94">/licitaciones/{id_licitacion}/enviar-a-evaluacion</span>`^^
-
-### 3.5 Finalizar Evaluación Técnica
-
-**Cierra la etapa técnica y pasa el estado a **`<span class="citation-93">EVALUACION_ECONOMIA</span>`^^^^^^^^.
-
-- **Método:** `POST`
-- **Endpoint:**`<span class="citation-92">/licitaciones/{id_licitacion}/finalizar-evaluacion-tecnica</span>`^^
-
-### 3.6 Adjudicar (Elegir Ganador)
-
-**El sistema selecciona la propuesta con el puntaje más alto y cambia el estado a **`<span class="citation-91">ADJUDICADA</span>`^^^^^^^^.
-
-- **Método:** `POST`
-- **Endpoint:**`<span class="citation-90">/licitaciones/{id_licitacion}/adjudicar</span>`^^
+**Nota:** Asegúrate de tener proveedores con estos IDs en tu BD. El estado cambiará automáticamente a **EN_INVITACION**.
 
 ---
 
-## 4. Gestión de Propuestas (Proveedores)
+## 📝 FASE 4: Recepción de Propuestas (Proveedores)
 
-### 4.1 Registrar Propuesta
+Simularemos 2 proveedores. Uno ganará, el otro perderá.
 
-Permite a un proveedor registrar su participación. **Retorna un **`<span class="citation-89">id_propuesta</span>`^^^^^^^^.
-
-- **Método:** `POST`
-- **Endpoint:**`<span class="citation-88">/licitaciones/{id_licitacion}/propuestas</span>`^^
-- **Cuerpo de la Petición (JSON):**
-
-**JSON**
-
-```
-{ "proveedor_id": 1 }
-```
-
-### 4.2 Subir Documento (Ej. Económico)
-
-**Adjunta documentos requeridos a una propuesta específica (ej. **`<span class="citation-87">id_propuesta: 10</span>`)^^^^^^.
+### 5. Registrar Propuesta Proveedor A (El Ganador)
 
 - **Método:** `POST`
-- **Endpoint:**`<span class="citation-86">/licitaciones/{id_licitacion}/propuestas/{id_propuesta}/documentos</span>`^^
-- **Cuerpo de la Petición (JSON):**
+- **URL:** `{{host}}/api/licitaciones/{id_licitacion}/propuestas`
+- **Body (JSON):**
 
-**JSON**
-
+```json
+{
+  "proveedor_id": 1
+}
 ```
+
+**Nota:** Guarda el `id_propuesta` retornado (ej: `10`).
+
+### 5.1. Subir Documento Económico (Obligatorio)
+
+- **Método:** `POST`
+- **URL:** `{{host}}/api/licitaciones/{id_licitacion}/propuestas/10/documentos`
+- **Body (JSON):**
+
+```json
 {
   "nombre": "Propuesta Económica Firmada",
-  "url_archivo": "https://bucket.s3/propuesta_p1.pdf",
+  "url_archivo": "a.pdf",
   "tipo": "ECONOMICO",
   "documento_requerido_id": 1
 }
 ```
 
+### 6. Registrar Propuesta Proveedor B (El Perdedor)
+
+- **Método:** `POST`
+- **URL:** `{{host}}/api/licitaciones/{id_licitacion}/propuestas`
+- **Body (JSON):**
+
+```json
+{
+  "proveedor_id": 2
+}
+```
+
+**Nota:** Guarda el `id_propuesta` (ej: `11`).
+
+### 7. Cerrar Recepción de Propuestas
+
+Ya nadie más puede postular. Pasamos a evaluación.
+
+- **Método:** `POST`
+- **URL:** `{{host}}/api/licitaciones/{id_licitacion}/finalizar-registro-propuestas`
+
+**Efecto:** El estado cambia a **CON_PROPUESTAS**.
+
 ---
 
-## 5. Evaluación de Propuestas
+## 🔍 FASE 5: Evaluación Técnica
 
-### 5.1 Calificar Técnicamente
+### 8. Iniciar Evaluación Técnica
 
-**Permite al evaluador aprobar o rechazar técnicamente una propuesta específica**^^.
+- **Método:** `POST`
+- **URL:** `{{host}}/api/licitaciones/{id_licitacion}/enviar-a-evaluacion`
+
+**Nota:** El estado cambia a **EVALUACION_TECNICA**.
+
+### 9. Calificar Técnicamente (Aprobar a ambos)
+
+Vamos a decir que ambos cumplen los requisitos técnicos.
+
+**Proveedor A (ID 10):**
 
 - **Método:** `PUT`
-- **Endpoint:**`<span class="citation-84">/licitaciones/{id_licitacion}/propuestas/{id_propuesta}/evaluacion-tecnica</span>`^^
-- **Cuerpo de la Petición (JSON):**
+- **URL:** `{{host}}/api/licitaciones/{id_licitacion}/propuestas/10/evaluacion-tecnica`
+- **Body:**
 
-**JSON**
-
-```
+```json
 {
   "aprobada_tecnicamente": true,
   "documentos": []
 }
 ```
 
-### 5.2 Calificar Económicamente
-
-Asigna puntuación económica a una propuesta. **Fundamental para decidir el ganador**^^^^^^.
+**Proveedor B (ID 11):**
 
 - **Método:** `PUT`
-- **Endpoint:**`<span class="citation-82">/licitaciones/{id_licitacion}/propuestas/{id_propuesta}/evaluacion-economica</span>`^^
-- **Cuerpo de la Petición (JSON):**
+- **URL:** `{{host}}/api/licitaciones/{id_licitacion}/propuestas/11/evaluacion-tecnica`
+- **Body:**
 
-**JSON**
-
+```json
+{
+  "aprobada_tecnicamente": true,
+  "documentos": []
+}
 ```
+
+### 10. Finalizar Evaluación Técnica
+
+- **Método:** `POST`
+- **URL:** `{{host}}/api/licitaciones/{id_licitacion}/finalizar-evaluacion-tecnica`
+
+**Nota:** El estado cambia a **EVALUACION_ECONOMIA**.
+
+---
+
+## 💰 FASE 6: Evaluación Económica y Adjudicación
+
+### 11. Calificar Económicamente
+
+Aquí decidimos quién gana por puntaje o precio.
+
+**Proveedor A (Ganador): Puntuación alta.**
+
+- **Método:** `PUT`
+- **URL:** `{{host}}/api/licitaciones/{id_licitacion}/propuestas/10/evaluacion-economica`
+- **Body:**
+
+```json
 {
   "aprobada_economicamente": true,
   "puntuacion_economica": 95.0,
@@ -215,58 +275,83 @@ Asigna puntuación económica a una propuesta. **Fundamental para decidir el gan
 }
 ```
 
+**Proveedor B (Perdedor): Puntuación baja.**
+
+- **Método:** `PUT`
+- **URL:** `{{host}}/api/licitaciones/{id_licitacion}/propuestas/11/evaluacion-economica`
+- **Body:**
+
+```json
+{
+  "aprobada_economicamente": true,
+  "puntuacion_economica": 80.0
+}
+```
+
+### 12. Adjudicar (Elegir Ganador)
+
+El sistema buscará el puntaje más alto (Propuesta 10) y la marcará como ganadora.
+
+- **Método:** `POST`
+- **URL:** `{{host}}/api/licitaciones/{id_licitacion}/adjudicar`
+
+**Nota:** El estado cambia a **ADJUDICADA**.
+
 ---
 
-## 6. Contrato y Cierre
+## 📄 FASE 7: Contrato y Cierre
 
-### 6.1 Generar Plantilla de Contrato
-
-**Genera el documento preliminar del contrato**^^.
+### 13. Generar Plantilla de Contrato
 
 - **Método:** `POST`
-- **Endpoint:**`<span class="citation-80">/licitaciones/{id_licitacion}/contrato/generar</span>`^^
-- **Cuerpo de la Petición (JSON):**
+- **URL:** `{{host}}/api/licitaciones/{id_licitacion}/contrato/generar`
+- **Body:**
 
-**JSON**
-
+```json
+{
+  "supervisorId": 1
+}
 ```
-{ "supervisorId": 1 }
-```
 
-### 6.2 Cargar Contrato Firmado
+### 14. Cargar Contrato Firmado
 
-Sube el PDF final firmado por el proveedor. **El estado cambia a **`<span class="citation-79">CON_CONTRATO</span>`^^^^^^^^.
+Simulamos que el proveedor devolvió el PDF firmado.
 
 - **Método:** `POST`
-- **Endpoint:**`<span class="citation-78">/licitaciones/{id_licitacion}/contrato/cargar-firmado</span>`^^
-- **Cuerpo de la Petición (JSON):**
+- **URL:** `{{host}}/api/licitaciones/{id_licitacion}/contrato/cargar-firmado`
+- **Body:**
 
-**JSON**
-
+```json
+{
+  "url_archivo": "https://contratofinal.pdf"
+}
 ```
-{ "url_archivo": "https://bucket.s3/contrato_firmado_final.pdf" }
-```
 
-### 6.3 Finalizar e Integrar
+**Nota:** El estado cambia a **CON_CONTRATO**.
 
-Cierra el proceso y notifica al módulo de logística. **Genera la Orden de Compra y cambia el estado a **`<span class="citation-77">FINALIZADA</span>`^^^^^^^^.
+### 15. Finalizar e Integrar con Orden de Compra
+
+El paso final que cierra todo y avisa al módulo de logística.
 
 - **Método:** `POST`
-- **Endpoint:**`<span class="citation-76">/licitaciones/{id_licitacion}/finalizar</span>`^^
-- **Respuesta Esperada:**
+- **URL:** `{{host}}/api/licitaciones/{id_licitacion}/finalizar`
 
-**JSON**
+**Respuesta Esperada:**
 
-```
+```json
 {
   "orden_compra_generada": true,
   "estado": "FINALIZADA"
 }
 ```
 
-### 6.4 Consultar Detalle Final
+---
 
-**Verificación final del objeto completo de la licitación**^^.
+## ✅ FASE 8: Verificación Final
+
+### 16. Consultar el Detalle Final
 
 - **Método:** `GET`
-- **Endpoint:**`<span class="citation-74">/licitaciones/{id_licitacion}</span>`
+- **URL:** `{{host}}/api/licitaciones/{id_licitacion}`
+
+Deberías ver el objeto completo con estado **FINALIZADA**, el `ganador_id` lleno, y el contrato vinculado.
