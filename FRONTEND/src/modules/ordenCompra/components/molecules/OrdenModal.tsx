@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, FileText, User, Calendar, DollarSign } from 'lucide-react';
 import { Button } from '../atoms/Button';
+import { CreditCard, Truck } from 'lucide-react';
 
 interface OrdenModalProps {
   isOpen: boolean;
@@ -13,6 +14,11 @@ interface OrdenModalProps {
   totalAmount: number;
   supplier: any;
   expectedDelivery: string;
+  paymentMode: 'CONTADO' | 'TRANSFERENCIA' | 'CREDITO';
+  paymentDays: number;
+  deliveryTerms: string;
+  solicitudId?: string;
+  notificacionInventarioId?: string;
 }
 
 export const OrdenModal: React.FC<OrdenModalProps> = ({
@@ -25,7 +31,12 @@ export const OrdenModal: React.FC<OrdenModalProps> = ({
   items,
   totalAmount,
   supplier,
-  expectedDelivery
+  expectedDelivery,
+  paymentMode,
+  paymentDays,
+  deliveryTerms,
+  solicitudId,
+  notificacionInventarioId
 }) => {
   if (!isOpen) return null;
 
@@ -115,6 +126,50 @@ export const OrdenModal: React.FC<OrdenModalProps> = ({
               <p className="text-gray-600 bg-gray-50 p-3 rounded-lg">{notes}</p>
             </div>
           )}
+
+
+          {/* Condiciones de Pago y Entrega */}
+          <div className="grid grid-cols-2 gap-6">
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <CreditCard className="w-4 h-4" />
+                <span>Condiciones de Pago:</span>
+              </div>
+              <p className="font-medium text-gray-900">
+                {paymentMode === 'CONTADO' ? 'Al Contado' : 
+                paymentMode === 'TRANSFERENCIA' ? 'Transferencia' : 'Crédito'}
+                {paymentMode !== 'CONTADO' && ` - ${paymentDays} días`}
+              </p>
+            </div>
+
+            <div className="space-y-1">
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                <Truck className="w-4 h-4" />
+                <span>Términos de Entrega:</span>
+              </div>
+              <p className="font-medium text-gray-900">
+                {deliveryTerms || 'No especificado'}
+              </p>
+            </div>
+          </div>
+
+          {/* Referencias según tipo */}
+          {(solicitudId || notificacionInventarioId) && (
+            <div className="p-3 bg-blue-50 rounded-lg">
+              <p className="text-sm font-medium text-blue-900">Referencias:</p>
+              {solicitudId && (
+                <p className="text-sm text-blue-700 mt-1">
+                  Solicitud/Contrato: {solicitudId}
+                </p>
+              )}
+              {notificacionInventarioId && (
+                <p className="text-sm text-blue-700 mt-1">
+                  Notificación Inventario: {notificacionInventarioId}
+                </p>
+              )}
+            </div>
+          )}
+
 
           {/* Productos/Servicios */}
           <div>

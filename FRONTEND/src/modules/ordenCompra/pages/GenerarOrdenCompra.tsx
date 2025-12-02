@@ -30,6 +30,12 @@ const GenerarOrdenCompra: React.FC = () => {
   const [selectedSupplier, setSelectedSupplier] = useState<ProveedorType | null>(null);
   const [isOrdenModalOpen, setIsOrdenModalOpen] = useState(false);
   const [isProveedorModalOpen, setIsProveedorModalOpen] = useState(false);
+  // Estados NUEVOS que faltan:
+  const [paymentMode, setPaymentMode] = useState<'CONTADO' | 'TRANSFERENCIA' | 'CREDITO'>('CONTADO');
+  const [paymentDays, setPaymentDays] = useState<number>(0);
+  const [deliveryTerms, setDeliveryTerms] = useState<string>('');
+  const [solicitudId, setSolicitudId] = useState<string>(''); // Para RFQ/Licitación
+  const [notificacionInventarioId, setNotificacionInventarioId] = useState<string>(''); // Para DIRECTA
 
   const handleOrderTypeChange = (newType: 'RFQ' | 'LICITACION' | 'DIRECTA') => {
     setOrderType(newType);
@@ -85,7 +91,24 @@ const GenerarOrdenCompra: React.FC = () => {
       alert('Por favor complete todos los campos de productos (nombre, cantidad y precio)');
       return;
     }
-    
+
+    const ordenData = {
+    tipoOrigen: orderType,
+    proveedorId: selectedSupplier?.id || '',
+    solicitudId: orderType !== 'DIRECTA' ? solicitudId : undefined,
+    notificacionInventarioId: orderType === 'DIRECTA' ? notificacionInventarioId : undefined,
+    lineas: items,
+    moneda: currency,
+    fechaEntregaEsperada: expectedDelivery,
+    condicionesPago: {
+      diasPlazo: paymentDays,
+      modalidad: paymentMode,
+    },
+    terminosEntrega: deliveryTerms,
+    observaciones: notes,
+    titulo: title,
+  };
+    console.log('Datos a enviar al backend:', ordenData);
     setIsOrdenModalOpen(true);
   };
 
@@ -146,6 +169,43 @@ const GenerarOrdenCompra: React.FC = () => {
                   onChange={(e) => setExpectedDelivery(e.target.value)}
                 />
 
+                {/* Condiciones de Pago */}
+                <div className="grid grid-cols-2 gap-4">
+                  <Select
+                    label="Modalidad de Pago"
+                    options={[
+                      { value: 'CONTADO', label: 'Al Contado' },
+                      { value: 'TRANSFERENCIA', label: 'Transferencia' },
+                      { value: 'CREDITO', label: 'Crédito' },
+                    ]}
+                    value={paymentMode}
+                    onChange={(e) => {
+                      setPaymentMode(e.target.value as 'CONTADO' | 'TRANSFERENCIA' | 'CREDITO');
+                      if (e.target.value === 'CONTADO') {
+                        setPaymentDays(0); // Contado = 0 días
+                      }
+                    }}
+                  />
+                  
+                  <Input
+                    label="Días de Plazo"
+                    type="number"
+                    min="0"
+                    value={paymentMode === 'CONTADO' ? 0 : paymentDays}
+                    onChange={(e) => setPaymentDays(parseInt(e.target.value) || 0)}
+                    disabled={paymentMode === 'CONTADO'}
+                    placeholder={paymentMode === 'CONTADO' ? 'Contado' : 'Ej: 30, 60, 90'}
+                  />
+                </div>
+
+              <TextArea
+                label="Términos de Entrega"
+                placeholder="Ej: Entrega en almacén central, FOB puerto de destino, etc."
+                rows={2}
+                value={deliveryTerms}
+                onChange={(e) => setDeliveryTerms(e.target.value)}
+              />
+
                 {/* Selección de Proveedor */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -184,6 +244,36 @@ const GenerarOrdenCompra: React.FC = () => {
                     </p>
                   )}
                 </div>
+
+                {/* Referencia de Solicitud (para RFQ/Licitación) */}
+                {orderType !== 'DIRECTA' && (
+                  <Input
+                    label="Número de Solicitud/Contrato"
+                    placeholder="Ingrese el número de referencia de la solicitud o contrato"
+                    value={solicitudId}
+                    onChange={(e) => setSolicitudId(e.target.value)}
+                  />
+                )}
+
+                {/* Referencia de Notificación (para Orden Directa) */}
+                {orderType === 'DIRECTA' && (
+                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                    <p className="font-medium text-blue-900">📦 Orden desde Notificación de Inventario</p>
+                    <p className="text-sm text-blue-700 mt-1">
+                      Esta orden se generará para reabastecer stock bajo.
+                    </p>
+                    <Input
+                      label="ID de Notificación de Inventario"
+                      placeholder="ID de la notificación recibida"
+                      value={notificacionInventarioId}
+                      onChange={(e) => setNotificacionInventarioId(e.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+                )}    
+
+
+
 
                 <TextArea
                   label="Notas adicionales"
@@ -279,6 +369,9 @@ const GenerarOrdenCompra: React.FC = () => {
         totalAmount={totalAmount}
         supplier={selectedSupplier}
         expectedDelivery={expectedDelivery}
+        paymentMode={paymentMode}
+        paymentDays={paymentDays}
+        deliveryTerms={deliveryTerms}
       />
 
       {/* Modal de Selección de Proveedor */}

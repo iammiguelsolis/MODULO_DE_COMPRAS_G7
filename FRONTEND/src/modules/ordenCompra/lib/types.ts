@@ -74,6 +74,11 @@ export interface OrdenModalProps {
   totalAmount: number;
   supplier: ProveedorType | null;
   expectedDelivery: string;
+  paymentMode: 'CONTADO' | 'TRANSFERENCIA' | 'CREDITO';
+  paymentDays: number;
+  deliveryTerms: string;
+  solicitudId?: string;
+  notificacionInventarioId?: string;
 }
 
 export interface ProveedorModalProps {
@@ -81,4 +86,24 @@ export interface ProveedorModalProps {
   onClose: () => void;
   onSelectSupplier: (supplier: ProveedorType) => void;
   selectedSupplier: ProveedorType | null;
+}
+
+
+export interface CondicionesPago {
+  diasPlazo: number;
+  modalidad: 'CONTADO' | 'TRANSFERENCIA' | 'CREDITO';
+}
+
+export interface OrdenCompraRequest {
+  tipoOrigen: 'RFQ' | 'LICITACION' | 'DIRECTA';
+  proveedorId: string;
+  solicitudId?: string;  // Para RFQ/Licitación
+  notificacionInventarioId?: string;  // Para DIRECTA
+  lineas: ItemType[];
+  moneda: 'USD' | 'PEN';
+  fechaEntregaEsperada: string;
+  condicionesPago: CondicionesPago;
+  terminosEntrega: string;
+  observaciones?: string;
+  titulo?: string;
 }
