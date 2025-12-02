@@ -54,6 +54,29 @@ class Proveedor(db.Model):
     indice_denuncias = db.Column(db.Float)
     tiene_procesos_de_mejora_de_condiciones_laborales = db.Column(db.Boolean, default=False, nullable = False)
 
+    def to_dict(self):
+        """Convierte el proveedor a un diccionario serializable"""
+        return {
+            "id_proveedor": self.id_proveedor,
+            "razon_social": self.razon_social,
+            "ruc": self.ruc,
+            "pais": self.pais,
+            "email": self.email,
+            "telefono": self.telefono,
+            "domicilio_legal": self.domicilio_legal,
+            "fecha_registro": self.fecha_registro.isoformat() if self.fecha_registro else None,
+            "esta_suspendido": self.esta_suspendido,
+            "confiabilidad_en_entregas": self.confiabilidad_en_entregas.value if self.confiabilidad_en_entregas else None,
+            "confiabilidad_en_condiciones_pago": self.confiabilidad_en_condiciones_pago.value if self.confiabilidad_en_condiciones_pago else None,
+            # Campos embebidos (detalles)
+            "numero_trabajadores": self.numero_trabajadores,
+            "tiene_sindicato": self.tiene_sindicato,
+            "ha_tomado_represalias_contra_sindicato": self.ha_tomado_represalias_contra_sindicato.value if self.ha_tomado_represalias_contra_sindicato else None,
+            "denuncias_incumplimiento_contrato": self.denuncias_incumplimiento_contrato,
+            "indice_denuncias": self.indice_denuncias,
+            "tiene_procesos_de_mejora_de_condiciones_laborales": self.tiene_procesos_de_mejora_de_condiciones_laborales
+        }
+
     def registrar_proveedor(self):
         pass
 

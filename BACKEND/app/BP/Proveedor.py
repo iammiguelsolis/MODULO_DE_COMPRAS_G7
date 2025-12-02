@@ -48,22 +48,7 @@ def crear_proveedor():
 @proveedor_bp.route('/', methods=['GET'])
 def listar_proveedores():
     proveedores = Proveedor.query.all()
-    proveedores_list = []
-    for proveedor in proveedores:
-        proveedores_list.append({
-            "id_proveedor": proveedor.id_proveedor,
-            "razon_social": proveedor.razon_social,
-            "ruc": proveedor.ruc,
-            "email": proveedor.email,
-            "telefono": proveedor.telefono,
-            "domicilio_legal": proveedor.domicilio_legal,
-            "fecha_registro": proveedor.fecha_registro,
-            "esta_suspendido": proveedor.esta_suspendido,
-            "confiabilidad_en_entregas": proveedor.confiabilidad_en_entregas,
-            "confiabilidad_en_condiciones_pago": proveedor.confiabilidad_en_condiciones_pago
-        })
-    
-    return jsonify(proveedores_list), 200
+    return jsonify([proveedor.to_dict() for proveedor in proveedores]), 200
 
 # Obtener proveedor por ID
 @proveedor_bp.route('/<int:id>', methods=['GET'])
@@ -72,18 +57,8 @@ def obtener_proveedor(id):
     if not proveedor:
         return jsonify({"message": "Proveedor no encontrado"}), 404
     
-    return jsonify({
-        "id_proveedor": proveedor.id_proveedor,
-        "razon_social": proveedor.razon_social,
-        "ruc": proveedor.ruc,
-        "email": proveedor.email,
-        "telefono": proveedor.telefono,
-        "domicilio_legal": proveedor.domicilio_legal,
-        "fecha_registro": proveedor.fecha_registro,
-        "esta_suspendido": proveedor.esta_suspendido,
-        "confiabilidad_en_entregas": proveedor.confiabilidad_en_entregas,
-        "confiabilidad_en_condiciones_pago": proveedor.confiabilidad_en_condiciones_pago
-    }), 200
+    return jsonify(proveedor.to_dict()), 200
+
 
 # Actualizar datos de un proveedor
 @proveedor_bp.route('/<int:id>', methods=['PUT'])
