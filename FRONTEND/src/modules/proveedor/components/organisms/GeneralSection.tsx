@@ -1,5 +1,6 @@
 import InputText from "../atoms/InputTextA";
 import Button from "../atoms/Button";
+import InfoForm from "../atoms/InfoForm";
 
 interface GeneralSectionProps {
     supplier: {
@@ -31,48 +32,63 @@ export default function GeneralSection({
             {/* Información General */}
             <div className="space-y-4 border border-gray-300 rounded-lg p-6">
                 <h2 className="font-semibold text-gray-700 mb-4">Información general</h2>
-
-                <InputText
-                    value={supplier.razonSocial}
-                    onChange={(v) => onChangeField("razonSocial", v.target.value)}
-                    placeholder="Razón social"
-                    fullWidth
-                    disabled={!editMode}
-                />
-
-                <InputText
-                    value={supplier.ruc}
-                    onChange={(v) => onChangeField("ruc", v.target.value)}
-                    placeholder="RUC"
-                    fullWidth
-                    disabled={!editMode}
-                />
-
-                <InputText
-                    value={supplier.rubro}
-                    onChange={(v) => onChangeField("rubro", v.target.value)}
-                    placeholder="Rubro"
-                    fullWidth
-                    disabled={!editMode}
-                />
-
-                <InputText
-                    value={supplier.pais}
-                    onChange={(v) => onChangeField("pais", v.target.value)}
-                    placeholder="País"
-                    fullWidth
-                    disabled={!editMode}
-                />
-
-                <InputText
-                    value={supplier.direccion}
-                    onChange={(v) => onChangeField("direccion", v.target.value)}
-                    placeholder="Dirección"
-                    fullWidth
-                    disabled={!editMode}
-                />
+                <div className="grid grid-cols-2 gap-10">
+                    <div className="relative col-span-1">
+                        <InfoForm
+                            value={supplier.razonSocial}
+                            label="Razón Social"
+                        />
+                    </div>
+                    <div className="relative col-span-1">
+                        <InfoForm
+                            value={supplier.ruc}
+                            label="RUC"
+                        />
+                    </div>
+                </div>
+                <div className="grid grid-cols-2 gap-10">
+                    <div className="relative col-span-1">
+                        <InfoForm
+                            value={supplier.rubro}
+                            label="Rubro"
+                        />
+                    </div>
+                    <div className="relative col-span-1">
+                        <InfoForm
+                            value={supplier.pais}
+                            label="País"
+                        />
+                    </div>
+                </div>
+                <div className="grid grid-cols-2 gap-10">
+                    <div className="relative col-span-1">
+                        <InfoForm
+                            value={supplier.telefono}
+                            label="Teléfono"
+                        />
+                    </div>
+                    <div className="relative col-span-1">
+                        <InfoForm
+                            value={supplier.email}
+                            label="Email"
+                        />
+                    </div>
+                </div>
+                <div className="grid grid-cols-8 gap-10">
+                    <div className="relative col-span-5">
+                        <InfoForm
+                            value={supplier.direccion}
+                            label="Dirección"
+                        />
+                    </div>
+                    <div className="relative col-span-3">
+                        <InfoForm
+                            value={supplier.moneda}
+                            label="Moneda Preferida"
+                        />
+                    </div>
+                </div>
             </div>
-
             {/* Términos y Estado */}
             <div className="space-y-4 border border-gray-300 rounded-lg p-6">
                 <h2 className="font-semibold text-gray-700 mb-4">Términos & Estado</h2>

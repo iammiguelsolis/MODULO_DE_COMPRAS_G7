@@ -9,7 +9,7 @@ import GeneralSection from "../components/organisms/GeneralSection";
 import EstadoSection from "../components/organisms/EstadoSection";
 import HistorialSection from "../components/organisms/HistorialSection";
 
-// Simulación de datos iniciales (en producción vendrían de una API)
+// Sample Data
 const sampleSupplierData = {
     id: 1,
     razonSocial: "Tecnologías Andinas S.A.C.",
@@ -17,8 +17,8 @@ const sampleSupplierData = {
     rubro: "TI & Hardware",
     pais: "Perú",
     direccion: "Av. Principal 123, Lima",
-    telefono: "",
-    email: "",
+    telefono: "987654321",
+    email: "something@someone.com",
     moneda: "PEN",
     estado: "Activo",
     historialCambios: [
