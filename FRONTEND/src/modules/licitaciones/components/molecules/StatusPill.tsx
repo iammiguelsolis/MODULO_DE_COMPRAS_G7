@@ -1,11 +1,10 @@
 import React from 'react';
 import './StatusPill.css';
 import {
-  FilePenLine,      // BORRADOR
+  Clock,            // PENDIENTE y EN EVALUACION
   AlertCircle,      // NUEVA
   Send,             // EN INVITACION
   FileText,         // CON PROPUESTAS
-  Clock,            // EN EVALUACION
   Award,            // ADJUDICADA
   ClipboardCheck,   // CON CONTRATO
   CheckCircle2,     // FINALIZADA
@@ -17,7 +16,7 @@ interface StatusPillProps {
 }
 
 const ICONS: { [key: string]: React.ReactElement } = {
-  BORRADOR: <FilePenLine size={14} />,
+  PENDIENTE: <Clock size={14} />,
   NUEVA: <AlertCircle size={14} />,
   'EN INVITACION': <Send size={14} />,
   'CON PROPUESTAS': <FileText size={14} />,
@@ -29,7 +28,7 @@ const ICONS: { [key: string]: React.ReactElement } = {
 };
 
 const STATUS_STYLES: { [key: string]: { text: string; className: string } } = {
-  BORRADOR: { text: 'Borrador', className: 'status-blue' },
+  PENDIENTE: { text: 'Pendiente', className: 'status-gray' },
   NUEVA: { text: 'Nueva', className: 'status-blue' },
   'EN INVITACION': { text: 'En invitación', className: 'status-blue' },
   'CON PROPUESTAS': { text: 'Con propuestas', className: 'status-blue' },

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ArrowLeftFromLine } from 'lucide-react';
+import { ArrowLeftFromLine, Scale, Wrench, PiggyBank } from 'lucide-react';
 import PageHeader from '../molecules/PageHeader';
 import Button from '../atoms/Button';
 import LicitacionTimeline from '../organisms/LicitacionTimeline';
@@ -20,7 +20,6 @@ import GenerateContractModal from '../organisms/GenerateContractModal';
 import SendToPurchaseOrderModal from '../organisms/SendToPurchaseOrderModal';
 import type { Proposal } from '../molecules/ProposalCard';
 import type { LicitacionStatus, EconomicEvaluation, Item, DocumentCategory } from '../../lib/types';
-import { Scale, Wrench, PiggyBank } from 'lucide-react';
 import './LicitacionDetailTemplate.css';
 
 interface LicitacionDetailTemplateProps {
@@ -37,16 +36,18 @@ interface LicitacionDetailTemplateProps {
     propuestasRegistradas?: number;
     propuestasAprobadasTecnicamente?: number;
     propuestasAprobadasEconomicamente?: number;
-    onApprove: () => void;
-    onReject: () => void;
-    onFinalizarInvitacion?: () => void;
-    onFinalizarRegistro?: () => void;
-    onEnviarEvaluacion?: () => void;
-    onIniciarEvaluacionTecnica?: () => void;
-    onIniciarEvaluacionEconomica?: () => void;
-    onGenerarContrato?: () => void;
-    onEnviarOrdenCompra?: () => void;
+    onInvitarProveedores: () => void;
+    onFinalizarInvitacion: () => void;
+    onRegistrarPropuesta: () => void;
+    onFinalizarRegistro: () => void;
+    onEnviarEvaluacion: () => void;
+    onIniciarEvaluacionTecnica: () => void;
+    onIniciarEvaluacionEconomica: () => void;
+    onGenerarContrato: () => void;
+    onEnviarOrdenCompra: () => void;
     isCancelledNoEconomicApprovals?: boolean;
+    onApprove?: () => void;
+    onReject?: () => void;
 }
 
 const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
@@ -63,16 +64,18 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
     propuestasRegistradas: _propuestasRegistradas,
     propuestasAprobadasTecnicamente,
     propuestasAprobadasEconomicamente,
-    onApprove,
-    onReject,
+    onInvitarProveedores,
     onFinalizarInvitacion,
+    onRegistrarPropuesta,
     onFinalizarRegistro,
     onEnviarEvaluacion,
     onIniciarEvaluacionTecnica,
     onIniciarEvaluacionEconomica,
     onGenerarContrato,
     onEnviarOrdenCompra,
-    isCancelledNoEconomicApprovals = false
+    isCancelledNoEconomicApprovals = false,
+    onApprove,
+    onReject
 }) => {
     // Modal states
     const [showApprovalModal, setShowApprovalModal] = useState(false);
@@ -117,14 +120,14 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
         setIsApproved(true);
         setSupervisorName('Mario Altamirano');
         setShowApprovalModal(false);
-        onApprove();
+        if (onApprove) onApprove();
     };
 
     const handleCancellationConfirm = () => {
         setIsRejected(true);
         setSupervisorName('Mario Altamirano');
         setShowCancellationModal(false);
-        onReject();
+        if (onReject) onReject();
     };
 
     // Mock suppliers for registration (should come from API/Props in real app)
@@ -138,6 +141,7 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
 
     const handleRegistrarPropuesta = () => {
         setShowRegisterProposalModal(true);
+        if (onRegistrarPropuesta) onRegistrarPropuesta();
     };
 
     const handleFinalizarRegistroClick = () => {
@@ -287,6 +291,7 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
 
     const handleInviteSuppliers = () => {
         setShowInviteModal(true);
+        if (onInvitarProveedores) onInvitarProveedores();
     };
 
     const handleFinalizarInvitacionClick = () => {
@@ -324,7 +329,6 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
         }
     };
 
-    // Mock data for LicitacionItemsTable (should come from API/Props in real app)
     const mockItems: Item[] = [
         {
             id: '1',
@@ -335,7 +339,6 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
         }
     ];
 
-    // Mock data for LicitacionRequiredDocs (should come from API/Props in real app)
     const mockDocumentCategories: DocumentCategory[] = [
         {
             title: 'Documentos Legales',
@@ -354,7 +357,6 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
         }
     ];
 
-    // Mock data for InviteSuppliersModal (should come from Providers API in real app)
     const mockAvailableSuppliers = [
         { id: 1, name: "Tech Solutions SAC", ruc: "20123456789", email: "ventas@techsolutions.com", category: "Tecnología" },
         { id: 2, name: "Computadoras del Perú SA", ruc: "20987654321", email: "contacto@computadoras.pe", category: "Tecnología" },
