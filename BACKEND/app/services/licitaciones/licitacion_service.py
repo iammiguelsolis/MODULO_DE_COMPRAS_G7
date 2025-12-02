@@ -40,7 +40,7 @@ class LicitacionService:
                 {
                     'tipo': TipoDocumento.ECONOMICO,
                     'nombre': 'Propuesta Económica',
-                    'ruta': 'https://xoghfokrptchamewjcrc.supabase.co/storage/v1/object/public/plantillas-licitaciones/financieros/Plantilla%20-%20Propuesta%20Economica.docx',
+                    'ruta': 'propuesta-economica',
                     'obligatorio': True
                 }
             ]
