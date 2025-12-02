@@ -369,15 +369,15 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
     ];
 
     const mockRequiredDocuments = [
-        "RUC y Ficha RUC",
-        "DNI del Representante Legal",
-        "Vigencia de Poder del Representante Legal",
-        "Ficha Técnica del Producto",
-        "Certificaciones de Calidad (ISO)",
-        "Referencias Comerciales",
-        "Propuesta Económica",
-        "Estados Financieros Auditados",
-        "Carta de Fianza"
+        "ruc",
+        "dni-representante",
+        "vigencia-poder",
+        "ficha-tecnica",
+        "cert-calidad-iso",
+        "ordenes-compra-pasadas",
+        "propuesta-economica",
+        "estados-financieros-auditados",
+        "carta-fianza"
     ];
 
     return (
@@ -469,7 +469,7 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                 estimatedAmount={estimatedAmount}
                 maxBudget={presupuestoMaximo}
                 availableSuppliers={mockAvailableSuppliers}
-                requiredDocuments={mockRequiredDocuments}
+                requiredDocumentIds={mockRequiredDocuments}
                 onSuppliersInvited={setInvitedSuppliers}
             />
 
