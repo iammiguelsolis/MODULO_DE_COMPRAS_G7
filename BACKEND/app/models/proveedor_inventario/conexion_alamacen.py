@@ -20,6 +20,18 @@ from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import relationship
 from datetime import date
 from typing import Optional
+
+#Considera que se trata de una empresa del 
+#sector teleco como claro o movistar, en base a esta clase material que viene a ser lo mismo que item
+# solo que mi profesor es tontito y pues me obliga a usar esta palabra que le gusta. Pues basandote en mi modelo, proponme un enum para las unidades de medida de productos
+# que pues representan basicamente lo que vendo, es como la carta de un restaurante, dice cual es mi pool de opciones
+
+class Material(db.Model):
+    id_item = db.Column(db.Integer, primary_key=True)
+    nombre = db.Column(db.String(100), nullable=False)
+    descripcion = db.Column(db.String(100), nullable=False)
+    unidad = db.Column(db.String(100), nullable=False) 
+
 class Almacen(db.Model):
     id_almacen = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
