@@ -12,12 +12,9 @@ class ProveedorDTO:
 class PropuestaResponseDTO:
     id_propuesta: int
     fecha_presentacion: str
-    monto_total: float
-    plazo_entrega_dias: int
-    garantia_meses: int
-    comentarios: Optional[str]
     estado_tecnico: str  # PENDIENTE, APROBADO, RECHAZADO
     estado_economico: str # PENDIENTE, APROBADO, RECHAZADO
+    puntuacion_economica: Optional[float]
     es_ganadora: bool
     proveedor: ProveedorDTO
     
@@ -39,12 +36,9 @@ class PropuestaResponseDTO:
         return PropuestaResponseDTO(
             id_propuesta=propuesta.id_propuesta,
             fecha_presentacion=str(propuesta.fecha_presentacion),
-            monto_total=float(propuesta.monto_total) if propuesta.monto_total else 0.0,
-            plazo_entrega_dias=propuesta.plazo_entrega_dias,
-            garantia_meses=propuesta.garantia_meses,
-            comentarios=propuesta.comentarios,
             estado_tecnico=estado_tec,
             estado_economico=estado_eco,
+            puntuacion_economica=propuesta.puntuacion_economica,
             es_ganadora=propuesta.es_ganadora,
             proveedor=ProveedorDTO(
                 id=propuesta.proveedor.id_proveedor,
@@ -53,3 +47,4 @@ class PropuestaResponseDTO:
                 email=propuesta.proveedor.email
             ) if propuesta.proveedor else None
         )
+

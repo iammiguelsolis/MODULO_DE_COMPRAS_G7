@@ -1,8 +1,5 @@
 from app.bdd import db
 from app.models.licitaciones.licitacion import Licitacion
-from app.models.licitaciones.items.material_solicitado import MaterialSolicitado
-from app.models.licitaciones.items.servicio_solicitado import ServicioSolicitado
-from app.enums.licitaciones.tipo_item import TipoItem
 
 class LicitacionService:
     """
@@ -15,41 +12,51 @@ class LicitacionService:
         Crea una nueva licitación en estado BORRADOR.
         """
         try:
+            from datetime import datetime
+            
+            fecha_limite = data.get('fecha_limite')
+            if isinstance(fecha_limite, str):
+                fecha_limite = datetime.strptime(fecha_limite, '%Y-%m-%d')
+
             # Crear instancia base
+            # NOTA: Al heredar de ProcesoAdquisicion, el ID se genera automáticamente 
+            # en la tabla padre 'procesos_adquisicion'.
             licitacion = Licitacion(
-                nombre=data.get('nombre'),
-                presupuesto_maximo=data.get('presupuesto_maximo'),
-                fecha_limite=data.get('fecha_limite'),
-                solicitud_id=data.get('solicitud_id'),
-                comprador_id=data.get('comprador_id')
+                presupuesto_max=data.get('presupuesto_max'),
+                fecha_limite=fecha_limite,
+                solicitud_id=data.get('solicitud_id')
             )
-            
-            # Agregar items si existen
-            items_data = data.get('items', [])
-            for item in items_data:
-                if item.get('tipo') == TipoItem.MATERIAL.value:
-                    nuevo_item = MaterialSolicitado(
-                        codigo=item.get('codigo'),
-                        nombre=item.get('nombre'),
-                        cantidad=item.get('cantidad'),
-                        unidad_medida=item.get('unidad_medida'),
-                        comentario=item.get('comentario'),
-                        fecha_entrega=item.get('fecha_entrega')
-                    )
-                else:
-                    nuevo_item = ServicioSolicitado(
-                        codigo=item.get('codigo'),
-                        nombre=item.get('nombre'),
-                        cantidad=item.get('cantidad'),
-                        unidad_medida=item.get('unidad_medida'),
-                        comentario=item.get('comentario'),
-                        fecha_entrega=item.get('fecha_entrega')
-                    )
-                # Relacionar item con licitación (asumiendo relación definida)
-                # nuevo_item.licitacion = licitacion
-                db.session.add(nuevo_item)
-            
             db.session.add(licitacion)
+            
+            # flush() es crucial aquí: envía el INSERT a la BD para obtener el 'id' generado
+            # antes de hacer el commit final.
+            db.session.flush() 
+
+            # Crear documento requerido por defecto (Propuesta Económica SIEMPRE es obligatoria)
+            from app.models.licitaciones.documentos import DocumentoRequerido
+            from app.enums.licitaciones.tipo_documento import TipoDocumento
+            
+            docs_default = [
+                {
+                    'tipo': TipoDocumento.ECONOMICO,
+                    'nombre': 'Propuesta Económica',
+                    'ruta': 'https://xoghfokrptchamewjcrc.supabase.co/storage/v1/object/public/plantillas-licitaciones/financieros/Plantilla%20-%20Propuesta%20Economica.docx',
+                    'obligatorio': True
+                }
+            ]
+
+            for doc in docs_default:
+                nuevo_doc = DocumentoRequerido(
+                    # CAMBIO IMPORTANTE: Usamos 'id' en lugar de 'id_licitacion'
+                    # debido a la herencia de ProcesoAdquisicion.
+                    licitacion_id=licitacion.id, 
+                    tipo=doc['tipo'],
+                    nombre=doc['nombre'],
+                    ruta_plantilla=doc['ruta'],
+                    obligatorio=doc['obligatorio']
+                )
+                db.session.add(nuevo_doc)
+
             db.session.commit()
             return licitacion
             
@@ -62,13 +69,45 @@ class LicitacionService:
         Obtiene una licitación por su ID.
         """
         return Licitacion.query.get(id_licitacion)
-    
-    def listar_todas(self):
+
+    def listar_todas(self, filtros=None, page=1, per_page=10):
         """
-        Lista todas las licitaciones.
+        Lista todas las licitaciones con filtros opcionales y paginación.
         """
-        return Licitacion.query.all()
-    
+        query = Licitacion.query
+        
+        if filtros:
+            if 'estado' in filtros:
+                query = query.filter(Licitacion._estado_nombre == filtros['estado'])
+            
+            if 'titulo' in filtros:
+                # Nota: Si el título está en la tabla Solicitud, aquí podrías necesitar un join.
+                # Asumimos que Licitacion tiene acceso al título o propiedad proxy.
+                query = query.filter(Licitacion.titulo.ilike(f"%{filtros['titulo']}%"))
+
+            if 'id' in filtros:
+                # CAMBIO: Filtramos por 'id' heredado
+                query = query.filter(Licitacion.id == filtros['id'])
+                
+            if 'fechaDesde' in filtros:
+                query = query.filter(Licitacion.fecha_creacion >= filtros['fechaDesde'])
+                
+            if 'fechaHasta' in filtros:
+                query = query.filter(Licitacion.fecha_creacion <= filtros['fechaHasta'])
+                
+            if 'limiteMontoMin' in filtros:
+                query = query.filter(Licitacion.presupuesto_max >= filtros['limiteMontoMin'])
+                
+            if 'limiteMontoMax' in filtros:
+                query = query.filter(Licitacion.presupuesto_max <= filtros['limiteMontoMax'])
+        
+        # Ordenar por fecha de creación descendente (campo heredado de ProcesoAdquisicion)
+        query = query.order_by(Licitacion.fecha_creacion.desc())
+        
+        # Paginación
+        pagination = query.paginate(page=page, per_page=per_page, error_out=False)
+        return pagination.items
+
     def avanzar_estado(self, id_licitacion):
         """
         Intenta avanzar al siguiente estado de la licitación.

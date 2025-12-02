@@ -2,15 +2,19 @@ from app.models.licitaciones.estados.estado_licitacion_state import EstadoLicita
 
 class EstadoConPropuestas(EstadoLicitacionState):
     """
-    Estado donde se han recibido propuestas y están listas para evaluación.
+    Estado cuando se han registrado propuestas y se cierra la recepción.
+    Listo para iniciar evaluación técnica.
     """
     
     def siguiente(self):
-        """
-        Pasa a evaluación técnica.
-        """
+        # CON_PROPUESTAS -> EVALUACION_TECNICA
         from app.models.licitaciones.estados.estado_en_evaluacion import EstadoEnEvaluacion
         return EstadoEnEvaluacion(self.licitacion)
-    
-    def get_nombre(self):
+        
+    def cancelar(self):
+        from app.models.licitaciones.estados.estado_cancelada import EstadoCancelada
+        self.licitacion.cambiar_estado(EstadoCancelada(self.licitacion))
+        return self.licitacion.estado_actual
+        
+    def get_nombre(self) -> str:
         return "CON_PROPUESTAS"

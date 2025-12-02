@@ -26,10 +26,6 @@ class PropuestaService:
             propuesta = PropuestaProveedor(
                 licitacion_id=id_licitacion,
                 proveedor_id=data_propuesta.get('proveedor_id'),
-                monto_total=data_propuesta.get('monto_total'),
-                plazo_entrega_dias=data_propuesta.get('plazo_entrega'),
-                garantia_meses=data_propuesta.get('garantia'),
-                comentarios=data_propuesta.get('comentarios'),
                 fecha_presentacion=datetime.now()
             )
             
@@ -40,6 +36,7 @@ class PropuestaService:
             for doc_data in documentos_data:
                 documento = Documento(
                     propuesta_id=propuesta.id_propuesta,
+                    documento_requerido_id=doc_data.get('documento_requerido_id'),
                     nombre=doc_data.get('nombre'),
                     url_archivo=doc_data.get('url'),
                     tipo=TipoDocumento(doc_data.get('tipo', 'TECNICO')), # Default a TECNICO
@@ -78,6 +75,7 @@ class PropuestaService:
         except Exception as e:
             db.session.rollback()
             raise e
+    
     def listar_por_licitacion(self, id_licitacion):
         """
         Lista todas las propuestas de una licitación.

@@ -2,12 +2,14 @@ from app.models.licitaciones.estados.estado_licitacion_state import EstadoLicita
 
 class EstadoCancelada(EstadoLicitacionState):
     """
-    Estado final cuando la licitación ha sido cancelada.
-    No hay transiciones desde este estado.
+    Estado final de cancelación.
     """
     
     def siguiente(self):
         return self
-    
-    def get_nombre(self):
+        
+    def cancelar(self):
+        return self
+        
+    def get_nombre(self) -> str:
         return "CANCELADA"

@@ -1,12 +1,8 @@
 from app.bdd import db
 from app.models.licitaciones.licitacion import Licitacion
+from app.models.licitaciones.propuesta import PropuestaProveedor
 
 class OrdenCompraIntegrationService:
-    """
-    Servicio encargado de preparar y enviar los datos necesarios al módulo de Orden de Compra
-    una vez que una licitación ha sido adjudicada.
-    """
-    
     def generar_datos_orden_compra(self, id_licitacion):
         """
         Recopila todos los datos necesarios para generar una Orden de Compra.
@@ -16,8 +12,19 @@ class OrdenCompraIntegrationService:
         if not licitacion:
             raise ValueError("Licitación no encontrada")
             
-        # Verificar que haya un ganador
-        propuesta_ganadora = licitacion.propuesta_ganadora
+        # Verificar que haya un ganador (cargar con relación proveedor)
+        from sqlalchemy.orm import joinedload
+        
+        # CAMBIO: Usamos licitacion.id en lugar de id_licitacion
+        if not licitacion.propuesta_ganadora:
+             # Intento de fallback por si la relación no cargó (aunque debería)
+             propuesta_ganadora = PropuestaProveedor.query.filter_by(
+                licitacion_id=licitacion.id, 
+                es_ganadora=True
+             ).first()
+        else:
+             propuesta_ganadora = licitacion.propuesta_ganadora
+
         if not propuesta_ganadora:
             raise ValueError("La licitación no tiene una propuesta ganadora adjudicada")
             
@@ -25,38 +32,31 @@ class OrdenCompraIntegrationService:
         if not proveedor:
             raise ValueError("La propuesta ganadora no tiene un proveedor asociado")
             
-        # Construir payload
+        # La Orden de Compra puede obtener los items a partir del id_solicitud
         payload = {
             "origen": "LICITACION",
-            "id_origen": licitacion.id_licitacion,
+            "id_origen": licitacion.id, # CAMBIO: .id
+            "id_solicitud": licitacion.solicitud_id,
             "proveedor": {
-                "id_externo": proveedor.id_proveedor,
+                "id": proveedor.id_proveedor,
                 "nombre": proveedor.nombre,
                 "ruc": proveedor.ruc,
-                "direccion": proveedor.direccion,
                 "email": proveedor.email
             },
-            "detalles": {
-                "fecha_adjudicacion": str(licitacion.fecha_limite), # O fecha actual
-                "monto_total": float(propuesta_ganadora.monto_total),
-                "moneda": "PEN", # Default por ahora
-                "condiciones_pago": propuesta_ganadora.comentarios, # Usar comentarios como proxy
-                "plazo_entrega_dias": propuesta_ganadora.plazo_entrega_dias
-            },
-            "items": []
+            "contrato": {
+                "url": None,
+                "fecha_firmado": None
+            }
         }
         
-        # Agregar items (pueden ser los solicitados o los ofertados si hubiera detalle por item en oferta)
-        # Por ahora usamos los solicitados que es lo que tenemos mapeado
-        if hasattr(licitacion, 'items'):
-            for item in licitacion.items:
-                payload["items"].append({
-                    "codigo": item.codigo,
-                    "descripcion": item.nombre,
-                    "cantidad": item.cantidad,
-                    "unidad": item.unidad_medida,
-                    "precio_unitario": 0.0 # El precio unitario real vendría del detalle de oferta si existiera
-                })
+        # Agregar datos del contrato si existe
+        from app.models.licitaciones.contrato import Contrato
+        # CAMBIO: Usamos licitacion.id para filtrar
+        contrato = Contrato.query.filter_by(licitacion_id=licitacion.id).first()
+        
+        if contrato:
+            payload["contrato"]["url"] = contrato.documento_firmado_url
+            payload["contrato"]["fecha_firmado"] = str(contrato.fecha_carga_firmado) if contrato.fecha_carga_firmado else None
                 
         return payload
 
@@ -72,23 +72,29 @@ class OrdenCompraIntegrationService:
             
             # Actualizar estado local
             licitacion = Licitacion.query.get(id_licitacion)
-            licitacion.contrato_generado = True
             
-            # Avanzar estado a CON_CONTRATO o FINALIZADA
-            # Asumimos que generar OC implica cerrar el proceso de licitación en este lado
-            # O moverlo a un estado de 'ESPERANDO_OC'. 
-            # Según diagrama: ADJUDICADA -> CON_CONTRATO
+            # CAMBIO: Usamos licitacion.id
+            propuesta_ganadora = PropuestaProveedor.query.filter_by(
+                licitacion_id=licitacion.id,
+                es_ganadora=True
+            ).first()
             
-            # Forzamos cambio de estado si existe la transición
-            # licitacion.cambiar_estado(EstadoConContrato(licitacion)) 
-            # Por ahora usamos la lógica de estados existente si la hay, o solo marcamos el flag.
+            # Obtener contrato
+            from app.models.licitaciones.contrato import Contrato
+            contrato = Contrato.query.filter_by(licitacion_id=licitacion.id).first()
+            
+            # Avanzar estado CON_CONTRATO -> FINALIZADA
+            licitacion.siguiente_estado()
             
             db.session.commit()
             
+            # Response según la especificación de la API
             return {
-                "success": True,
-                "mensaje": "Datos enviados al módulo de Orden de Compra exitosamente",
-                "payload_enviado": datos
+                "id_licitacion": licitacion.id, # CAMBIO: .id
+                "estado": licitacion.estado_actual.get_nombre(),
+                "proveedor_adjudicado_id": propuesta_ganadora.proveedor_id if propuesta_ganadora else None,
+                "contrato_id": contrato.id_contrato if contrato else None,
+                "orden_compra_generada": True
             }
             
         except Exception as e:

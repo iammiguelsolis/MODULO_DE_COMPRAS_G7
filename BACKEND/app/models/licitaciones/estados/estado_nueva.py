@@ -7,16 +7,18 @@ class EstadoNueva(EstadoLicitacionState):
     """
     
     def siguiente(self):
-        """
-        Si se enviaron invitaciones y se finalizó el periodo -> EN_INVITACION
-        """
-        if getattr(self.licitacion, 'invitaciones_enviadas', False):
+        # NUEVA -> EN_INVITACION (Si se enviaron invitaciones)
+        if self.licitacion.invitaciones_enviadas:
             from app.models.licitaciones.estados.estado_en_invitacion import EstadoEnInvitacion
             return EstadoEnInvitacion(self.licitacion)
         return self
-    
-    def get_nombre(self):
+        
+    def cancelar(self):
+        from app.models.licitaciones.estados.estado_cancelada import EstadoCancelada
+        self.licitacion.cambiar_estado(EstadoCancelada(self.licitacion))
+        
+    def get_nombre(self) -> str:
         return "NUEVA"
-    
-    def puede_invitar_proveedores(self):
+        
+    def puede_invitar_proveedores(self) -> bool:
         return True

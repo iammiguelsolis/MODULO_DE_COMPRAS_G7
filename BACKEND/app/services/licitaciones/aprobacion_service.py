@@ -16,7 +16,7 @@ class AprobacionService:
         if not licitacion:
             raise ValueError("Licitación no encontrada")
             
-        # Instanciar el supervisor correspondiente (Chain Handler)
+        # Instanciar el supervisor correspondiente
         supervisor = SupervisorCompra(id_supervisor)
         
         try:

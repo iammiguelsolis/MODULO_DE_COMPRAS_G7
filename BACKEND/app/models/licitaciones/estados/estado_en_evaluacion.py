@@ -3,27 +3,28 @@ from app.models.licitaciones.estados.estado_licitacion_state import EstadoLicita
 class EstadoEnEvaluacion(EstadoLicitacionState):
     """
     Estado de Evaluación Técnica.
-    En este estado el comité técnico revisa las propuestas.
     """
     
     def siguiente(self):
-        """
-        Si hay propuestas aprobadas técnicamente -> EVALUACION_ECONOMIA
-        Si no -> CANCELADA
-        """
-        # Filtra propuestas aprobadas técnicamente
-        # Asumimos que PropuestaProveedor tiene atributo 'aprobada_tecnicamente'
-        propuestas = getattr(self.licitacion, 'propuestas', [])
-        aprobadas = [p for p in propuestas if getattr(p, 'aprobada_tecnicamente', False)]
+        # EVALUACION_TECNICA -> EVALUACION_ECONOMIA (Si hay al menos 1 propuesta válida técnicamente)
+        propuestas_validas = [p for p in self.licitacion.propuestas if p.aprobada_tecnicamente]
         
-        if len(aprobadas) > 0:
+        if propuestas_validas:
             from app.models.licitaciones.estados.estado_evaluacion_economia import EstadoEvaluacionEconomia
             return EstadoEvaluacionEconomia(self.licitacion)
         else:
+            # Si todas fueron rechazadas -> CANCELADA
+            # Esto podría ser automático o manual, según regla 5: "Si Propuestas_Validas == 0 -> CANCELADA"
+            # Asumimos que el servicio llama a siguiente() después de evaluar todas.
             return self.cancelar()
-    
-    def get_nombre(self):
+            
+    def cancelar(self):
+        from app.models.licitaciones.estados.estado_cancelada import EstadoCancelada
+        self.licitacion.cambiar_estado(EstadoCancelada(self.licitacion))
+        return self.licitacion.estado_actual
+        
+    def get_nombre(self) -> str:
         return "EVALUACION_TECNICA"
-    
-    def puede_evaluar(self):
+        
+    def puede_evaluar(self) -> bool:
         return True

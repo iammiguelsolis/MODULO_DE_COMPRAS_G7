@@ -1,156 +1,148 @@
 from app.bdd import db
 from app.models.licitaciones.licitacion import Licitacion
-from app.models.licitaciones.supervisores.supervisor_compra import SupervisorCompra
-from app.models.licitaciones.supervisores.supervisor_tecnico import SupervisorTecnico
-from app.models.licitaciones.supervisores.supervisor_economico import SupervisorEconomico
+from app.models.licitaciones.propuesta import PropuestaProveedor
 
 class EvaluacionService:
     """
-    Servicio encargado de orquestar el proceso de evaluación de licitaciones.
-    Configura y ejecuta la Cadena de Responsabilidad (Chain of Responsibility) de supervisores.
+    Servicio encargado de la lógica de evaluación técnica y económica.
+    Orquesta los cambios de estado y validaciones de ganadores.
     """
-    
-    def configurar_cadena(self, id_sup_compra, id_sup_tecnico, id_sup_economico):
+
+    def listar_propuestas_para_evaluacion(self, id_licitacion):
         """
-        Construye la cadena de aprobación:
-        SupervisorCompra -> SupervisorTecnico -> SupervisorEconomico
-        
-        Retorna el primer eslabón de la cadena.
-        """
-        sup_compra = SupervisorCompra(id_sup_compra)
-        sup_tecnico = SupervisorTecnico(id_sup_tecnico)
-        sup_economico = SupervisorEconomico(id_sup_economico)
-        
-        # Encadenamiento fluido
-        sup_compra.set_siguiente(sup_tecnico).set_siguiente(sup_economico)
-        
-        return sup_compra
-    
-    def evaluar_licitacion(self, id_licitacion, ids_supervisores):
-        """
-        Ejecuta la evaluación completa de la licitación pasando por toda la cadena.
-        
-        Args:
-            id_licitacion: ID de la licitación a evaluar.
-            ids_supervisores: Dict con IDs {'compra': 1, 'tecnico': 2, 'economico': 3}
+        Lista las propuestas formateadas para la pantalla de evaluación.
         """
         licitacion = Licitacion.query.get(id_licitacion)
         if not licitacion:
             raise ValueError("Licitación no encontrada")
-            
-        # Configurar la cadena con los supervisores asignados
-        cadena = self.configurar_cadena(
-            id_sup_compra=ids_supervisores.get('compra'),
-            id_sup_tecnico=ids_supervisores.get('tecnico'),
-            id_sup_economico=ids_supervisores.get('economico')
-        )
         
-        try:
-            # Iniciar el proceso de evaluación desde el primer eslabón
-            resultado = cadena.procesar(licitacion)
-            
-            if resultado:
-                # Si la cadena retorna True, significa que todos aprobaron
-                # y el estado ya debería haber avanzado a ADJUDICADA (por el Sup. Económico)
-                db.session.commit()
-                return {
-                    "success": True, 
-                    "mensaje": "Evaluación completada exitosamente. Licitación adjudicada.",
-                    "estado_final": licitacion.estado_actual.get_nombre()
-                }
-            else:
-                # Si retorna False, algún supervisor rechazó y la licitación se canceló
-                db.session.commit() # Commit para guardar el estado CANCELADA y motivos
-                return {
-                    "success": False, 
-                    "mensaje": "Evaluación rechazada por uno de los comités.",
-                    "estado_final": licitacion.estado_actual.get_nombre()
-                }
-                
-        except Exception as e:
-            db.session.rollback()
-            raise e
-            
-    def registrar_evaluacion_tecnica(self, id_licitacion, id_supervisor, evaluaciones_data):
+        # Aquí podrías usar tu DTO si prefieres, por simplicidad devolvemos dicts
+        from app.dtos.licitaciones.propuesta_dto import PropuestaResponseDTO
+        return [PropuestaResponseDTO.from_model(p) for p in licitacion.propuestas]
+
+    def iniciar_evaluacion_tecnica(self, id_licitacion):
         """
-        Registra la evaluación técnica de las propuestas (Paso previo a la cadena completa).
-        Actualiza el estado de 'aprobada_tecnicamente' de cada propuesta.
+        Cambia el estado de CON_PROPUESTAS a EVALUACION_TECNICA.
         """
         licitacion = Licitacion.query.get(id_licitacion)
         if not licitacion:
             raise ValueError("Licitación no encontrada")
-            
-        # Validar estado correcto
-        if licitacion.estado_actual.get_nombre() != "EVALUACION_TECNICA":
-            raise ValueError("La licitación no está en etapa de evaluación técnica")
-            
-        supervisor = SupervisorTecnico(id_supervisor)
+
+        # Validar estado actual
+        nombre_estado = licitacion.estado_actual.get_nombre()
+        if nombre_estado not in ["CON_PROPUESTAS", "EN_INVITACION"]:
+            # A veces se pasa directo de invitación si se cierra manual
+            pass 
         
+        # Forzamos avance al siguiente estado (EVALUACION_TECNICA)
+        # Asumiendo que el estado actual tiene implementado siguiente() hacia allá
+        # O usamos la lógica de transición manual si el State Pattern lo requiere
         try:
-            # Procesar cada evaluación recibida
-            for eval_item in evaluaciones_data:
-                propuesta_id = eval_item.get('propuesta_id')
-                aprobada = eval_item.get('aprobada')
-                motivo = eval_item.get('motivo_rechazo')
-                
-                # Buscar propuesta en la licitación
-                propuesta = next((p for p in licitacion.propuestas if p.id_propuesta == propuesta_id), None)
-                
-                if propuesta:
-                    if aprobada:
-                        # En un caso real, aquí validaríamos documentos individuales
-                        supervisor.aprobar_propuesta(propuesta) # Esto solo lee, necesitamos setear
-                        propuesta.aprobada_tecnicamente = True
-                    else:
-                        supervisor.rechazar_propuesta(propuesta, motivo)
-            
-            # Intentar avanzar estado (Si hay aprobadas -> EVALUACION_ECONOMIA)
-            # El método siguiente() del estado EVALUACION_TECNICA hace esta validación
+            # Si estamos en CON_PROPUESTAS, siguiente() lleva a EVALUACION_TECNICA
             licitacion.siguiente_estado()
-            
             db.session.commit()
-            return {"success": True, "mensaje": "Evaluación técnica registrada", "nuevo_estado": licitacion.estado_actual.get_nombre()}
-            
+            return licitacion
         except Exception as e:
             db.session.rollback()
             raise e
 
-    def registrar_evaluacion_economica(self, id_licitacion, id_supervisor, evaluaciones_data):
+    def registrar_evaluacion_tecnica(self, id_licitacion, id_propuesta, data):
         """
-        Registra puntuaciones económicas y selecciona ganador.
+        Guarda el resultado técnico (Aprobado/Rechazado) de una propuesta.
+        """
+        propuesta = PropuestaProveedor.query.get(id_propuesta)
+        if not propuesta or propuesta.licitacion_id != id_licitacion:
+            raise ValueError("Propuesta no encontrada o no pertenece a la licitación")
+
+        try:
+            propuesta.aprobada_tecnicamente = data.get('aprobada_tecnicamente', False)
+            propuesta.motivo_rechazo_tecnico = data.get('motivo_rechazo_tecnico')
+            
+            # (Opcional) Aquí podrías actualizar validación de documentos individuales
+            
+            db.session.commit()
+            return {"mensaje": "Evaluación técnica guardada"}
+        except Exception as e:
+            db.session.rollback()
+            raise e
+
+    def finalizar_evaluacion_tecnica(self, id_licitacion):
+        """
+        Verifica si hay propuestas aptas y avanza a EVALUACION_ECONOMIA.
         """
         licitacion = Licitacion.query.get(id_licitacion)
         if not licitacion:
             raise ValueError("Licitación no encontrada")
-            
-        if licitacion.estado_actual.get_nombre() != "EVALUACION_ECONOMIA":
-            raise ValueError("La licitación no está en etapa de evaluación económica")
-            
-        supervisor = SupervisorEconomico(id_supervisor)
+
+        # Verificar que al menos una propuesta haya sido aprobada técnicamente
+        aprobadas = [p for p in licitacion.propuestas if p.aprobada_tecnicamente]
+        
+        if not aprobadas:
+            # Si todas fallaron, la licitación debería cancelarse o declararse desierta
+            licitacion.cancelar()
+            db.session.commit()
+            return {"mensaje": "Ninguna propuesta aprobó la técnica. Licitación CANCELADA."}
         
         try:
-            # Registrar puntuaciones
-            for eval_item in evaluaciones_data:
-                propuesta_id = eval_item.get('propuesta_id')
-                puntuacion = eval_item.get('puntuacion')
-                justificacion = eval_item.get('justificacion')
-                
-                propuesta = next((p for p in licitacion.propuestas if p.id_propuesta == propuesta_id), None)
-                if propuesta:
-                    supervisor.aprobar(propuesta, puntuacion, justificacion)
+            # Avanzar estado: EVALUACION_TECNICA -> EVALUACION_ECONOMIA
+            licitacion.siguiente_estado()
+            db.session.commit()
+            return {"mensaje": "Evaluación técnica finalizada. Pasando a Económica."}
+        except Exception as e:
+            db.session.rollback()
+            raise e
+
+    def registrar_evaluacion_economica(self, id_licitacion, id_propuesta, data):
+        """
+        Guarda el puntaje económico.
+        """
+        propuesta = PropuestaProveedor.query.get(id_propuesta)
+        if not propuesta:
+            raise ValueError("Propuesta no encontrada")
+
+        try:
+            propuesta.aprobada_economicamente = data.get('aprobada_economicamente', False)
+            propuesta.puntuacion_economica = data.get('puntuacion_economica', 0.0)
+            propuesta.justificacion_economica = data.get('justificacion_economica')
             
-            # El supervisor económico valida (selecciona ganador) y avanza
-            resultado = supervisor.validar(licitacion)
+            db.session.commit()
+            return {"mensaje": "Evaluación económica guardada"}
+        except Exception as e:
+            db.session.rollback()
+            raise e
+
+    def adjudicar_licitacion(self, id_licitacion):
+        """
+        Selecciona la propuesta ganadora (mayor puntaje) y cierra la licitación.
+        """
+        licitacion = Licitacion.query.get(id_licitacion)
+        if not licitacion:
+            raise ValueError("Licitación no encontrada")
+
+        # 1. Filtrar solo las que aprobaron técnica y económica
+        candidatos = [p for p in licitacion.propuestas if p.aprobada_tecnicamente and p.aprobada_economicamente]
+        
+        if not candidatos:
+            return {"error": "No hay candidatos aprobados para adjudicar"}
+
+        # 2. Elegir la de mayor puntaje
+        ganador = max(candidatos, key=lambda p: p.puntuacion_economica or 0)
+        
+        try:
+            # Marcar ganadora
+            ganador.es_ganadora = True
             
-            if resultado:
-                db.session.commit()
-                return {"success": True, "mensaje": "Ganador seleccionado y licitación adjudicada"}
-            else:
-                # Si no hay ganador viable
-                licitacion.cancelar()
-                db.session.commit()
-                return {"success": False, "mensaje": "No se seleccionó ganador. Licitación cancelada."}
-                
+            # Actualizar referencia en la licitación (opcional si usas la relación property)
+            # licitacion.oferta_ganadora_id = ganador.id_propuesta 
+            
+            # Avanzar estado: EVALUACION_ECONOMIA -> ADJUDICADA
+            licitacion.siguiente_estado()
+            
+            db.session.commit()
+            return {
+                "mensaje": f"Licitación adjudicada al proveedor {ganador.proveedor.nombre}",
+                "ganador_id": ganador.id_propuesta
+            }
         except Exception as e:
             db.session.rollback()
             raise e

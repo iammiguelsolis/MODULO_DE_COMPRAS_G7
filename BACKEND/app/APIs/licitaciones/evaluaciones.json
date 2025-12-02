@@ -1,410 +1,199 @@
 {
-  "openapi": "3.0.0",
-  "info": {
-    "title": "API de Evaluaciones",
-    "version": "1.0.0",
-    "description": "Endpoints para gestionar evaluaciones técnicas y económicas de propuestas"
-  },
-  "paths": {
-    "/licitaciones/{id}/enviarEvaluacion": {
-      "put": {
-        "tags": ["Evaluaciones"],
-        "summary": "Enviar a evaluación técnica",
-        "description": "Envía la licitación a evaluación técnica, cambiando el estado de CON_PROPUESTAS a EVALUACION_TECNICA.",
-        "operationId": "enviarEvaluacion",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID de la licitación",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "requestBody": {
+  "endpoints": [
+    {
+      "method": "GET",
+      "url": "/api/licitaciones/{id}/propuestas",
+      "summary": "Listar propuestas para evaluación",
+      "description": "Obtiene todas las propuestas con sus documentos y estados de evaluación (JOIN propuestas + documentos_licitacion).",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
           "required": true,
+          "schema": { "type": "integer" }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Lista de propuestas",
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "required": ["supervisorTecnicoId"],
-                "properties": {
-                  "supervisorTecnicoId": {
-                    "type": "integer",
-                    "description": "ID del supervisor técnico asignado"
-                  },
-                  "notas": {
-                    "type": "string"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Licitación enviada a evaluación técnica",
-            "content": {
-              "application/json": {
-                "schema": {
+                "type": "array",
+                "items": {
                   "type": "object",
                   "properties": {
-                    "idLicitacion": {
-                      "type": "integer"
-                    },
-                    "estado": {
-                      "type": "string",
-                      "enum": ["EVALUACION_TECNICA"]
-                    },
-                    "supervisorTecnico": {
-                      "type": "object",
-                      "properties": {
-                        "id": {
-                          "type": "integer"
-                        },
-                        "nombre": {
-                          "type": "string"
-                        }
-                      }
-                    },
-                    "propuestasAEvaluar": {
-                      "type": "integer"
-                    },
-                    "mensaje": {
-                      "type": "string"
-                    }
+                    "id_propuesta": { "type": "integer" },
+                    "proveedor_id": { "type": "integer" },
+                    "aprobada_tecnicamente": { "type": "boolean" },
+                    "aprobada_economicamente": { "type": "boolean" },
+                    "puntuacion_economica": { "type": "number" },
+                    "documentos": { "type": "array" }
                   }
                 }
               }
             }
-          },
-          "400": {
-            "description": "Estado inválido o sin propuestas"
-          },
-          "404": {
-            "description": "Licitación no encontrada"
           }
         }
       }
     },
-    "/licitaciones/{id}/evaluacion-tecnica": {
-      "post": {
-        "tags": ["Evaluaciones"],
-        "summary": "Registrar evaluación técnica",
-        "description": "Registra las evaluaciones técnicas de las propuestas. Si ninguna propuesta es aprobada, la licitación pasa a CANCELADA. Si hay aprobadas, pasa a EVALUACION_ECONOMIA.",
-        "operationId": "registrarEvaluacionTecnica",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID de la licitación",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "requestBody": {
+    {
+      "method": "POST",
+      "url": "/api/licitaciones/{id}/enviar-a-evaluacion",
+      "summary": "Iniciar Evaluación Técnica",
+      "description": "Cambia el estado de la licitación a 'EVALUACION_TECNICA'.",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
           "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/EvaluacionTecnicaRequest"
-              },
-              "example": {
-                "supervisorTecnicoId": 11,
-                "evaluaciones": [
-                  {
-                    "propuestaId": 1001,
-                    "aprobada": true,
-                    "documentosEvaluados": [
-                      {
-                        "documentoId": "RUC",
-                        "estado": "CORRECTO"
-                      },
-                      {
-                        "documentoId": "FICHA_TECNICA",
-                        "estado": "CORRECTO"
-                      }
-                    ],
-                    "observaciones": "Cumple con todas las especificaciones técnicas. Certificaciones vigentes."
-                  },
-                  {
-                    "propuestaId": 1002,
-                    "aprobada": false,
-                    "motivoRechazo": "Documentación técnica incompleta. Falta certificación ISO.",
-                    "observaciones": "No cumple requisitos mínimos"
-                  }
-                ]
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Evaluaciones registradas exitosamente",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "idLicitacion": {
-                      "type": "integer"
-                    },
-                    "estado": {
-                      "type": "string",
-                      "enum": ["EVALUACION_ECONOMIA", "CANCELADA"]
-                    },
-                    "propuestasEvaluadas": {
-                      "type": "integer"
-                    },
-                    "propuestasAprobadas": {
-                      "type": "integer"
-                    },
-                    "propuestasRechazadas": {
-                      "type": "integer"
-                    },
-                    "fechaEvaluacion": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "mensaje": {
-                      "type": "string"
-                    }
-                  }
-                },
-                "example": {
-                  "idLicitacion": 456,
-                  "estado": "EVALUACION_ECONOMIA",
-                  "propuestasEvaluadas": 3,
-                  "propuestasAprobadas": 2,
-                  "propuestasRechazadas": 1,
-                  "fechaEvaluacion": "2025-11-22T14:30:00",
-                  "mensaje": "Evaluación técnica completada. 2 propuestas aprobadas para evaluación económica."
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Estado inválido o datos incorrectos"
-          },
-          "404": {
-            "description": "Licitación no encontrada"
-          }
+          "schema": { "type": "integer" }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Estado actualizado a EVALUACION_TECNICA"
         }
       }
     },
-    "/licitaciones/{id}/evaluacion-economica": {
-      "post": {
-        "tags": ["Evaluaciones"],
-        "summary": "Registrar evaluación económica",
-        "description": "Registra las evaluaciones económicas de las propuestas técnicamente aprobadas. Selecciona al ganador con mayor puntuación. Si ninguna propuesta es aprobada, la licitación pasa a CANCELADA.",
-        "operationId": "registrarEvaluacionEconomica",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "description": "ID de la licitación",
-            "required": true,
-            "schema": {
-              "type": "integer",
-              "format": "int64"
-            }
-          }
-        ],
-        "requestBody": {
+    {
+      "method": "PUT",
+      "url": "/api/licitaciones/{id}/propuestas/{propuesta_id}/evaluacion-tecnica",
+      "summary": "Guardar Evaluación Técnica de Proveedor",
+      "description": "Actualiza el estado técnico de la propuesta y valida sus documentos.",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
           "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/EvaluacionEconomicaRequest"
-              },
-              "example": {
-                "supervisorEconomicoId": 12,
-                "evaluaciones": [
-                  {
-                    "propuestaId": 1001,
-                    "aprobada": true,
-                    "puntuacion": 88.5,
-                    "justificacion": "Mejor relación precio-calidad. Plazo de entrega óptimo. Garantía extendida.",
-                    "criterios": {
-                      "precio": 90,
-                      "plazo": 85,
-                      "garantia": 90
-                    }
-                  },
-                  {
-                    "propuestaId": 1003,
-                    "aprobada": true,
-                    "puntuacion": 75.0,
-                    "justificacion": "Precio competitivo pero plazo de entrega más largo.",
-                    "criterios": {
-                      "precio": 85,
-                      "plazo": 65,
-                      "garantia": 75
-                    }
-                  }
-                ],
-                "propuestaGanadoraId": 1001
-              }
-            }
-          }
+          "schema": { "type": "integer" }
         },
-        "responses": {
-          "200": {
-            "description": "Evaluaciones registradas y ganador seleccionado",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "idLicitacion": {
-                      "type": "integer"
-                    },
-                    "estado": {
-                      "type": "string",
-                      "enum": ["ADJUDICADA", "CANCELADA"]
-                    },
-                    "propuestasEvaluadas": {
-                      "type": "integer"
-                    },
-                    "propuestasAprobadas": {
-                      "type": "integer"
-                    },
-                    "propuestaGanadora": {
-                      "type": "object",
-                      "properties": {
-                        "idPropuesta": {
-                          "type": "integer"
-                        },
-                        "proveedor": {
-                          "type": "object"
-                        },
-                        "puntuacion": {
-                          "type": "number"
-                        },
-                        "montoAdjudicado": {
-                          "type": "number"
-                        }
-                      }
-                    },
-                    "fechaEvaluacion": {
-                      "type": "string",
-                      "format": "date-time"
-                    },
-                    "mensaje": {
-                      "type": "string"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Estado inválido o datos incorrectos"
-          },
-          "404": {
-            "description": "Licitación no encontrada"
-          }
+        {
+          "name": "propuesta_id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "integer" }
         }
-      }
-    }
-  },
-  "components": {
-    "schemas": {
-      "EvaluacionTecnicaRequest": {
-        "type": "object",
-        "required": ["supervisorTecnicoId", "evaluaciones"],
-        "properties": {
-          "supervisorTecnicoId": {
-            "type": "integer"
-          },
-          "evaluaciones": {
-            "type": "array",
-            "items": {
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
               "type": "object",
-              "required": ["propuestaId", "aprobada"],
               "properties": {
-                "propuestaId": {
-                  "type": "integer"
-                },
-                "aprobada": {
-                  "type": "boolean"
-                },
-                "documentosEvaluados": {
+                "aprobada_tecnicamente": { "type": "boolean" },
+                "motivo_rechazo_tecnico": { "type": "string" },
+                "documentos": {
                   "type": "array",
                   "items": {
                     "type": "object",
                     "properties": {
-                      "documentoId": {
-                        "type": "string"
-                      },
-                      "estado": {
-                        "type": "string",
-                        "enum": ["CORRECTO", "INCORRECTO"]
-                      }
+                      "id_documento": { "type": "integer" },
+                      "validado": { "type": "boolean" },
+                      "observaciones": { "type": "string" }
                     }
                   }
-                },
-                "motivoRechazo": {
-                  "type": "string",
-                  "description": "Requerido si aprobada=false"
-                },
-                "observaciones": {
-                  "type": "string"
                 }
-              }
+              },
+              "required": ["aprobada_tecnicamente"]
             }
           }
         }
       },
-      "EvaluacionEconomicaRequest": {
-        "type": "object",
-        "required": [
-          "supervisorEconomicoId",
-          "evaluaciones",
-          "propuestaGanadoraId"
-        ],
-        "properties": {
-          "supervisorEconomicoId": {
-            "type": "integer"
-          },
-          "evaluaciones": {
-            "type": "array",
-            "items": {
+      "responses": {
+        "200": { "description": "Evaluación técnica guardada" }
+      }
+    },
+    {
+      "method": "POST",
+      "url": "/api/licitaciones/{id}/finalizar-evaluacion-tecnica",
+      "summary": "Finalizar Evaluación Técnica",
+      "description": "Verifica si hay propuestas válidas (aprobada_tecnicamente=TRUE). Si hay >= 1, pasa a 'EVALUACION_ECONOMIA'. Si no, pasa a 'CANCELADA'.",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "integer" }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Estado actualizado a EVALUACION_ECONOMIA o CANCELADA"
+        }
+      }
+    },
+    {
+      "method": "PUT",
+      "url": "/api/licitaciones/{id}/propuestas/{propuesta_id}/evaluacion-economica",
+      "summary": "Guardar Evaluación Económica",
+      "description": "Actualiza la puntuación económica de la propuesta.",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "integer" }
+        },
+        {
+          "name": "propuesta_id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "integer" }
+        }
+      ],
+      "requestBody": {
+        "required": true,
+        "content": {
+          "application/json": {
+            "schema": {
               "type": "object",
-              "required": ["propuestaId", "aprobada"],
               "properties": {
-                "propuestaId": {
-                  "type": "integer"
-                },
-                "aprobada": {
-                  "type": "boolean"
-                },
-                "puntuacion": {
-                  "type": "number",
-                  "description": "Puntuación de 0-100, requerido si aprobada=true"
-                },
-                "justificacion": {
-                  "type": "string"
-                },
-                "criterios": {
-                  "type": "object",
-                  "description": "Puntuaciones por criterio"
+                "aprobada_economicamente": { "type": "boolean" },
+                "puntuacion_economica": { "type": "number" },
+                "justificacion_economica": { "type": "string" },
+                "motivo_rechazo_economico": { "type": "string" }
+              },
+              "required": ["aprobada_economicamente"]
+            }
+          }
+        }
+      },
+      "responses": {
+        "200": { "description": "Evaluación económica guardada" }
+      }
+    },
+    {
+      "method": "POST",
+      "url": "/api/licitaciones/{id}/adjudicar",
+      "summary": "Adjudicar Licitación",
+      "description": "Selecciona la propuesta con mayor puntaje (MAX puntuacion_economica) entre las aprobadas. Marca 'es_ganadora'=TRUE y cambia estado a 'ADJUDICADA'.",
+      "parameters": [
+        {
+          "name": "id",
+          "in": "path",
+          "required": true,
+          "schema": { "type": "integer" }
+        }
+      ],
+      "responses": {
+        "200": {
+          "description": "Licitación ADJUDICADA",
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "id_licitacion": { "type": "integer" },
+                  "estado": { "type": "string", "example": "ADJUDICADA" },
+                  "propuesta_ganadora_id": { "type": "integer" }
                 }
               }
             }
-          },
-          "propuestaGanadoraId": {
-            "type": "integer",
-            "description": "ID de la propuesta con mayor puntuación"
           }
         }
       }
     }
-  }
+  ]
 }
