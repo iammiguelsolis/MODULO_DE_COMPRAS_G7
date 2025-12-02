@@ -12,12 +12,12 @@ class OrdenCompraIntegrationService:
         if not licitacion:
             raise ValueError("Licitación no encontrada")
             
-        # Verificar que haya un ganador (cargar con relación proveedor)
+        # Verificar que haya un ganador
         from sqlalchemy.orm import joinedload
         
-        # CAMBIO: Usamos licitacion.id en lugar de id_licitacion
+        
         if not licitacion.propuesta_ganadora:
-             # Intento de fallback por si la relación no cargó (aunque debería)
+             # Intento de fallback por si la relación no cargó
              propuesta_ganadora = PropuestaProveedor.query.filter_by(
                 licitacion_id=licitacion.id, 
                 es_ganadora=True
@@ -35,7 +35,7 @@ class OrdenCompraIntegrationService:
         # La Orden de Compra puede obtener los items a partir del id_solicitud
         payload = {
             "origen": "LICITACION",
-            "id_origen": licitacion.id, # CAMBIO: .id
+            "id_origen": licitacion.id,
             "id_solicitud": licitacion.solicitud_id,
             "proveedor": {
                 "id": proveedor.id_proveedor,
@@ -49,9 +49,9 @@ class OrdenCompraIntegrationService:
             }
         }
         
-        # Agregar datos del contrato si existe
+        
         from app.models.licitaciones.contrato import Contrato
-        # CAMBIO: Usamos licitacion.id para filtrar
+
         contrato = Contrato.query.filter_by(licitacion_id=licitacion.id).first()
         
         if contrato:
@@ -73,7 +73,7 @@ class OrdenCompraIntegrationService:
             # Actualizar estado local
             licitacion = Licitacion.query.get(id_licitacion)
             
-            # CAMBIO: Usamos licitacion.id
+            
             propuesta_ganadora = PropuestaProveedor.query.filter_by(
                 licitacion_id=licitacion.id,
                 es_ganadora=True

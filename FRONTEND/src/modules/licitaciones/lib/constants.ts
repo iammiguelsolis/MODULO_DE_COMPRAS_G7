@@ -80,7 +80,7 @@ export const doc_tec: Documento[] = [
   },
   {
     id: "ficha-tecnica",
-    nombre: "Ficha Técnica del Producto/Servicio",
+    nombre: "Ficha Técnica del ProductoServicio",
     tipo: "TECNICO",
     obligatorio: false,
   },
