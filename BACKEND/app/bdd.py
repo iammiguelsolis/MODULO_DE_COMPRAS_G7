@@ -8,7 +8,7 @@ from flask_sqlalchemy import SQLAlchemy
 #esta es la conexion para mi local 
 #modifiquen esta linea para la suya o en todo caso cuando tengamos remoto pondremos el link fijo
 
-coneccion="mysql+mysqlconnector://admin:myservergod@compras.cjme8uwesdzz.us-east-2.rds.amazonaws.com:3306/modulo_de_compras" 
+coneccion="mysql+mysqlconnector://admin:myservergod@compras.cjme8uwesdzz.us-east-2.rds.amazonaws.com:3306/test" 
 db = SQLAlchemy()
 
 

@@ -166,3 +166,6 @@ Todos los endpoints usan nomenclatura consistente:
 3. Crear tests de integración
 4. Documentar casos de error específicos
 5. Configurar autenticación y autorización por rol
+
+
+## XDDDDDDDDDDDDDDDDDDDDDDD PROXIMOS PASOS CHAMARE, PONLE LA CITA TEXTUAL A GPT POR LO MENOS
