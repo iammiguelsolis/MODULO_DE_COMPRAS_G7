@@ -3,6 +3,7 @@ import { FileText, Upload, CheckCircle, Download, Trophy } from 'lucide-react';
 import Modal from '../atoms/Modal';
 import Button from '../atoms/Button';
 import Alert from '../atoms/Alert';
+import { getContractTemplatePath, downloadFile } from '../../lib/documentTemplateUtils';
 import './GenerateContractModal.css';
 
 interface WinnerProvider {
@@ -61,9 +62,11 @@ const GenerateContractModal: React.FC<GenerateContractModalProps> = ({
         }
     };
 
+
+
     const handleDownloadTemplate = () => {
-        console.log('[Mock] Descargando plantilla de contrato...');
-        // In a real app, this would trigger a file download
+        const contractPath = getContractTemplatePath();
+        downloadFile(contractPath, 'Plantilla - Contrato Adjudicacion.docx');
     };
 
     if (!winnerProvider) return null;

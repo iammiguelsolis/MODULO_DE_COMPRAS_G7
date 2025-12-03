@@ -1,20 +1,25 @@
 import React, { useState } from 'react';
+import { useParams } from 'react-router-dom';
 import LicitacionDetailTemplate from '../components/templates/LicitacionDetailTemplate';
 import type { LicitacionStatus } from '../lib/types';
 
 const LicitacionDetailPage: React.FC = () => {
-    // Estado de la licitación - Por ahora local, luego vendrá del backend
-    const [currentStatus, setCurrentStatus] = useState<LicitacionStatus>('BORRADOR');
+    const { id } = useParams<{ id: string }>();
 
-    // Timestamps de cuando se completó cada estado (simulado por ahora)
-    const [timestamps, setTimestamps] = useState<Partial<Record<LicitacionStatus, string>>>({});
+    // Estado de la licitación
+    // TODO: Cargar desde backend usando el ID
+    const [currentStatus, setCurrentStatus] = useState<LicitacionStatus>('NUEVA');
 
+    // Timestamps para el timeline
+    const [timestamps, setTimestamps] = useState<Record<string, string>>({});
+
+    // Datos mockeados
     const licitacionData = {
-        id: "2025001",
+        id: id || "2025001",
         nombre: "Compra de equipos de cómputo",
         createdDate: "01/11/2025",
         buyer: "Samnuel Luque",
-        supervisor: "---",
+        supervisor: "Mario Altamirano",
         estimatedAmount: 39000,
         presupuestoMaximo: 45000,
         proveedoresCount: 8,
@@ -36,24 +41,11 @@ const LicitacionDetailPage: React.FC = () => {
         });
     };
 
-    // Handlers para cambiar de estado
-    const handleApprove = () => {
-        // Guardar timestamp del estado actual antes de cambiar
-        setTimestamps(prev => ({
-            ...prev,
-            [currentStatus]: getCurrentTimestamp()
-        }));
-        setCurrentStatus('NUEVA');
-    };
+    // Handlers para transiciones de estado
 
-    const handleReject = () => {
-        // Guardar timestamp del estado actual antes de cambiar
-        setTimestamps(prev => ({
-            ...prev,
-            [currentStatus]: getCurrentTimestamp()
-        }));
-        // La licitación rechazada se maneja en el template, no cambiamos el status aquí
-        console.log('Solicitud rechazada');
+    const handleInvitarProveedores = () => {
+        // Lógica para abrir modal de invitación
+        console.log("Abriendo modal de invitación");
     };
 
     const handleFinalizarInvitacion = () => {
@@ -63,6 +55,10 @@ const LicitacionDetailPage: React.FC = () => {
             ['NUEVA']: getCurrentTimestamp()
         }));
         setCurrentStatus('EN_INVITACION');
+    };
+
+    const handleRegistrarPropuesta = () => {
+        console.log("Registrando propuesta");
     };
 
     const handleFinalizarRegistro = () => {
@@ -137,9 +133,9 @@ const LicitacionDetailPage: React.FC = () => {
             propuestasRegistradas={licitacionData.propuestasRegistradas}
             propuestasAprobadasTecnicamente={licitacionData.propuestasAprobadasTecnicamente}
             propuestasAprobadasEconomicamente={licitacionData.propuestasAprobadasEconomicamente}
-            onApprove={handleApprove}
-            onReject={handleReject}
+            onInvitarProveedores={handleInvitarProveedores}
             onFinalizarInvitacion={handleFinalizarInvitacion}
+            onRegistrarPropuesta={handleRegistrarPropuesta}
             onFinalizarRegistro={handleFinalizarRegistro}
             onEnviarEvaluacion={handleEnviarEvaluacion}
             onIniciarEvaluacionTecnica={handleIniciarEvaluacionTecnica}

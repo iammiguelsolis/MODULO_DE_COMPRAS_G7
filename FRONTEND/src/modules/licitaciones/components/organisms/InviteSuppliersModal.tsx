@@ -7,6 +7,8 @@ import Label from '../atoms/Label';
 import Input from '../atoms/Input';
 import Textarea from '../atoms/Textarea';
 import Checkbox from '../atoms/Checkbox';
+import { doc_legales, doc_tec, doc_finan } from '../../lib/constants';
+import { getTemplatePathById, downloadMultipleFilesAsZip } from '../../lib/documentTemplateUtils';
 import './InviteSuppliersModal.css';
 
 interface Supplier {
@@ -25,7 +27,7 @@ interface InviteSuppliersModalProps {
     estimatedAmount: number;
     maxBudget: number;
     availableSuppliers: Supplier[];
-    requiredDocuments: string[];
+    requiredDocumentIds: string[];
     onSuppliersInvited?: (suppliers: string[]) => void;
 }
 
@@ -36,10 +38,11 @@ const InviteSuppliersModal: React.FC<InviteSuppliersModalProps> = ({
     licitacionTitle,
     maxBudget,
     availableSuppliers,
-    requiredDocuments,
+    requiredDocumentIds,
     onSuppliersInvited
 }) => {
     const [selectedSuppliers, setSelectedSuppliers] = useState<number[]>([]);
+    const [isDownloading, setIsDownloading] = useState(false);
 
     const handleToggleSupplier = (supplierId: number) => {
         setSelectedSuppliers(prev => {
@@ -93,6 +96,42 @@ Juan Pérez - Módulo de Compras`;
         if (onSuppliersInvited) {
             onSuppliersInvited(getSelectedSupplierNames());
         }
+    };
+
+    const handleDownloadTemplates = async () => {
+        setIsDownloading(true);
+        try {
+            const allDocs = [...doc_legales, ...doc_tec, ...doc_finan];
+
+            const files = requiredDocumentIds
+                .map(id => {
+                    const path = getTemplatePathById(id);
+                    const doc = allDocs.find(d => d.id === id);
+                    // Si no encontramos el documento por ID, intentamos buscar por nombre (fallback para compatibilidad)
+                    // o simplemente ignoramos si no hay path
+                    return path && doc ? { path, name: doc.nombre } : null;
+                })
+                .filter((f): f is { path: string; name: string } => f !== null);
+
+            if (files.length > 0) {
+                await downloadMultipleFilesAsZip(
+                    files,
+                    `Plantillas_Licitacion_${licitacionId}.zip`
+                );
+            } else {
+                console.warn('No templates found for the required documents');
+            }
+        } catch (error) {
+            console.error('Error downloading templates:', error);
+        } finally {
+            setIsDownloading(false);
+        }
+    };
+
+    const getDocumentName = (id: string) => {
+        const allDocs = [...doc_legales, ...doc_tec, ...doc_finan];
+        const doc = allDocs.find(d => d.id === id);
+        return doc ? doc.nombre : id;
     };
 
     const handleClose = () => {
@@ -184,13 +223,19 @@ Juan Pérez - Módulo de Compras`;
                                         <h4>Documentos Requeridos (Plantillas)</h4>
                                     </div>
                                     <ul className="documents-list">
-                                        {requiredDocuments.map((doc, index) => (
-                                            <li key={index}>{doc}</li>
+                                        {requiredDocumentIds.map((docId, index) => (
+                                            <li key={index}>{getDocumentName(docId)}</li>
                                         ))}
                                     </ul>
-                                    <Button variant="primary" size="sm" className="download-button">
+                                    <Button
+                                        variant="primary"
+                                        size="sm"
+                                        className="download-button"
+                                        onClick={handleDownloadTemplates}
+                                        disabled={isDownloading}
+                                    >
                                         <Download size={16} />
-                                        Descargar Plantillas (ZIP)
+                                        {isDownloading ? 'Generando ZIP...' : 'Descargar Plantillas (ZIP)'}
                                     </Button>
                                 </div>
                             </div>

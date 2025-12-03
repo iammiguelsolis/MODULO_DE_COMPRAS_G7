@@ -1,58 +1,80 @@
 from dataclasses import dataclass
 from typing import List, Optional, Dict, Any
-
-@dataclass
-class ItemDTO:
-    codigo: str
-    nombre: str
-    cantidad: int
-    unidad_medida: str
-    tipo: str  # MATERIAL o SERVICIO
-    comentario: Optional[str] = None
-    fecha_entrega: Optional[str] = None
+from app.dtos.licitaciones.item_dto import ItemDTO
+from app.dtos.licitaciones.documento_dto import DocumentoRequeridoDTO
 
 @dataclass
 class CrearLicitacionDTO:
     solicitud_id: int
-    nombre: str
-    presupuesto_maximo: float
+    presupuesto_max: float
     fecha_limite: str
     comprador_id: int
-    items: List[Dict[str, Any]]
 
 @dataclass
 class LicitacionResponseDTO:
     id_licitacion: int
-    nombre: str
     estado: str
-    presupuesto_maximo: float
-    fecha_creacion: str
+    presupuesto_max: float
     fecha_limite: str
-    
     items: List[ItemDTO]
+    documentos_requeridos: List[DocumentoRequeridoDTO]
+    titulo: str = ""
+    comentarios: str = ""
+    
+    proveedor_ganador: Optional[Dict[str, Any]] = None
+    contrato: Optional[Dict[str, Any]] = None
     
     @staticmethod
     def from_model(licitacion):
-        # Mapear items solicitados
+        # 1. Mapear items usando el DTO de items
         items_dto = []
-        if hasattr(licitacion, 'items'):
-            for item in licitacion.items:
-                items_dto.append(ItemDTO(
-                    codigo=item.codigo,
-                    nombre=item.nombre,
-                    cantidad=item.cantidad,
-                    unidad_medida=item.unidad_medida,
-                    tipo=item.tipo,
-                    comentario=item.comentario,
-                    fecha_entrega=str(item.fecha_entrega) if item.fecha_entrega else None
-                ))
+        if licitacion.solicitud_origen and licitacion.solicitud_origen.items:
+            items_dto = [ItemDTO.from_model(i) for i in licitacion.solicitud_origen.items]
         
+        # 2. Mapear documentos requeridos
+        docs_requeridos = []
+        if licitacion.documentos_requeridos:
+            for doc in licitacion.documentos_requeridos:
+                docs_requeridos.append(DocumentoRequeridoDTO(
+                    id_requerido=doc.id_requerido,
+                    nombre=doc.nombre,
+                    tipo=doc.tipo.value if hasattr(doc.tipo, 'value') else str(doc.tipo),
+                    obligatorio=doc.obligatorio,
+                    ruta_plantilla=doc.ruta_plantilla
+                ))
+
+        # 3. Obtener proveedor ganador
+        proveedor_data = None
+        if licitacion.propuesta_ganadora:
+            prov = licitacion.propuesta_ganadora.proveedor
+            proveedor_data = {
+                'id_proveedor': prov.id_proveedor,
+                'nombre': prov.nombre,
+                'ruc': prov.ruc,
+                'email': prov.email,
+                'telefono': prov.telefono
+            }
+        
+        # 4. Obtener contrato
+        contrato_data = None
+        if licitacion.contrato:
+            contrato_data = {
+                'id_contrato': licitacion.contrato.id_contrato,
+                'fecha_generacion': licitacion.contrato.fecha_generacion_plantilla.isoformat(),
+                'plantilla_url': licitacion.contrato.plantilla_url,
+                'documento_firmado_url': licitacion.contrato.documento_firmado_url,
+                'estado': licitacion.contrato.estado.value
+            }
+
         return LicitacionResponseDTO(
-            id_licitacion=licitacion.id_licitacion,
-            nombre=licitacion.nombre,
+            id_licitacion=licitacion.id,
+            titulo=licitacion.solicitud_origen.titulo if licitacion.solicitud_origen else "",
+            comentarios=licitacion.solicitud_origen.notas_adicionales if licitacion.solicitud_origen else "",
             estado=licitacion.estado_actual.get_nombre(),
-            presupuesto_maximo=float(licitacion.presupuesto_maximo) if licitacion.presupuesto_maximo else 0.0,
-            fecha_creacion=str(licitacion.fecha_creacion) if licitacion.fecha_creacion else "",
-            fecha_limite=str(licitacion.fecha_limite) if licitacion.fecha_limite else "",
-            items=items_dto
+            presupuesto_max=float(licitacion.presupuesto_max) if licitacion.presupuesto_max else 0.0,
+            fecha_limite=licitacion.fecha_limite.isoformat() if licitacion.fecha_limite else None,
+            items=items_dto,
+            documentos_requeridos=docs_requeridos,
+            proveedor_ganador=proveedor_data,
+            contrato=contrato_data
         )

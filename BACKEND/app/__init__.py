@@ -1,8 +1,7 @@
-from flask import Flask, get_flashed_messages
-from app.bdd import db
+from flask import Flask
+from app.bdd import db, coneccion
 from app.extensiones import bcrypt
 from flask_bcrypt import Bcrypt
-from app.bdd import coneccion
 from flask_cors import CORS
 # Lo de abajo es un ejemplo de como importar una BP
 #from app.BP.Colaborador import colaborador_bp
@@ -10,6 +9,10 @@ from sqlalchemy.sql import text #permite ejecutar consultas sql puras
 from app.BP.facturasProveedor.routes import facturas_bp 
 from app.BP.Proveedor import proveedor_bp
 from app.BP.Inventario import inventario_bp
+from app.BP.solicitudes.solicitudes_controller import solicitudes_bp
+from app.BP.adquisiciones.adquisiciones_controller import adquisiciones_bp
+from app.BP.licitaciones import register_licitaciones_blueprints
+
 bcrypt = Bcrypt()
 
 def create_app():
@@ -49,5 +52,8 @@ def create_app():
     
     app.register_blueprint(proveedor_bp, url_prefix="/api/proveedores")
     app.register_blueprint(inventario_bp, url_prefix="/api/inventario")
-    return app
+    app.register_blueprint(solicitudes_bp) 
+    app.register_blueprint(adquisiciones_bp)
+    register_licitaciones_blueprints(app)
 
+    return app

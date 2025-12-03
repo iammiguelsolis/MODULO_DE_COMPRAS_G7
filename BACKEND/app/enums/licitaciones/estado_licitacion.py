@@ -5,7 +5,6 @@ class EstadoLicitacion(Enum):
     Enumeración de los posibles estados de una licitación.
     Representa el flujo completo del proceso de adquisición.
     """
-    BORRADOR = "BORRADOR"
     NUEVA = "NUEVA"
     EN_INVITACION = "EN_INVITACION"
     CON_PROPUESTAS = "CON_PROPUESTAS"

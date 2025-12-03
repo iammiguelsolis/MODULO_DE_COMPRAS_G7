@@ -19,21 +19,31 @@ class InvitacionService:
             raise ValueError(f"No se pueden enviar invitaciones en estado {licitacion.estado_actual.get_nombre()}")
             
         try:
-            # Aquí iría la lógica de crear registros en una tabla 'invitaciones'
-            # y enviar correos electrónicos reales.
-            # Por ahora, simulamos actualizando el flag en la licitación.
+            from app.models.licitaciones.invitacion import InvitacionProveedor
             
-            # Simulación de envío
-            print(f"Enviando correos a proveedores: {ids_proveedores}")
+            registros_creados = 0
+            for proveedor_id in ids_proveedores:
+                # Verificar si ya existe invitación para evitar duplicados
+                existe = InvitacionProveedor.query.filter_by(
+                    licitacion_id=id_licitacion, 
+                    proveedor_id=proveedor_id
+                ).first()
+                
+                if not existe:
+                    nueva_invitacion = InvitacionProveedor(
+                        licitacion_id=id_licitacion,
+                        proveedor_id=proveedor_id
+                    )
+                    db.session.add(nueva_invitacion)
+                    registros_creados += 1
             
-            licitacion.invitaciones_enviadas = True
-            
-            # Intentar avanzar estado (NUEVA -> EN_INVITACION)
-            # Nota: El estado NUEVA avanza si invitaciones_enviadas es True
-            licitacion.siguiente_estado()
+            if registros_creados > 0:
+                licitacion.invitaciones_enviadas = True
+                # Intentar avanzar estado (NUEVA -> EN_INVITACION)
+                licitacion.siguiente_estado()
             
             db.session.commit()
-            return {"success": True, "mensaje": f"Invitaciones enviadas a {len(ids_proveedores)} proveedores"}
+            return {"success": True, "mensaje": f"Invitaciones enviadas a {registros_creados} proveedores"}
             
         except Exception as e:
             db.session.rollback()
@@ -44,5 +54,4 @@ class InvitacionService:
         Fuerza el cierre del periodo de invitación si es necesario.
         """
         # En nuestro flujo actual, el envío de invitaciones ya transiciona el estado.
-        # Este método podría usarse si hubiera un paso intermedio explícito.
         pass

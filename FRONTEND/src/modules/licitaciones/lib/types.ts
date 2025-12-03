@@ -8,6 +8,7 @@ export interface Item {
   price?: number;
   estimatedHours?: number;
   hourlyRate?: number;
+  total?: number;
 }
 
 /**
@@ -25,7 +26,7 @@ export interface Licitacion {
  * Estados posibles de una licitación en el flujo del proceso
  */
 export type LicitacionStatus =
-  | "BORRADOR"
+  | "PENDIENTE"
   | "NUEVA"
   | "EN_INVITACION"
   | "CON_PROPUESTAS"
@@ -95,6 +96,20 @@ export interface LicitacionDetail {
   requiredDocuments: Documento[];
   providers?: Provider[];
   contract?: Contract;
+}
+
+/**
+ * Solicitud de licitación en estado pendiente
+ */
+export interface SolicitudPendiente {
+  id: string;
+  nombre: string;
+  notas: string;
+  items: Item[];
+  presupuestoMaximo: number;
+  documentosRequeridos: Documento[];
+  fechaCreacion: string;
+  solicitante: string;
 }
 
 // ==================================================================

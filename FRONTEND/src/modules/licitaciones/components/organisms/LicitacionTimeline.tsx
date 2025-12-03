@@ -1,17 +1,13 @@
 import React from 'react';
 import TimelineItem from '../molecules/TimelineItem';
 import Button from '../atoms/Button';
-import { CheckCircle, XCircle, Send, Mail, Flag, PencilLine, ArrowRight, Settings, FileText } from 'lucide-react';
+import { Send, Mail, Flag, PencilLine, ArrowRight, Settings, FileText } from 'lucide-react';
 import type { LicitacionStatus } from '../../lib/types';
 import './LicitacionTimeline.css';
 
 interface LicitacionTimelineProps {
     currentStatus: LicitacionStatus;
     timestamps: Partial<Record<LicitacionStatus, string>>;
-    onApprove: () => void;
-    onReject: () => void;
-    isApproved?: boolean;
-    supervisorName?: string;
     isRejected?: boolean;
     proveedoresCount?: number;
     propuestasRegistradas?: number;
@@ -29,11 +25,16 @@ interface LicitacionTimelineProps {
     isCancelledNoProposals?: boolean;
     isCancelledNoApprovals?: boolean;
     isCancelledNoEconomicApprovals?: boolean;
+    // Props kept for compatibility but not used in this version
+    onApprove?: () => void;
+    onReject?: () => void;
+    isApproved?: boolean;
+    supervisorName?: string;
 }
 
 // Mapeo del orden de los estados
 const statusOrder: LicitacionStatus[] = [
-    'BORRADOR',
+    'PENDIENTE', // Aunque no se muestra en el timeline, es el estado inicial
     'NUEVA',
     'EN_INVITACION',
     'CON_PROPUESTAS',
@@ -47,10 +48,6 @@ const statusOrder: LicitacionStatus[] = [
 const LicitacionTimeline: React.FC<LicitacionTimelineProps> = ({
     currentStatus,
     timestamps,
-    onApprove,
-    onReject,
-    isApproved = false,
-    supervisorName,
     isRejected = false,
     proveedoresCount = 8,
     propuestasRegistradas = 3,
@@ -95,65 +92,20 @@ const LicitacionTimeline: React.FC<LicitacionTimelineProps> = ({
         <div className="licitacion-timeline">
             <h3 className="timeline-header-title">Flujo del proceso de licitación</h3>
 
-            {isRejected ? (
-                <>
-                    <TimelineItem
-                        stepNumber={1}
-                        title="Cancelada"
-                        description="Solicitud cancelada por Mario Altamirano"
-                        status="completed"
-                        timestamp={timestamps['BORRADOR']}
-                        isRejected={true}
-                    />
-
-                    <TimelineItem
-                        stepNumber={2}
-                        title="Nueva"
-                        description="Aprobada por supervisor"
-                        status="pending"
-                        statusText="Pendiente"
-                    />
-                </>
-            ) : (
-                <TimelineItem
-                    stepNumber={1}
-                    title="Borrador"
-                    description={isApproved ? `Aprobada por ${supervisorName || 'Mario Altamirano'}` : "Licitación a la espera de aprobación"}
-                    status={getStepStatus('BORRADOR')}
-                    timestamp={timestamps['BORRADOR']}
-                    statusText={getStatusText('BORRADOR')}
-                >
-                    {currentStatus === 'BORRADOR' && !isApproved && (
-                        <>
-                            <Button variant="primary" size="sm" onClick={onApprove}>
-                                <CheckCircle size={16} />
-                                Aprobar Solicitud
-                            </Button>
-                            <Button variant="secondary" size="sm" onClick={onReject}>
-                                <XCircle size={16} />
-                                Cancelar Solicitud
-                            </Button>
-                        </>
-                    )}
-                </TimelineItem>
-            )}
-
             {!isRejected && (
                 <TimelineItem
-                    stepNumber={2}
+                    stepNumber={1}
                     title="Nueva"
                     description={
                         currentStatus === 'EN_INVITACION' || timestamps['EN_INVITACION']
                             ? `Invitaciones enviadas a ${proveedoresCount} proveedores`
-                            : isApproved
-                                ? "Invitando proveedores"
-                                : "Aprobada por supervisor"
+                            : "Invitando proveedores"
                     }
                     status={getStepStatus('NUEVA')}
-                    timestamp={timestamps['NUEVA']}
+                    timestamp={currentStatus === 'NUEVA' ? undefined : timestamps['NUEVA']}
                     statusText={getStatusText('NUEVA')}
                 >
-                    {currentStatus === 'NUEVA' && isApproved && (
+                    {currentStatus === 'NUEVA' && (
                         <>
                             <Button variant="primary" size="sm" onClick={onInvitarProveedores}>
                                 <Mail size={16} />
@@ -172,7 +124,7 @@ const LicitacionTimeline: React.FC<LicitacionTimelineProps> = ({
 
             {isCancelledNoProposals ? (
                 <TimelineItem
-                    stepNumber={3}
+                    stepNumber={2}
                     title="Cancelada"
                     description="Licitación cancelada debido a la falta de propuestas"
                     status="completed"
@@ -181,7 +133,7 @@ const LicitacionTimeline: React.FC<LicitacionTimelineProps> = ({
                 />
             ) : (
                 <TimelineItem
-                    stepNumber={3}
+                    stepNumber={2}
                     title="En invitación"
                     description={
                         currentStatus === 'CON_PROPUESTAS' || getStepStatus('EN_INVITACION') === 'completed'
@@ -210,12 +162,12 @@ const LicitacionTimeline: React.FC<LicitacionTimelineProps> = ({
             )}
 
             <TimelineItem
-                stepNumber={4}
+                stepNumber={3}
                 title="Con propuestas"
                 description={
                     currentStatus === 'EVALUACION_TECNICA' || getStepStatus('CON_PROPUESTAS') === 'completed'
                         ? "Enviado a evaluación"
-                        : "Pendiente del envío a la evaluación"
+                        : "Pendiente del envío a evaluación"
                 }
                 status={getStepStatus('CON_PROPUESTAS')}
                 timestamp={timestamps['CON_PROPUESTAS']}
@@ -231,7 +183,7 @@ const LicitacionTimeline: React.FC<LicitacionTimelineProps> = ({
 
             {isCancelledNoApprovals ? (
                 <TimelineItem
-                    stepNumber={5}
+                    stepNumber={4}
                     title="Cancelada"
                     description="Ningún proveedor pasó la evaluación técnica"
                     status="completed"
@@ -240,7 +192,7 @@ const LicitacionTimeline: React.FC<LicitacionTimelineProps> = ({
                 />
             ) : (
                 <TimelineItem
-                    stepNumber={5}
+                    stepNumber={4}
                     title="En evaluación - Comité Técnico"
                     description={
                         currentStatus === 'EVALUACION_ECONOMIA' || getStepStatus('EVALUACION_TECNICA') === 'completed'
@@ -262,7 +214,7 @@ const LicitacionTimeline: React.FC<LicitacionTimelineProps> = ({
 
             {isCancelledNoEconomicApprovals ? (
                 <TimelineItem
-                    stepNumber={6}
+                    stepNumber={5}
                     title="Cancelada"
                     description="Ningún proveedor pasó la evaluación económica"
                     status="completed"
@@ -271,7 +223,7 @@ const LicitacionTimeline: React.FC<LicitacionTimelineProps> = ({
                 />
             ) : (
                 <TimelineItem
-                    stepNumber={6}
+                    stepNumber={5}
                     title="En evaluación - Comité de Economía"
                     description={
                         currentStatus === 'ADJUDICADA' || getStepStatus('EVALUACION_ECONOMIA') === 'completed'
@@ -292,7 +244,7 @@ const LicitacionTimeline: React.FC<LicitacionTimelineProps> = ({
             )}
 
             <TimelineItem
-                stepNumber={7}
+                stepNumber={6}
                 title="Adjudicada"
                 description={
                     currentStatus === 'CON_CONTRATO' || getStepStatus('ADJUDICADA') === 'completed'
@@ -312,7 +264,7 @@ const LicitacionTimeline: React.FC<LicitacionTimelineProps> = ({
             </TimelineItem>
 
             <TimelineItem
-                stepNumber={8}
+                stepNumber={7}
                 title="Con contrato"
                 description={
                     currentStatus === 'FINALIZADA' || getStepStatus('CON_CONTRATO') === 'completed'
@@ -332,7 +284,7 @@ const LicitacionTimeline: React.FC<LicitacionTimelineProps> = ({
             </TimelineItem>
 
             <TimelineItem
-                stepNumber={9}
+                stepNumber={8}
                 title="Finalizada"
                 description="Proceso de Licitación finalizado"
                 status={getStepStatus('FINALIZADA')}
