@@ -5,7 +5,7 @@ from app.models.proveedor_inventario.conexion_alamacen import Material
 inventario_bp = Blueprint('inventario_bp', __name__)
 
 # Crear un material / item
-@inventario_bp.route('/crear', methods=['POST'])
+@inventario_bp.route('/create', methods=['POST'])
 def registrar_material():
     data = request.get_json()
     

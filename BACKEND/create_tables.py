@@ -7,7 +7,7 @@ from app.models.proveedor_inventario.dominio_proveedor import (
     Proveedor, ContactoProveedor, DetallesProveedor
 )
 from app.models.proveedor_inventario.conexion_alamacen import (
-    Almacen, Entrega, DetalleEntrega
+    Almacen, Entrega, DetalleEntrega, Material
 )
 # Agrega otros modelos si tienes...
 
