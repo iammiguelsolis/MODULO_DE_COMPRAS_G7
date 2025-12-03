@@ -35,7 +35,6 @@ class Proveedor(db.Model):
         nullable=False
     )
     denuncias_incumplimiento_contrato = db.Column(db.Integer)
-    indice_denuncias = db.Column(db.Float)
     tiene_procesos_de_mejora_de_condiciones_laborales = db.Column(db.Boolean, default=False, nullable=False)
 
     # -------------------------------------------------------------------------
