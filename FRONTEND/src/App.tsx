@@ -1,7 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import MainLayaout from "./global/layaouts/MainLayaout";
 import Solicitud from "./modules/solicitudes/page/Solicitud";
-import FacturacionApp from "./modules/facturación/page/FacturacionApp";
+import FacturacionApp from "./modules/facturación/page/FacturasProveedoresPage";
 import LicitacionesListPage from "./modules/licitaciones/pages/LicitacionesListPage";
 import LicitacionDetailPage from "./modules/licitaciones/pages/LicitacionDetailPage";
 import LicitacionPage from "./modules/licitaciones/pages/LicitacionPage";
