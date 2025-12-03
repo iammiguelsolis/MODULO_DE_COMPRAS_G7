@@ -12,7 +12,7 @@
 
 #En desarrollo, todavia no listo para ejecutar run.py
 
-"""
+
 from abc import ABC, abstractmethod
 from app.bdd import db
 from .inventario_enums import *
@@ -21,44 +21,17 @@ from sqlalchemy.orm import relationship
 from datetime import date
 from typing import Optional
 
-class Almacen(db.Model):
-    id_almacen = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(100), nullable=False)
-    ubicacion = db.Column(db.String(100), nullable=False)
-
-class Entrega(db.Model):
-    __tablename__ = "entrega"
-    #OJO falta implementar la OC pero siguiendo mi nomenclatura
-    #ya puedo ir poniendo las clases
-    id_entrega = db.Column(db.Integer, primary_key=True)
-    id_proveedor = db.Column(db.Integer, db.ForeignKey("proveedor.id_proveedor"), nullable=False)
-    id_orden_compra = db.Column(db.Integer, db.ForeignKey("orden_compra.id_orden_compra"), nullable=False)
-    fecha_entrega = db.Column(db.Date, nullable=False)
-
-    # Relación 1 a N
-    detalles = relationship("DetalleEntrega", backref="entrega", cascade="all, delete-orphan")
-
-
-class DetalleEntrega(db.Model):
-    __tablename__ = "detalle_entrega"
-
-    id_detalle_entrega = db.Column(db.Integer, primary_key=True)
-    id_entrega = db.Column(db.Integer, db.ForeignKey("entrega.id_entrega"), nullable=False)
-    id_linea_oc = db.Column(db.Integer, db.ForeignKey("linea_oc.id_linea_oc"), nullable=False)
-    cantidad_entrega = db.Column(db.SmallInteger, nullable=False)
-    fecha_registro = db.Column(db.Date, default=date.today)
-
-    def __repr__(self):
-        return f"<DetalleEntrega línea={self.id_linea_oc} cantidad={self.cantidad_entrega}>"
-
 class Proveedor(db.Model):
     __tablename__ = "proveedor"
     id_proveedor = db.Column(db.Integer, primary_key=True)
-    nombre = db.Column(db.String(100), nullable = False)
+    razon_social = db.Column(db.String(100), nullable = False)
     ruc = db.Column(db.String(20), nullable = False)
-    direccion = db.Column(db.String(100), nullable = False)
-    correo = db.Column(db.String(100), nullable=False)
+    pais = db.Column(db.String(100), nullable = True)
+    email = db.Column(db.String(100), nullable = False)
+    telefono = db.Column(db.String(20), nullable = False)
+    domicilio_legal = db.Column(db.String(100), nullable = False)
     fecha_registro = db.Column(db.Date, nullable=False)
+    esta_suspendido = db.Column(db.Boolean, default=False)
 
     confiabilidad_en_entregas = db.Column(
         db.Enum(EscalaCalificacion, values_callable=lambda x: [e.value for e in x]),
@@ -70,17 +43,39 @@ class Proveedor(db.Model):
         nullable=False
     )
     
-    #DTO DetallesProveedor
-
-    numero_trabajadores = db.Column(db.Integer) #deberia ser small int pero me da pereza xddd
+    #Objeto embebido
+    numero_trabajadores = db.Column(db.Integer) 
     tiene_sindicato = db.Column(db.Boolean, default=False, nullable = False)
     ha_tomado_represalias_contra_sindicato = db.Column(
         db.Enum(PosiblesValores, values_callable=lambda x: [e.value for e in x]),
         nullable=False
     )
-    denuncias_incumplimiento_contrato = db.Column(db.Integer) #aqui tambien deberia ser un small int porque es complejo tener mas de 30k denuncias
+    denuncias_incumplimiento_contrato = db.Column(db.Integer) 
     indice_denuncias = db.Column(db.Float)
     tiene_procesos_de_mejora_de_condiciones_laborales = db.Column(db.Boolean, default=False, nullable = False)
+
+    def to_dict(self):
+        """Convierte el proveedor a un diccionario serializable"""
+        return {
+            "id_proveedor": self.id_proveedor,
+            "razon_social": self.razon_social,
+            "ruc": self.ruc,
+            "pais": self.pais,
+            "email": self.email,
+            "telefono": self.telefono,
+            "domicilio_legal": self.domicilio_legal,
+            "fecha_registro": self.fecha_registro.isoformat() if self.fecha_registro else None,
+            "esta_suspendido": self.esta_suspendido,
+            "confiabilidad_en_entregas": self.confiabilidad_en_entregas.value if self.confiabilidad_en_entregas else None,
+            "confiabilidad_en_condiciones_pago": self.confiabilidad_en_condiciones_pago.value if self.confiabilidad_en_condiciones_pago else None,
+            # Campos embebidos (detalles)
+            "numero_trabajadores": self.numero_trabajadores,
+            "tiene_sindicato": self.tiene_sindicato,
+            "ha_tomado_represalias_contra_sindicato": self.ha_tomado_represalias_contra_sindicato.value if self.ha_tomado_represalias_contra_sindicato else None,
+            "denuncias_incumplimiento_contrato": self.denuncias_incumplimiento_contrato,
+            "indice_denuncias": self.indice_denuncias,
+            "tiene_procesos_de_mejora_de_condiciones_laborales": self.tiene_procesos_de_mejora_de_condiciones_laborales
+        }
 
     def registrar_proveedor(self):
         pass
@@ -88,10 +83,10 @@ class Proveedor(db.Model):
     def actualizar_datos(self):
         pass
 
-"""
-"""
+    def cambiar_estado_proveedor(self):
+        pass
+
 class DetallesProveedor:
-    #DTO lógico que agrupa información extendida o derivada del proveedor.
 
     def __init__(
         self,
@@ -111,10 +106,8 @@ class DetallesProveedor:
             tiene_procesos_de_mejora_de_condiciones_laborales
         )
 
-    # --- Métodos de negocio / validación ---
-
     def evaluar_riesgo_laboral(self) -> str:
-        # Evalúa el riesgo de relaciones laborales del proveedor.
+
         if self.ha_tomado_represalias_contra_sindicato == "Sí" or self.denuncias_incumplimiento_contrato > 10:
             return "Alto"
         elif self.tiene_sindicato and self.tiene_procesos_de_mejora_de_condiciones_laborales:
@@ -122,13 +115,18 @@ class DetallesProveedor:
         return "Medio"
 
     def resumen(self) -> str:
-        #Devuelve un resumen textual.
+        
         return (
             f"Trabajadores: {self.numero_trabajadores}, Sindicato: {self.tiene_sindicato}, "
             f"Denuncias: {self.denuncias_incumplimiento_contrato}, Riesgo: {self.evaluar_riesgo_laboral()}"
         )
-""""
 
 
-
-
+class ContactoProveedor(db.Model):
+    __tablename__ = "contacto_proveedor"
+    id_contacto_proveedor = db.Column(db.Integer, primary_key=True)
+    id_proveedor = db.Column(db.Integer, db.ForeignKey("proveedor.id_proveedor"), nullable=False) 
+    nombre = db.Column(db.String(100), nullable = False)
+    cargo = db.Column(db.String(100), nullable = False)
+    email = db.Column(db.String(100), nullable = False)
+    telefono = db.Column(db.String(20), nullable = False)

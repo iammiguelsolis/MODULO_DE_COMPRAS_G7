@@ -17,3 +17,5 @@ def register_licitaciones_blueprints(app):
     app.register_blueprint(evaluaciones_bp)
     app.register_blueprint(contrato_bp)
     app.register_blueprint(orden_compra_bp)
+
+

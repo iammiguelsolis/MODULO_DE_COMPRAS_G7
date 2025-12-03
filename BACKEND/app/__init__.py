@@ -6,7 +6,8 @@ from app.bdd import coneccion
 # Lo de abajo es un ejemplo de como importar una BP
 #from app.BP.Colaborador import colaborador_bp
 from sqlalchemy.sql import text #permite ejecutar consultas sql puras 
-
+from app.BP.Proveedor import proveedor_bp
+from app.BP.Inventario import inventario_bp
 bcrypt = Bcrypt()
 
 def create_app():
@@ -22,16 +23,7 @@ def create_app():
     # Registrar Blueprints
     # ejemplo de restro, ahorita tira error si descomento
     # app.register_blueprint(colaborador_bp, url_prefix='/colaborador')
-
-    # 🔴 Manejador de errores
-
-    #Eso de abajo es cuando se hace server side rendering todo en flask, ahorita se maneja por react
-    """
-    @app.errorhandler(404)
-    def pagina_no_encontrada(error):
-        from flask import render_template
-        return render_template("error/404.html"), 404
-    """
-    
+    app.register_blueprint(proveedor_bp, url_prefix="/api/proveedores")
+    app.register_blueprint(inventario_bp, url_prefix="/api/inventario")
     return app
 
