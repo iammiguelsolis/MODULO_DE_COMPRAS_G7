@@ -62,19 +62,12 @@ export default function SupplierTable({ suppliers }: SupplierTableProps) {
                             <td className="px-6 py-4">{renderStars(s.clasificacion)}</td>
                             <td className="px-6 py-4 text-sm">{s.estado}</td>
 
-                            <td className="px-6 py-4 flex gap-2">
+                            <td className="px-6 py-4 flex gap-1">
                                 <Button
                                     variant="primary"
                                     onClick={() => setSelectedSupplierId(s.id)}
                                 >
                                     Ver
-                                </Button>
-
-                                <Button
-                                    variant="secondary"
-                                    onClick={() => navigate(`/proveedores/${s.id}?tab=historial`)}
-                                >
-                                    Editar
                                 </Button>
                             </td>
                         </tr>

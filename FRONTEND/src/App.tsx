@@ -7,6 +7,7 @@ import LicitacionDetailPage from "./modules/licitaciones/pages/LicitacionDetailP
 import LicitacionPage from "./modules/licitaciones/pages/LicitacionPage";
 import ProveedorPage from "./modules/proveedor/page/ProveedorPage";
 import ProveedorDetailPage from "./modules/proveedor/page/ProveedorDetailPage";
+import AnalisisProveedoresPage from "./modules/analisisProveedor/page/AnalisisProveedoresPage";
 
 function App() {
   return (
@@ -32,7 +33,7 @@ function App() {
           <Route path="/ordenes" element={<h1>ordenes</h1>} />
           <Route path="/facturacion" element={<FacturacionApp />} />
           <Route path="/comparacion" element={<h1>reportes</h1>} />
-          <Route path="/analisis" element={<h1>analisis de Proveedores</h1>} />
+          <Route path="/analisis" element={<AnalisisProveedoresPage />} />
 
         </Route>
 
