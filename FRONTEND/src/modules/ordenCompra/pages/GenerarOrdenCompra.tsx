@@ -1,5 +1,7 @@
 import { PlusCircle, Search } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { useLocation, useSearchParams } from "react-router-dom";
+
 import { Input } from '../components/atoms/Input';
 import { TextArea } from '../components/atoms/TextArea';
 import { Button } from '../components/atoms/Button';
@@ -8,46 +10,95 @@ import { SummaryCard } from '../components/molecules/SummaryCard';
 import { Select } from '../components/atoms/Select';
 import { OrdenModal } from '../components/molecules/OrdenModal';
 import { ProveedorModal } from '../components/molecules/ProveedorModal';
+
 import type { ItemType, ProveedorType } from '../lib/types';
 import { ORDER_TYPES, CURRENCIES } from '../lib/constants';
 
 const GenerarOrdenCompra: React.FC = () => {
+  // ROUTER
+  const location = useLocation();
+  const [searchParams] = useSearchParams();
+
+  // Tipo de origen que viene por query param
+  const tipoRuta = searchParams.get("tipo")?.toUpperCase() as
+    | "RFQ"
+    | "LICITACION"
+    | "DIRECTA"
+    | undefined;
+
+  // JSON que envía tu compañero
+  const datosOrigen = location.state;
+
+  // ESTADOS
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
-  const [orderType, setOrderType] = useState<'RFQ' | 'LICITACION' | 'DIRECTA'>('RFQ');
+  const [orderType, setOrderType] = useState<"RFQ" | "LICITACION" | "DIRECTA">("RFQ");
+
   const [currency, setCurrency] = useState<'USD' | 'PEN'>('USD');
   const [expectedDelivery, setExpectedDelivery] = useState('');
-  const [items, setItems] = useState<ItemType[]>([
-    { 
-      id: '1', 
-      productId: '',
-      name: '', 
-      quantity: 1, 
-      unitPrice: 0,
-      description: '' 
-    },
-  ]);
+
   const [selectedSupplier, setSelectedSupplier] = useState<ProveedorType | null>(null);
-  const [isOrdenModalOpen, setIsOrdenModalOpen] = useState(false);
-  const [isProveedorModalOpen, setIsProveedorModalOpen] = useState(false);
-  // Estados NUEVOS que faltan:
+  const [items, setItems] = useState<ItemType[]>([]);
+
   const [paymentMode, setPaymentMode] = useState<'CONTADO' | 'TRANSFERENCIA' | 'CREDITO'>('CONTADO');
   const [paymentDays, setPaymentDays] = useState<number>(0);
   const [deliveryTerms, setDeliveryTerms] = useState<string>('');
-  const [solicitudId, setSolicitudId] = useState<string>(''); // Para RFQ/Licitación
-  const [notificacionInventarioId, setNotificacionInventarioId] = useState<string>(''); // Para DIRECTA
 
-  const handleOrderTypeChange = (newType: 'RFQ' | 'LICITACION' | 'DIRECTA') => {
-    setOrderType(newType);
-    // Si es LICITACIÓN, cargaríamos datos del contrato aquí
-    if (newType === 'LICITACION') {
-      // En una implementación real, cargaríamos datos de la licitación
-      // Por ahora, solo cambiamos el tipo
+  const [solicitudId, setSolicitudId] = useState<string>('');
+  const [notificacionInventarioId, setNotificacionInventarioId] = useState<string>('');
+
+  const [isOrdenModalOpen, setIsOrdenModalOpen] = useState(false);
+  const [isProveedorModalOpen, setIsProveedorModalOpen] = useState(false);
+
+
+  // --------------------------------------------------------------
+  // CARGAR AUTOMÁTICAMENTE DATOS DESDE LICITACIÓN, RFQ O DIRECTA
+  // --------------------------------------------------------------
+  useEffect(() => {
+    if (!tipoRuta || !datosOrigen) return;
+
+    setOrderType(tipoRuta);
+
+    // LICITACIÓN
+    if (tipoRuta === "LICITACION") {
+      setSelectedSupplier(datosOrigen.proveedor);
+      setItems(datosOrigen.items ?? []);
+      setSolicitudId(datosOrigen.id_solicitud);
+      setExpectedDelivery(datosOrigen.contrato?.fecha_firmado || "");
+      return;
     }
-  };
 
+    // RFQ
+    if (tipoRuta === "RFQ") {
+      setSelectedSupplier(datosOrigen.proveedor || null);
+      setItems(datosOrigen.items ?? []);
+      setSolicitudId(datosOrigen.id_solicitud);
+      return;
+    }
+
+    // DIRECTA (notificación inventario)
+    if (tipoRuta === "DIRECTA") {
+      setNotificacionInventarioId(datosOrigen.notificacionId);
+
+      setItems([
+        {
+          id: "1",
+          productId: datosOrigen.productoId,
+          name: datosOrigen.productoNombre,
+          quantity: datosOrigen.cantidadSugerida,
+          unitPrice: 0,
+          description: ""
+        }
+      ]);
+    }
+  }, [tipoRuta, datosOrigen]);
+
+
+  // -----------------------------------------
+  // MANEJO DE ITEMS
+  // -----------------------------------------
   const handleItemChange = (id: string, field: keyof ItemType, value: string | number) => {
-    setItems(items.map(item => 
+    setItems(items.map(item =>
       item.id === id ? { ...item, [field]: value } : item
     ));
   };
@@ -70,9 +121,7 @@ const GenerarOrdenCompra: React.FC = () => {
     setItems([...items, newItem]);
   };
 
-  const calculateSubtotal = (quantity: number, unitPrice: number) => {
-    return quantity * unitPrice;
-  };
+  const calculateSubtotal = (quantity: number, unitPrice: number) => quantity * unitPrice;
 
   const calculateTotal = () => {
     return items.reduce((sum, item) => {
@@ -80,45 +129,23 @@ const GenerarOrdenCompra: React.FC = () => {
     }, 0);
   };
 
+
+  // -----------------------------------------
+  // CREAR ORDEN
+  // -----------------------------------------
   const handleCreateOrder = () => {
-    // Validar campos requeridos
     if (!selectedSupplier) {
-      alert('Por favor seleccione un proveedor');
-      return;
-    }
-    
-    if (items.some(item => !item.name || item.quantity <= 0 || item.unitPrice <= 0)) {
-      alert('Por favor complete todos los campos de productos (nombre, cantidad y precio)');
+      alert('Debe seleccionar un proveedor');
       return;
     }
 
-    const ordenData = {
-    tipoOrigen: orderType,
-    proveedorId: selectedSupplier?.id || '',
-    solicitudId: orderType !== 'DIRECTA' ? solicitudId : undefined,
-    notificacionInventarioId: orderType === 'DIRECTA' ? notificacionInventarioId : undefined,
-    lineas: items,
-    moneda: currency,
-    fechaEntregaEsperada: expectedDelivery,
-    condicionesPago: {
-      diasPlazo: paymentDays,
-      modalidad: paymentMode,
-    },
-    terminosEntrega: deliveryTerms,
-    observaciones: notes,
-    titulo: title,
-  };
-    console.log('Datos a enviar al backend:', ordenData);
     setIsOrdenModalOpen(true);
   };
 
-  const handleSelectSupplier = (supplier: ProveedorType) => {
-    setSelectedSupplier(supplier);
-    setIsProveedorModalOpen(false);
-  };
 
   const totalAmount = calculateTotal();
-  const isReadOnly = orderType === 'LICITACION';
+  const isReadOnly = orderType === "LICITACION";
+
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
@@ -128,22 +155,20 @@ const GenerarOrdenCompra: React.FC = () => {
           <p className="text-gray-600 mt-1">Complete el formulario para crear una nueva orden de compra.</p>
         </div>
 
-        {/* Sección Superior: Detalles y Resumen */}
+        {/* Superior */}
         <div className="grid grid-cols-3 gap-6 mb-6">
-          {/* Detalles de la Orden */}
+          {/* Datos */}
           <div className="col-span-2">
             <div className="bg-white rounded-lg border border-gray-200 p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-2">Detalles de la Orden</h2>
-              <p className="text-sm text-gray-600 mb-6">
-                Complete la información general de la orden de compra.
-              </p>
+              <h2 className="text-xl font-semibold mb-2 text-gray-900">Detalles</h2>
 
               <div className="space-y-4">
+
                 <Input
-                  label="Título de la orden"
-                  placeholder="Ingrese el título descriptivo"
+                  label="Título"
+                  placeholder="Ingrese título"
                   value={title}
-                  onChange={(e) => setTitle(e.target.value)}
+                  onChange={e => setTitle(e.target.value)}
                 />
 
                 <div className="grid grid-cols-2 gap-4">
@@ -151,7 +176,8 @@ const GenerarOrdenCompra: React.FC = () => {
                     label="Tipo de Orden"
                     options={ORDER_TYPES}
                     value={orderType}
-                    onChange={(e) => handleOrderTypeChange(e.target.value as 'RFQ' | 'LICITACION' | 'DIRECTA')}
+                    onChange={() => {}}
+                    disabled
                   />
 
                   <Select
@@ -163,126 +189,71 @@ const GenerarOrdenCompra: React.FC = () => {
                 </div>
 
                 <Input
-                  label="Fecha Esperada de Entrega"
                   type="date"
+                  label="Fecha esperada de entrega"
                   value={expectedDelivery}
-                  onChange={(e) => setExpectedDelivery(e.target.value)}
+                  onChange={e => setExpectedDelivery(e.target.value)}
+                  disabled={isReadOnly}
                 />
 
-                {/* Condiciones de Pago */}
-                <div className="grid grid-cols-2 gap-4">
-                  <Select
-                    label="Modalidad de Pago"
-                    options={[
-                      { value: 'CONTADO', label: 'Al Contado' },
-                      { value: 'TRANSFERENCIA', label: 'Transferencia' },
-                      { value: 'CREDITO', label: 'Crédito' },
-                    ]}
-                    value={paymentMode}
-                    onChange={(e) => {
-                      setPaymentMode(e.target.value as 'CONTADO' | 'TRANSFERENCIA' | 'CREDITO');
-                      if (e.target.value === 'CONTADO') {
-                        setPaymentDays(0); // Contado = 0 días
-                      }
-                    }}
-                  />
-                  
-                  <Input
-                    label="Días de Plazo"
-                    type="number"
-                    min="0"
-                    value={paymentMode === 'CONTADO' ? 0 : paymentDays}
-                    onChange={(e) => setPaymentDays(parseInt(e.target.value) || 0)}
-                    disabled={paymentMode === 'CONTADO'}
-                    placeholder={paymentMode === 'CONTADO' ? 'Contado' : 'Ej: 30, 60, 90'}
-                  />
-                </div>
-
-              <TextArea
-                label="Términos de Entrega"
-                placeholder="Ej: Entrega en almacén central, FOB puerto de destino, etc."
-                rows={2}
-                value={deliveryTerms}
-                onChange={(e) => setDeliveryTerms(e.target.value)}
-              />
-
-                {/* Selección de Proveedor */}
+                {/* Proveedor */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Proveedor *
-                  </label>
+                  <label className="block mb-2 text-sm text-gray-700 font-medium">Proveedor</label>
+
                   {selectedSupplier ? (
-                    <div className="flex items-center justify-between p-3 border border-gray-300 rounded-lg bg-gray-50">
+                    <div className="p-3 border rounded flex items-center justify-between bg-gray-50">
                       <div>
-                        <p className="font-medium text-gray-900">{selectedSupplier.name}</p>
-                        <p className="text-sm text-gray-600">{selectedSupplier.contact} • {selectedSupplier.email}</p>
+                        <p className="font-medium">{selectedSupplier.name}</p>
+                        <p className="text-sm text-gray-600">{selectedSupplier.email}</p>
                       </div>
+
                       {!isReadOnly && (
-                        <Button 
-                          variant="secondary" 
-                          size="sm"
-                          onClick={() => setIsProveedorModalOpen(true)}
-                        >
+                        <Button variant="secondary" onClick={() => setIsProveedorModalOpen(true)}>
                           Cambiar
                         </Button>
                       )}
                     </div>
                   ) : (
-                    <Button 
-                      variant="secondary" 
+                    <Button
+                      variant="secondary"
                       icon={Search}
                       onClick={() => setIsProveedorModalOpen(true)}
-                      className="w-full justify-center"
                       disabled={isReadOnly}
                     >
-                      Seleccionar Proveedor
+                      Seleccionar proveedor
                     </Button>
-                  )}
-                  {orderType === 'LICITACION' && (
-                    <p className="text-sm text-blue-600 mt-2">
-                      ℹ️ El proveedor está definido por el contrato de licitación
-                    </p>
                   )}
                 </div>
 
-                {/* Referencia de Solicitud (para RFQ/Licitación) */}
-                {orderType !== 'DIRECTA' && (
+                {/* ID Solicitud */}
+                {orderType !== "DIRECTA" && (
                   <Input
                     label="Número de Solicitud/Contrato"
-                    placeholder="Ingrese el número de referencia de la solicitud o contrato"
                     value={solicitudId}
-                    onChange={(e) => setSolicitudId(e.target.value)}
+                    onChange={e => setSolicitudId(e.target.value)}
+                    disabled={isReadOnly}
                   />
                 )}
 
-                {/* Referencia de Notificación (para Orden Directa) */}
-                {orderType === 'DIRECTA' && (
-                  <div className="p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                    <p className="font-medium text-blue-900">📦 Orden desde Notificación de Inventario</p>
-                    <p className="text-sm text-blue-700 mt-1">
-                      Esta orden se generará para reabastecer stock bajo.
-                    </p>
-                    <Input
-                      label="ID de Notificación de Inventario"
-                      placeholder="ID de la notificación recibida"
-                      value={notificacionInventarioId}
-                      onChange={(e) => setNotificacionInventarioId(e.target.value)}
-                      className="mt-2"
-                    />
-                  </div>
-                )}    
+                {/* Notificación Inventario */}
+                {orderType === "DIRECTA" && (
+                  <Input
+                    label="ID Notificación de Inventario"
+                    value={notificacionInventarioId}
+                    onChange={e => setNotificacionInventarioId(e.target.value)}
+                    disabled
+                  />
+                )}
 
-
-
-
+                {/* Notas */}
                 <TextArea
                   label="Notas adicionales"
-                  placeholder="Ingrese notas adicionales para la orden"
-                  rows={4}
+                  rows={3}
                   value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
+                  onChange={e => setNotes(e.target.value)}
                   disabled={isReadOnly}
                 />
+
               </div>
             </div>
           </div>
@@ -301,34 +272,19 @@ const GenerarOrdenCompra: React.FC = () => {
           </div>
         </div>
 
-        {/* Sección Inferior: Productos */}
-        <div className="bg-white rounded-lg border border-gray-200 p-6">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-xl font-semibold text-gray-900">Productos/Servicios</h2>
+        {/* Items */}
+        <div className="bg-white border rounded-lg p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold text-gray-900">Productos / Servicios</h2>
+
             {!isReadOnly && (
               <Button variant="primary" icon={PlusCircle} onClick={handleAddItem}>
-                Agregar Producto
+                Agregar
               </Button>
             )}
           </div>
-          <p className="text-sm text-gray-600 mb-6">
-            {isReadOnly 
-              ? 'Productos definidos en el contrato de licitación (solo lectura)' 
-              : 'Agregue los productos o servicios a incluir en la orden'
-            }
-          </p>
 
           <div className="space-y-4">
-            {/* Encabezados */}
-            <div className="grid grid-cols-12 gap-4 text-sm font-medium text-gray-600 pb-2 border-b">
-              <div className="col-span-5">Producto/Servicio</div>
-              <div className="col-span-2">Cantidad</div>
-              <div className="col-span-2">Precio Unit.</div>
-              <div className="col-span-2">Subtotal</div>
-              <div className="col-span-1">Acciones</div>
-            </div>
-
-            {/* Filas de productos */}
             {items.map((item) => (
               <ProductRow
                 key={item.id}
@@ -344,20 +300,15 @@ const GenerarOrdenCompra: React.FC = () => {
 
           {/* Total */}
           <div className="flex justify-end mt-6 pt-6 border-t">
-            <div className="text-right">
-              <p className="text-sm text-gray-600">Total</p>
-              <p className="text-2xl font-bold text-gray-900">
-                {currency === 'USD' ? '$' : 'S/.'} {totalAmount.toLocaleString('es-ES', { 
-                  minimumFractionDigits: 2, 
-                  maximumFractionDigits: 2 
-                })}
-              </p>
-            </div>
+            <p className="text-2xl font-bold">
+              Total: {currency === 'USD' ? '$' : 'S/'}
+              {totalAmount.toFixed(2)}
+            </p>
           </div>
         </div>
       </div>
 
-      {/* Modal de Confirmación de Orden */}
+      {/* MODALES */}
       <OrdenModal
         isOpen={isOrdenModalOpen}
         onClose={() => setIsOrdenModalOpen(false)}
@@ -372,13 +323,14 @@ const GenerarOrdenCompra: React.FC = () => {
         paymentMode={paymentMode}
         paymentDays={paymentDays}
         deliveryTerms={deliveryTerms}
+        solicitudId={solicitudId}
+        notificacionInventarioId={notificacionInventarioId}
       />
 
-      {/* Modal de Selección de Proveedor */}
       <ProveedorModal
         isOpen={isProveedorModalOpen}
         onClose={() => setIsProveedorModalOpen(false)}
-        onSelectSupplier={handleSelectSupplier}
+        onSelectSupplier={setSelectedSupplier}
         selectedSupplier={selectedSupplier}
       />
     </div>
