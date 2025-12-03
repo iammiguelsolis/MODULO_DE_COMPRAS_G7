@@ -10,10 +10,10 @@ service = OrdenCompraIntegrationService()
 def finalizar_licitacion(id):
     """
     POST /api/licitaciones/{id}/finalizar
-    Finaliza la licitación e integra con OC.
+    Finaliza la licitación para que esté disponible en el módulo de órdenes de compra.
     """
     try:
-        result = service.notificar_generacion_orden_compra(id)
+        result = service.confirmar_envio_a_orden_compra(id)
         return jsonify(result), 200
     except ValueError as e:
         return jsonify({'error': str(e)}), 400
