@@ -9,10 +9,6 @@
 
 """
 
-
-#En desarrollo, todavia no listo para ejecutar run.py
-
-
 from abc import ABC, abstractmethod
 from app.bdd import db
 from .inventario_enums import *
@@ -30,8 +26,18 @@ class Material(db.Model):
     id_item = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
     descripcion = db.Column(db.String(100), nullable=False)
-    unidad = db.Column(db.String(100), nullable=False) 
+    unidad = db.Column(
+        db.Enum(UnidadMedidaAlmacen, values_callable=lambda x: [e.value for e in x]),
+        nullable=False
+    ) #me encanta esta forma de utilizar enums
 
+    def to_dict(self):
+        return {
+            "id_item": self.id_item,
+            "nombre": self.nombre,
+            "descripcion": self.descripcion,
+            "unidad": self.unidad.value if self.unidad else None
+        }
 class Almacen(db.Model):
     id_almacen = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
