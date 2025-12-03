@@ -6,7 +6,7 @@ import {
   Send,             // EN INVITACION
   FileText,         // CON PROPUESTAS
   Clock,            // EN EVALUACION
-  Award,            // ADJUDICADO
+  Award,            // ADJUDICADA
   ClipboardCheck,   // CON CONTRATO
   CheckCircle2,     // FINALIZADA
   XCircle,          // CANCELADA
@@ -22,7 +22,7 @@ const ICONS: { [key: string]: React.ReactElement } = {
   'EN INVITACION': <Send size={14} />,
   'CON PROPUESTAS': <FileText size={14} />,
   'EN EVALUACION': <Clock size={14} />,
-  ADJUDICADO: <Award size={14} />,
+  ADJUDICADA: <Award size={14} />,
   'CON CONTRATO': <ClipboardCheck size={14} />,
   FINALIZADA: <CheckCircle2 size={14} />,
   CANCELADA: <XCircle size={14} />,
@@ -34,7 +34,7 @@ const STATUS_STYLES: { [key: string]: { text: string; className: string } } = {
   'EN INVITACION': { text: 'En invitación', className: 'status-blue' },
   'CON PROPUESTAS': { text: 'Con propuestas', className: 'status-blue' },
   'EN EVALUACION': { text: 'En evaluación', className: 'status-blue' },
-  ADJUDICADO: { text: 'Adjudicado', className: 'status-blue' },
+  ADJUDICADA: { text: 'Adjudicada', className: 'status-blue' },
   'CON CONTRATO': { text: 'Con contrato', className: 'status-blue' },
   FINALIZADA: { text: 'Finalizada', className: 'status-green' },
   CANCELADA: { text: 'Cancelada', className: 'status-red' },

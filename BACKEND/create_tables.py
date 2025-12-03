@@ -1,0 +1,44 @@
+# create_tables.py
+from app import create_app
+from app.bdd import db
+
+# Importa TODOS tus modelos
+from app.models.proveedor_inventario.dominio_proveedor import (
+    Proveedor, ContactoProveedor, DetallesProveedor
+)
+from app.models.proveedor_inventario.conexion_alamacen import (
+    Almacen, Entrega, DetalleEntrega
+)
+# Agrega otros modelos si tienes...
+
+print("=" * 60)
+print("🚀 CREACIÓN DE TABLAS EN AWS RDS")
+print("=" * 60)
+
+app = create_app()
+
+with app.app_context():
+    try:
+        print("\n🔄 Conectando a AWS RDS MySQL...")
+        print(f"📍 Base de datos: modulo_de_compras_test")
+        print(f"🌍 Región: us-east-2")
+        
+        print("\n🔄 Creando tablas basadas en modelos...")
+        db.create_all()
+        
+        print("\n✅ ¡Tablas creadas exitosamente en AWS!")
+        
+        # Opcional: listar tablas creadas
+        inspector = db.inspect(db.engine)
+        print("\n📋 Tablas en la base de datos:")
+        for table in inspector.get_table_names():
+            print(f"   ✓ {table}")
+            
+    except Exception as e:
+        print(f"\n❌ Error al crear tablas: {e}")
+        print("\n💡 Verifica:")
+        print("   - Credenciales de BD")
+        print("   - Security Group de RDS")
+        print("   - Tu IP tiene acceso")
+
+print("\n" + "=" * 60)

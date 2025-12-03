@@ -7,7 +7,7 @@ export const estados_li = [
   "EN INVITACION",
   "CON PROPUESTAS",
   "EN EVALUACION",
-  "ADJUDICADO",
+  "ADJUDICADA",
   "CON CONTRATO",
   "FINALIZADA",
   "CANCELADA",

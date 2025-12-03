@@ -1,0 +1,83 @@
+{
+  "openapi": "3.0.0",
+  "info": {
+    "title": "API de Adjudicación",
+    "version": "1.0.0",
+    "description": "Endpoint para adjudicar licitación al proveedor ganador (DEPRECADO - ahora se hace automáticamente en evaluación económica)"
+  },
+  "paths": {
+    "/licitaciones/{id}/adjudicacion": {
+      "post": {
+        "tags": ["Adjudicación"],
+        "summary": "Adjudicar licitación a proveedor ganador",
+        "description": "NOTA: Este endpoint está deprecado xddd ni llega a produción y lo deprecas?. La adjudicación ahora se realiza automáticamente al completar la evaluación económica. Se mantiene por compatibilidad.",
+        "deprecated": true,
+        "operationId": "adjudicarLicitacion",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "ID de la licitación",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int64"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["propuestaGanadoraId"],
+                "properties": {
+                  "propuestaGanadoraId": {
+                    "type": "integer"
+                  },
+                  "justificacion": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Licitación adjudicada",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "idLicitacion": {
+                      "type": "integer"
+                    },
+                    "estado": {
+                      "type": "string",
+                      "enum": ["ADJUDICADA"]
+                    },
+                    "propuestaGanadora": {
+                      "type": "object"
+                    },
+                    "mensaje": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Estado inválido"
+          },
+          "404": {
+            "description": "Licitación no encontrada"
+          }
+        }
+      }
+    }
+  }
+}

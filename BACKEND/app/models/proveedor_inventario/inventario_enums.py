@@ -1,0 +1,20 @@
+from enum import Enum
+
+class EscalaCalificacion(Enum):
+    muy_alto = "MUY_ALTO"
+    alto = "ALTO"
+    mediano = "MEDIANO"
+    bajo = "BAJO"
+    muy_bajo = "MUY_BAJO"
+
+class PosiblesValores(Enum):
+    si = "SI"
+    no = "NO"
+    no_aplica = "NO_APLICA"
+
+class UnidadMedidaAlmacen(Enum):
+    # Unidades físicas
+    UNIDAD = "Unidad"          # Ej: 1 router, 1 teléfono
+    METRO = "Metro"            # Ej: cable de fibra óptica
+    KILOMETRO = "Kilómetro"    # Ej: tendido de red
+    # WATTS = "W"            # Ej: consumo de equipos, por ejemplo equipos de sonido
