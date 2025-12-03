@@ -7,6 +7,7 @@ from app.bdd import coneccion
 #from app.BP.Colaborador import colaborador_bp
 from sqlalchemy.sql import text #permite ejecutar consultas sql puras 
 from app.BP.Proveedor import proveedor_bp
+from app.BP.Inventario import inventario_bp
 bcrypt = Bcrypt()
 
 def create_app():
@@ -23,6 +24,6 @@ def create_app():
     # ejemplo de restro, ahorita tira error si descomento
     # app.register_blueprint(colaborador_bp, url_prefix='/colaborador')
     app.register_blueprint(proveedor_bp, url_prefix="/api/proveedores")
-    
+    app.register_blueprint(inventario_bp, url_prefix="/api/inventario")
     return app
 
