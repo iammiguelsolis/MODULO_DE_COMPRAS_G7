@@ -37,6 +37,9 @@ class FacturaProveedor(db.Model, FacturaObservable, metaclass=ModelABC):
     proveedor_id = db.Column(db.Integer)
     #proveedor_id = db.Column(db.Integer, db.ForeignKey('proveedores.id'))
     
+    # Referencia a Orden de Compra (Sin FK, puede ser nulo)
+    orden_compra_id = db.Column(db.String(50), nullable=True)
+    
     # Relaciones (Composición)
     lineas = db.relationship('LineaFactura', backref='factura', lazy=True, cascade="all, delete-orphan")
     documentos_adjuntos = db.relationship('DocumentoAdjunto', backref='factura', lazy=True)
@@ -66,6 +69,7 @@ class FacturaProveedor(db.Model, FacturaObservable, metaclass=ModelABC):
             "fecha_emision": self.fecha_emision,
             "fecha_vencimiento": self.fecha_vencimiento,
             "proveedor_id": self.proveedor_id,
+            "orden_compra_id": self.orden_compra_id,
             "ha_sido_observada": self.ha_sido_observada,
             "motivo_observacion": self.motivo_observacion.name if self.motivo_observacion else None,
             "version": self.version

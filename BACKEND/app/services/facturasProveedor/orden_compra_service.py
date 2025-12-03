@@ -30,7 +30,7 @@ class OrdenCompraService:
         # Aquí retornamos valores genéricos, el conciliador deberá manejarlo.
         return {
             "id": orden_id,
-            "total": 3168.0, # Valor ejemplo
+            "total": 3068.0, # Valor ejemplo
             "moneda": "PEN",
             "estado": "APROBADA"
         }

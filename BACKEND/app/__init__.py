@@ -3,6 +3,7 @@ from app.bdd import db
 from app.extensiones import bcrypt
 from flask_bcrypt import Bcrypt
 from app.bdd import coneccion
+from flask_cors import CORS
 # Lo de abajo es un ejemplo de como importar una BP
 #from app.BP.Colaborador import colaborador_bp
 from sqlalchemy.sql import text #permite ejecutar consultas sql puras
@@ -12,6 +13,9 @@ bcrypt = Bcrypt()
 
 def create_app():
     app = Flask(__name__)
+
+    CORS(app, resources={r"/*": {"origins": "*"}})
+
     app.secret_key = '3zM8c.1Z9>@2_x$!;Y`:3u?5'
     app.config["SQLALCHEMY_DATABASE_URI"]=coneccion #%40 es @ pero escapado
 

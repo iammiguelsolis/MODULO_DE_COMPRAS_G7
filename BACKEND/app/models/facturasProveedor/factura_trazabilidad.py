@@ -21,6 +21,7 @@ class FacturaTrazabilidad(db.Model, FacturaObserver, metaclass=ModelABC):
     fecha_deteccion_error = db.Column(db.Date, default=datetime.utcnow) # 
     motivo = db.Column(db.Enum(MotivoObservacion), nullable=False) # 
     fecha_correccion = db.Column(db.Date, nullable=True) # 
+    observacion_texto = db.Column(db.String(255), nullable=True)
 
     # --- IMPLEMENTACIÓN DE LA INTERFAZ OBSERVER ---
     def actualizar(self, factura):

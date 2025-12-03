@@ -46,6 +46,9 @@ def registrar_factura():
     nueva_factura.numero_factura = data.get('numeroFactura')
     nueva_factura.proveedor_id = data.get('proveedorId')
     
+    # Manejo de Orden de Compra (Opcional)
+    nueva_factura.orden_compra_id = data.get('ordenCompraId')
+    
     # Manejo de Fechas (String -> Date Object)
     try:
         if data.get('fechaEmision'):
@@ -197,6 +200,30 @@ def obtener_factura(id_factura):
     if not factura:
         return jsonify({"error": "Factura no encontrada"}), 404
     return jsonify(factura.to_dict()), 200
+
+
+# ---------------- 3.1 Actualizar Factura (PUT /facturas-proveedor/{id}) -----------------
+@facturas_bp.route('/<int:id_factura>', methods=['PUT'])
+def actualizar_factura(id_factura):
+    factura = FacturaProveedor.query.get(id_factura)
+    if not factura:
+        return jsonify({"error": "Factura no encontrada"}), 404
+    
+    data = request.get_json()
+    
+    # Actualización de campos permitidos
+    # Por ahora, el requerimiento principal es la Orden de Compra
+    if 'ordenCompraId' in data:
+        factura.orden_compra_id = data.get('ordenCompraId')
+        
+    # Aquí se podrían agregar más campos si fuera necesario
+    
+    try:
+        db.session.commit()
+        return jsonify(factura.to_dict()), 200
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
 
 
 #-------------------- 4.0 OBTENER ADJUNTOS (GET /facturas-proveedor/{id}/adjuntos) -----------------
