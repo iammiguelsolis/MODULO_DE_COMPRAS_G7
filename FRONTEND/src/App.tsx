@@ -10,8 +10,7 @@ import ProveedorDetailPage from "./modules/proveedor/page/ProveedorDetailPage";
 import AnalisisProveedoresPage from "./modules/analisisProveedor/page/AnalisisProveedoresPage";
 import { ComparacionListPage } from "./modules/comparacion/pages/ComparacionListPage";
 import { ComparacionPage } from "./modules/comparacion/pages/ComparacionPage";
-
-
+import GenerarOrdenCompraPage from "./modules/ordenCompra/pages/GenerarOrdenCompra";
 
 function App() {
   return (
@@ -34,7 +33,7 @@ function App() {
           <Route path="/licitacion/detail" element={<LicitacionDetailPage />} />
           <Route path="/licitaciones/crear" element={<LicitacionPage />} />
 
-          <Route path="/ordenes" element={<h1>ordenes</h1>} />
+          <Route path="/ordenes" element={<GenerarOrdenCompraPage/>} />
           <Route path="/facturacion" element={<FacturacionApp />} />
 
           <Route path="/comparacion" element={<ComparacionListPage />} />

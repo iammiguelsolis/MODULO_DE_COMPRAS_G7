@@ -33,7 +33,7 @@ def create_app():
 
     db.init_app(app)
     bcrypt.init_app(app)
-
+    #añadido
     # Registrar Blueprints
     # ejemplo de restro, ahorita tira error si descomento
     # app.register_blueprint(colaborador_bp, url_prefix='/colaborador')
