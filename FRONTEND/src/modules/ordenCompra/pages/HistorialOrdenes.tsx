@@ -1,4 +1,3 @@
-console.log("Renderizando HistorialOrdenes 🟢");
 import React from "react";
 import { useEffect, useState } from 'react';
 import { Search } from 'lucide-react';
