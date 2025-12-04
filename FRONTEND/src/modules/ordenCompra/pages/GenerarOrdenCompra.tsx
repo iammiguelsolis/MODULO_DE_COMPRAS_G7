@@ -1,6 +1,6 @@
 import { PlusCircle, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams, useNavigate } from "react-router-dom";
 
 import { Input } from '../components/atoms/Input';
 import { TextArea } from '../components/atoms/TextArea';
@@ -18,6 +18,7 @@ const GenerarOrdenCompra: React.FC = () => {
   // ROUTER
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   // Tipo de origen que viene por query param
   const tipoRuta = searchParams.get("tipo")?.toUpperCase() as
@@ -154,6 +155,13 @@ const GenerarOrdenCompra: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Generar Orden de Compra</h1>
           <p className="text-gray-600 mt-1">Complete el formulario para crear una nueva orden de compra.</p>
         </div>
+
+        <Button
+          variant="secondary"
+          onClick={() => navigate("/ordenes/historial")}
+        >
+          Ver historial de órdenes
+        </Button>
 
         {/* Superior */}
         <div className="grid grid-cols-3 gap-6 mb-6">

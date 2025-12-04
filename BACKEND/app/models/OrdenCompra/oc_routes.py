@@ -44,12 +44,43 @@ def serialize_orden(oc: OrdenCompra):
 
 # ---------- Rutas ----------
 
-@oc_bp.route('/', methods=['GET'])
+@oc_bp.route('/ordenes', methods=['GET'])
 def listar_ordenes():
-    """Lista todas las órdenes de compra."""
-    ordenes = OrdenCompra.query.all()
-    data = [serialize_orden(oc) for oc in ordenes]
-    return jsonify(data), 200
+    """Lista todas las órdenes de compra.
+    Se pueden agregar filtros por estado y tipo_origen usando query params:   
+    """
+    estado_param = request.args.get('estado')        # ej: 'EN_PROCESO'
+    tipo_origen_param = request.args.get('tipo_origen')  # ej: 'RFQ', 'LICITACION', 'DIRECTA'
+
+    query = OrdenCompra.query
+
+    if estado_param:
+        try:
+            estado_enum = EstadoOC[estado_param]  # EstadoOC.EN_PROCESO, etc.
+            query = query.filter(OrdenCompra.estado == estado_enum)
+        except KeyError:
+            return jsonify({"error": f"Estado inválido: {estado_param}"}), 400
+
+    if tipo_origen_param:
+        query = query.filter(OrdenCompra.tipo_origen == tipo_origen_param.upper())
+
+    ordenes = query.order_by(OrdenCompra.fecha_creacion.desc()).all()
+
+    resultado = []
+    for oc in ordenes:
+        resultado.append({
+            "id": oc.id_orden_compra,
+            "numero_referencia": oc.numero_referencia,
+            "titulo": oc.titulo,
+            "proveedor": oc.proveedor.razon_social if hasattr(oc.proveedor, 'razon_social') else getattr(oc.proveedor, 'nombre', None),
+            "fecha_creacion": oc.fecha_creacion.isoformat() if oc.fecha_creacion else None,
+            "estado": oc.estado.value if oc.estado else None,
+            "tipo_origen": oc.tipo_origen,
+            "moneda": oc.moneda.value if hasattr(oc.moneda, 'value') else oc.moneda,
+            "total": oc.calcular_total()
+        })
+
+    return jsonify(resultado), 200
 
 
 @oc_bp.route('/<int:id_orden>', methods=['GET'])
