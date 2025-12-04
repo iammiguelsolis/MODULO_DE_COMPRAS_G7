@@ -10,12 +10,8 @@ import ProveedorDetailPage from "./modules/proveedor/page/ProveedorDetailPage";
 import AnalisisProveedoresPage from "./modules/analisisProveedor/page/AnalisisProveedoresPage";
 import { ComparacionListPage } from "./modules/comparacion/pages/ComparacionListPage";
 import { ComparacionPage } from "./modules/comparacion/pages/ComparacionPage";
-<<<<<<< HEAD
 import GenerarOrdenCompra from "./modules/ordenCompra/pages/GenerarOrdenCompra";
 import HistorialOrdenes from "./modules/ordenCompra/pages/HistorialOrdenes";
-=======
-import GenerarOrdenCompraPage from "./modules/ordenCompra/pages/GenerarOrdenCompra";
->>>>>>> backup_main
 
 function App() {
   return (
