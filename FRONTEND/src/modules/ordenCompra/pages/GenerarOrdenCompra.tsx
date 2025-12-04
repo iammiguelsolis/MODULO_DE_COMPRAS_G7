@@ -13,6 +13,7 @@ import { ProveedorModal } from '../components/molecules/ProveedorModal';
 
 import type { ItemType, ProveedorType } from '../lib/types';
 import { ORDER_TYPES, CURRENCIES } from '../lib/constants';
+import axios from "axios";
 
 const GenerarOrdenCompra: React.FC = () => {
   // ROUTER
@@ -143,6 +144,48 @@ const GenerarOrdenCompra: React.FC = () => {
     setIsOrdenModalOpen(true);
   };
 
+  const enviarOrden = async () => {
+    try {
+      const payload = {
+        tipoOrigen: orderType,
+        proveedorId: selectedSupplier?.id || null,
+        solicitudId: solicitudId || undefined,
+        notificacionInventarioId: notificacionInventarioId || undefined,
+
+        moneda: currency,
+        fechaEntregaEsperada: expectedDelivery,
+        condicionesPago: {
+          diasPlazo: paymentDays,
+          modalidad: paymentMode
+        },
+        terminosEntrega: deliveryTerms,
+        observaciones: notes,
+        titulo: title,
+
+        lineas: items.map((i) => ({
+          productId: i.productId,
+          name: i.name,
+          quantity: i.quantity,
+          unitPrice: i.unitPrice,
+          description: i.description
+        }))
+      };
+
+      console.log("📤 Enviando al backend:", payload);
+
+      const response = await axios.post(
+        "http://127.0.0.1:5000/api/ordenes-compra/",
+        payload
+      );
+
+      alert("✔ Orden creada: " + response.data.data.numero_referencia);
+      setIsOrdenModalOpen(false);
+
+    } catch (error: any) {
+      console.error("❌ Error enviando orden:", error);
+      alert("❌ Error: " + (error.response?.data?.error || "Error desconocido"));
+    }
+  };
 
   const totalAmount = calculateTotal();
   const isReadOnly = orderType === "LICITACION";
@@ -320,6 +363,7 @@ const GenerarOrdenCompra: React.FC = () => {
       <OrdenModal
         isOpen={isOrdenModalOpen}
         onClose={() => setIsOrdenModalOpen(false)}
+        onConfirm={enviarOrden}          // <-- AQUÍ LO PASAS
         title={title}
         notes={notes}
         orderType={orderType}
