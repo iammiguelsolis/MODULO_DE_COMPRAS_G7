@@ -4,7 +4,7 @@ from .orden_compra import OrdenCompra, LineaOC
 from .oc_enums import EstadoOC, TipoPago, Moneda
 
 # blueprint que Flask quiere importar
-oc_bp = Blueprint('orden_compra', __name__, url_prefix='/api/ordenes-compra')
+oc_bp = Blueprint('ordenes_compra', __name__, url_prefix='/api/ordenes-compra')
 
 
 # ---------- Helpers de serialización ----------
@@ -158,11 +158,11 @@ def crear_orden():
 
         # Mapear modalidad a Enum TipoPago
         if modalidad_str == "TRANSFERENCIA":
-            modalidad_pago = TipoPago.transferencia
+            modalidad_pago = TipoPago.TRANSFERENCIA
         elif modalidad_str == "CREDITO":
-            modalidad_pago = TipoPago.credito
+            modalidad_pago = TipoPago.CREDITO
         else:
-            modalidad_pago = TipoPago.contado
+            modalidad_pago = TipoPago.CONTADO
 
         nueva_oc = OrdenCompra(
             tipo_origen=tipo_origen,
@@ -187,7 +187,7 @@ def crear_orden():
                 id_item=l.get("productId"),  # aquí está simplificado
                 precio_unitario=l.get("unitPrice", 0),
                 cantidad=l.get("quantity", 0),
-                estado=EstadoOC.Borrador,  # o algún estado de línea inicial
+                estado=EstadoOC.BORRADOR,  # o algún estado de línea inicial
             )
             nueva_oc.lineas.append(linea)
 
@@ -210,7 +210,7 @@ def cerrar_orden(id_orden):
     oc = OrdenCompra.query.get_or_404(id_orden)
 
     try:
-        oc.cambiar_estado(EstadoOC.Cerrada)
+        oc.cambiar_estado(EstadoOC.CERRADA)
         db.session.commit()
         return jsonify({
             "message": "Orden cerrada",

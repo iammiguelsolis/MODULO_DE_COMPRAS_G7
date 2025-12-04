@@ -4,6 +4,7 @@ import { Search } from 'lucide-react';
 import { Input } from '../components/atoms/Input';
 import { Select } from '../components/atoms/Select';
 import { Button } from '../components/atoms/Button';
+import { ordenCompraService } from '../lib/ordenCompraService';
 
 interface OrdenHistorial {
   id: number;
@@ -43,14 +44,10 @@ const HistorialOrdenes: React.FC = () => {
   const cargarOrdenes = async () => {
     try {
       setCargando(true);
-      const params = new URLSearchParams();
-      if (estadoFiltro) params.append('estado', estadoFiltro);
-      if (origenFiltro) params.append('tipo_origen', origenFiltro);
-
-      const res = await fetch(
-        `http://localhost:5000/orden-compra/ordenes?${params.toString()}`
-      );
-      const data = await res.json();
+      const data = await ordenCompraService.getOrdenes({
+        estado: estadoFiltro,
+        tipo_origen: origenFiltro
+      });
       setOrdenes(data);
     } catch (error) {
       console.error('Error cargando órdenes:', error);
