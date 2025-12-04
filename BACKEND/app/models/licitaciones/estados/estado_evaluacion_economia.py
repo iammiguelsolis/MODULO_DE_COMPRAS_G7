@@ -3,25 +3,24 @@ from app.models.licitaciones.estados.estado_licitacion_state import EstadoLicita
 class EstadoEvaluacionEconomia(EstadoLicitacionState):
     """
     Estado de Evaluación Económica.
-    En este estado el comité económico revisa las propuestas aprobadas técnicamente.
     """
     
-    def get_nombre(self):
-        return "EVALUACION_ECONOMIA"
-    
     def siguiente(self):
-        """
-        Si se seleccionó un ganador -> ADJUDICADA
-        Si no -> CANCELADA
-        """
-        # Verificar que hay un ganador
-        if getattr(self.licitacion, 'propuesta_ganadora', None):
+        # EVALUACION_ECONOMIA -> ADJUDICADA (Si hay ganadora)
+        if self.licitacion.propuesta_ganadora:
             from app.models.licitaciones.estados.estado_adjudicada import EstadoAdjudicada
             return EstadoAdjudicada(self.licitacion)
         else:
-            # Cancelar si no hay ganador viable
-            from app.models.licitaciones.estados.estado_cancelada import EstadoCancelada
-            return EstadoCancelada(self.licitacion)
-    
-    def puede_evaluar(self):
+            # Si no hay ganadora (Desierto) -> CANCELADA
+            return self.cancelar()
+            
+    def cancelar(self):
+        from app.models.licitaciones.estados.estado_cancelada import EstadoCancelada
+        self.licitacion.cambiar_estado(EstadoCancelada(self.licitacion))
+        return self.licitacion.estado_actual
+        
+    def get_nombre(self) -> str:
+        return "EVALUACION_ECONOMIA"
+        
+    def puede_evaluar(self) -> bool:
         return True

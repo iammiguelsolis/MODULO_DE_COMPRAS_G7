@@ -27,17 +27,17 @@ const Solicitud: React.FC = () => {
   const handleRequestTypeChange = (newType: 'producto' | 'servicio') => {
     setRequestType(newType);
     setItems([
-      { 
-        id: Date.now().toString(), 
-        name: '', 
-        quantity: newType === 'producto' ? 50 : 0, 
-        price: newType === 'producto' ? '$ 20.00' : '$ 0.00' 
+      {
+        id: Date.now().toString(),
+        name: '',
+        quantity: newType === 'producto' ? 50 : 0,
+        price: newType === 'producto' ? '$ 20.00' : '$ 0.00'
       }
     ]);
   };
 
   const handleItemChange = (id: string, field: keyof ItemType, value: string | number) => {
-    setItems(items.map(item => 
+    setItems(items.map(item =>
       item.id === id ? { ...item, [field]: value } : item
     ));
   };
@@ -116,8 +116,8 @@ const Solicitud: React.FC = () => {
           <div className="col-span-1">
             <SummaryCard
               totalAmount={totalAmount}
-              processType={ totalAmount >= 5000 ? 'Tipo de Proceso: Licitación' : 'Tipo de Proceso: Simple' }
-              processDescription={ totalAmount >= 5000 ? 'Esta solicitud supera el límite y debeseguir un proceso de licitación formal.' : 'Compra simple, rápida de bajo monto.' }
+              processType={totalAmount >= 5000 ? 'Tipo de Proceso: Licitación' : 'Tipo de Proceso: Simple'}
+              processDescription={totalAmount >= 5000 ? 'Esta solicitud supera el límite y debeseguir un proceso de licitación formal.' : 'Compra simple, rápida de bajo monto.'}
               purchaseType={purchaseType}
               onCreateRequest={handleCreateRequest}
             />

@@ -2,19 +2,24 @@ from app.models.licitaciones.estados.estado_licitacion_state import EstadoLicita
 
 class EstadoConContrato(EstadoLicitacionState):
     """
-    Estado CON_CONTRATO: Contrato firmado y cargado.
-    Espera la generación de Orden de Compra para pasar a FINALIZADA.
+    Estado cuando el contrato está firmado.
+    Listo para integración con Órdenes de Compra.
     """
     
-    def get_nombre(self):
-        return "CON_CONTRATO"
-    
     def siguiente(self):
-        """
-        Transición a FINALIZADA después de generar la Orden de Compra.
-        """
+        # CON_CONTRATO -> FINALIZADA (Tras integración exitosa)
+        # La integración se hace en el servicio, aquí solo transicionamos
         from app.models.licitaciones.estados.estado_finalizada import EstadoFinalizada
         return EstadoFinalizada(self.licitacion)
+        
+    def cancelar(self):
+        # En esta etapa ya es difícil cancelar, pero por interfaz se mantiene
+        from app.models.licitaciones.estados.estado_cancelada import EstadoCancelada
+        self.licitacion.cambiar_estado(EstadoCancelada(self.licitacion))
+        return self.licitacion.estado_actual
+        
+    def get_nombre(self) -> str:
+        return "CON_CONTRATO"
     
     def generar_orden_compra(self):
         """

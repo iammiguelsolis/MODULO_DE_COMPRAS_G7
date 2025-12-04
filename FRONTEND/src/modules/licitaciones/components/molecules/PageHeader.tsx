@@ -5,15 +5,19 @@ interface PageHeaderProps {
     title: string;
     description?: React.ReactNode;
     className?: string;
+    action?: React.ReactNode;
 }
 
-const PageHeader: React.FC<PageHeaderProps> = ({ title, description, className }) => {
+const PageHeader: React.FC<PageHeaderProps> = ({ title, description, className, action }) => {
     const headerClassName = `page-header ${className || ''}`.trim();
 
     return (
         <header className={headerClassName}>
-            <h1>{title}</h1>
-            {description && <div className="page-header-description">{description}</div>}
+            <div className="page-header-content">
+                <h1>{title}</h1>
+                {description && <div className="page-header-description">{description}</div>}
+            </div>
+            {action && <div className="page-header-action">{action}</div>}
         </header>
     );
 };

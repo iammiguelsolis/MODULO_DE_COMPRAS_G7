@@ -2,7 +2,6 @@ import type { Documento } from "./types";
 
 // Status options para filtros de licitaciones
 export const estados_li = [
-  "BORRADOR",
   "NUEVA",
   "EN INVITACION",
   "CON PROPUESTAS",
@@ -19,20 +18,25 @@ export const doc_legales: Documento[] = [
     id: "acta-constitucion",
     nombre: "Acta de Constitución",
     tipo: "LEGAL",
-    obligatorio: true,
+    obligatorio: false,
   },
   {
     id: "vigencia-poder",
     nombre: "Certificado de Vigencia de Poder",
     tipo: "LEGAL",
-    obligatorio: true,
+    obligatorio: false,
   },
-  { id: "ruc", nombre: "RUC y Ficha RUC", tipo: "LEGAL", obligatorio: true },
+  {
+    id: "ruc",
+    nombre: "RUC y Ficha RUC",
+    tipo: "LEGAL",
+    obligatorio: false,
+  },
   {
     id: "dni-representante",
     nombre: "DNI del Representante Legal",
     tipo: "LEGAL",
-    obligatorio: true,
+    obligatorio: false,
   },
   {
     id: "poder-representacion",
@@ -44,7 +48,7 @@ export const doc_legales: Documento[] = [
     id: "no-impedimento",
     nombre: "Declaración Jurada de No Impedimento",
     tipo: "LEGAL",
-    obligatorio: true,
+    obligatorio: false,
   },
   {
     id: "estatutos-empresa",
@@ -62,7 +66,7 @@ export const doc_legales: Documento[] = [
     id: "licencia-funcionamiento",
     nombre: "Licencia de Funcionamiento",
     tipo: "LEGAL",
-    obligatorio: true,
+    obligatorio: false,
   },
 ];
 
@@ -76,9 +80,9 @@ export const doc_tec: Documento[] = [
   },
   {
     id: "ficha-tecnica",
-    nombre: "Ficha Técnica del Producto/Servicio",
+    nombre: "Ficha Técnica del ProductoServicio",
     tipo: "TECNICO",
-    obligatorio: true,
+    obligatorio: false,
   },
   {
     id: "cert-homologacion",
@@ -96,7 +100,7 @@ export const doc_tec: Documento[] = [
     id: "especificaciones-tecnicas",
     nombre: "Especificaciones Técnicas",
     tipo: "TECNICO",
-    obligatorio: true,
+    obligatorio: false,
   },
   {
     id: "muestras-prototipos",
@@ -114,7 +118,7 @@ export const doc_tec: Documento[] = [
     id: "cert-garantia",
     nombre: "Certificado de Garantía",
     tipo: "TECNICO",
-    obligatorio: true,
+    obligatorio: false,
   },
   {
     id: "plan-implementacion",
@@ -148,7 +152,7 @@ export const doc_finan: Documento[] = [
     id: "estados-financieros-auditados",
     nombre: "Estados Financieros Auditados",
     tipo: "ECONOMICO",
-    obligatorio: true,
+    obligatorio: false,
   },
   {
     id: "linea-credito-aprobada",
@@ -160,7 +164,7 @@ export const doc_finan: Documento[] = [
     id: "carta-fianza",
     nombre: "Carta de Fianza",
     tipo: "ECONOMICO",
-    obligatorio: true,
+    obligatorio: false,
   },
   {
     id: "poliza-fianza",
@@ -172,13 +176,13 @@ export const doc_finan: Documento[] = [
     id: "cert-no-adeudo-tributario",
     nombre: "Certificado de No Adeudo Tributario",
     tipo: "ECONOMICO",
-    obligatorio: true,
+    obligatorio: false,
   },
   {
     id: "cert-no-adeudo-essalud",
     nombre: "Certificado de No Adeudo a ESSALUD",
     tipo: "ECONOMICO",
-    obligatorio: true,
+    obligatorio: false,
   },
   {
     id: "balance-general",
@@ -208,7 +212,7 @@ export const doc_finan: Documento[] = [
     id: "constancia-inscripcion-registro",
     nombre: "Constancia de Inscripción en Registro",
     tipo: "ECONOMICO",
-    obligatorio: true,
+    obligatorio: false,
   },
 ];
 
