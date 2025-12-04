@@ -3,7 +3,7 @@ from app.bdd import db
 from .orden_compra import OrdenCompra, LineaOC
 from .oc_enums import EstadoOC, TipoPago, Moneda
 
-# ESTE es el blueprint que Flask quiere importar
+# blueprint que Flask quiere importar
 oc_bp = Blueprint('orden_compra', __name__, url_prefix='/api/ordenes-compra')
 
 
@@ -44,7 +44,7 @@ def serialize_orden(oc: OrdenCompra):
 
 # ---------- Rutas ----------
 
-@oc_bp.route('/ordenes', methods=['GET'])
+@oc_bp.route('/', methods=['GET'])
 def listar_ordenes():
     """Lista todas las órdenes de compra.
     Se pueden agregar filtros por estado y tipo_origen usando query params:   
