@@ -118,13 +118,33 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
 
   const handleOfferSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (offerForm.id_proveedor === 0) return alert("Seleccione un proveedor");
-    if (offerForm.monto_total <= 0) return alert("El monto total no puede ser 0");
+
+    if (offerForm.id_proveedor === 0) {
+      return alert("Seleccione un proveedor");
+    }
+
+    if (offerForm.monto_total <= 0) {
+      return alert("El monto total no puede ser 0");
+    }
+
+    // ✅ VALIDACIÓN: PROVEEDOR NO PUEDE TENER MÁS DE UNA OFERTA
+    const proveedorYaOferto = compra.ofertas.some(
+      oferta => oferta.proveedor_id === offerForm.id_proveedor
+    );
+
+    if (proveedorYaOferto) {
+      return alert("Este proveedor ya registró una oferta en este proceso.");
+    }
 
     onOfertar(offerForm);
     setShowOfferModal(false);
-    // Reset form
-    setOfferForm({ id_proveedor: 0, monto_total: 0, comentarios: '', items: [] });
+
+    setOfferForm({
+      id_proveedor: 0,
+      monto_total: 0,
+      comentarios: '',
+      items: []
+    });
   };
 
   const getStatusStep = () => {
@@ -192,12 +212,17 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
                   step={2} currentStep={currentStep} label="En invitación" desc="Registrando propuestas"
                   isActive={currentStep === 2}
                 >
-                  {compra.estado === 'INVITANDO_PROVEEDORES' && (
+                  {(compra.estado === 'INVITANDO_PROVEEDORES' || compra.estado === 'EVALUANDO_OFERTAS') && (
                     <div className="space-y-2 mt-2">
-                      <button onClick={() => setShowOfferModal(true)} className="w-full bg-white border border-blue-600 text-blue-600 py-2 rounded text-sm font-medium hover:bg-blue-50 flex justify-center gap-2 items-center">
-                        <FileText size={14} /> Registrar Oferta
+
+                      <button
+                        onClick={() => setShowOfferModal(true)}
+                        className="w-full bg-white border border-blue-600 text-blue-600 py-2 rounded text-sm font-medium hover:bg-blue-50 flex justify-center gap-2 items-center"
+                      >
+                        <FileText size={14} /> Añadir Nueva Oferta
                       </button>
-                      {compra.ofertas.length > 0 && (
+
+                      {compra.estado === 'INVITANDO_PROVEEDORES' && compra.ofertas.length > 0 && (
                         <button
                           onClick={onCerrarOfertas}
                           className="w-full bg-indigo-600 text-white py-2 rounded text-sm font-medium hover:bg-indigo-700 flex justify-center gap-2 items-center"
@@ -205,6 +230,7 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
                           <CheckCircle size={14} /> Cerrar Recepción de Ofertas
                         </button>
                       )}
+
                     </div>
                   )}
                 </TimelineStep>
@@ -369,9 +395,23 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
                       required
                     >
                       <option value={0}>-- Seleccione quién oferta --</option>
-                      {proveedores.map(p => (
-                        <option key={p.id_proveedor} value={p.id_proveedor}>{p.razon_social} (RUC: {p.ruc})</option>
-                      ))}
+                        {proveedores.map(p => {
+                          const yaOferto = compra.ofertas.some(
+                            oferta => oferta.proveedor_id === p.id_proveedor
+                          );
+
+                          console.log(compra);
+
+                          return (
+                            <option
+                              key={p.id_proveedor}
+                              value={p.id_proveedor}
+                              disabled={yaOferto}
+                            >
+                              {p.razon_social} {yaOferto ? '(YA OFERTÓ)' : `(RUC: ${p.ruc})`}
+                            </option>
+                          );
+                        })}
                     </select>
                   </div>
                   <div>
