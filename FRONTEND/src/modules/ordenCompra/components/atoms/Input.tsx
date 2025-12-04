@@ -1,13 +1,16 @@
 import React from 'react';
+import type { LucideIcon } from 'lucide-react';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
   label?: string;
   error?: string;
+  icon?: LucideIcon; 
 }
 
 export const Input: React.FC<InputProps> = ({ 
   label, 
-  error, 
+  error,
+  icon, 
   className = '', 
   ...props 
 }) => {

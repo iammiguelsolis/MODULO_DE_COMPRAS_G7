@@ -1,6 +1,6 @@
 import { PlusCircle, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams, useNavigate } from "react-router-dom";
 
 import { Input } from '../components/atoms/Input';
 import { TextArea } from '../components/atoms/TextArea';
@@ -13,11 +13,13 @@ import { ProveedorModal } from '../components/molecules/ProveedorModal';
 
 import type { ItemType, ProveedorType } from '../lib/types';
 import { ORDER_TYPES, CURRENCIES } from '../lib/constants';
+import axios from "axios";
 
 const GenerarOrdenCompra: React.FC = () => {
   // ROUTER
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   // Tipo de origen que viene por query param
   const tipoRuta = searchParams.get("tipo")?.toUpperCase() as
@@ -142,6 +144,48 @@ const GenerarOrdenCompra: React.FC = () => {
     setIsOrdenModalOpen(true);
   };
 
+  const enviarOrden = async () => {
+    try {
+      const payload = {
+        tipoOrigen: orderType,
+        proveedorId: selectedSupplier?.id || null,
+        solicitudId: solicitudId || undefined,
+        notificacionInventarioId: notificacionInventarioId || undefined,
+
+        moneda: currency,
+        fechaEntregaEsperada: expectedDelivery,
+        condicionesPago: {
+          diasPlazo: paymentDays,
+          modalidad: paymentMode
+        },
+        terminosEntrega: deliveryTerms,
+        observaciones: notes,
+        titulo: title,
+
+        lineas: items.map((i) => ({
+          productId: i.productId,
+          name: i.name,
+          quantity: i.quantity,
+          unitPrice: i.unitPrice,
+          description: i.description
+        }))
+      };
+
+      console.log("📤 Enviando al backend:", payload);
+
+      const response = await axios.post(
+        "http://127.0.0.1:5000/api/ordenes-compra/",
+        payload
+      );
+
+      alert("✔ Orden creada: " + response.data.data.numero_referencia);
+      setIsOrdenModalOpen(false);
+
+    } catch (error: any) {
+      console.error("❌ Error enviando orden:", error);
+      alert("❌ Error: " + (error.response?.data?.error || "Error desconocido"));
+    }
+  };
 
   const totalAmount = calculateTotal();
   const isReadOnly = orderType === "LICITACION";
@@ -154,6 +198,13 @@ const GenerarOrdenCompra: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Generar Orden de Compra</h1>
           <p className="text-gray-600 mt-1">Complete el formulario para crear una nueva orden de compra.</p>
         </div>
+
+        <Button
+          variant="secondary"
+          onClick={() => navigate("/ordenes/historial")}
+        >
+          Ver historial de órdenes
+        </Button>
 
         {/* Superior */}
         <div className="grid grid-cols-3 gap-6 mb-6">
@@ -312,6 +363,7 @@ const GenerarOrdenCompra: React.FC = () => {
       <OrdenModal
         isOpen={isOrdenModalOpen}
         onClose={() => setIsOrdenModalOpen(false)}
+        onConfirm={enviarOrden}          // <-- AQUÍ LO PASAS
         title={title}
         notes={notes}
         orderType={orderType}

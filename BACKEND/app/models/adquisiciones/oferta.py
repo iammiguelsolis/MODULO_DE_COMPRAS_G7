@@ -7,7 +7,17 @@ class OfertaProveedor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     proceso_id = db.Column(db.Integer, db.ForeignKey('procesos_adquisicion.id'))
     
+    # --- NUEVO: Vinculación con la tabla real de Proveedores ---
+    # Usamos 'proveedor.id_proveedor' porque así se llama la tabla y PK en tu modelo Proveedor
+    proveedor_id = db.Column(db.Integer, db.ForeignKey('proveedor.id_proveedor'), nullable=True)
+    
+    # Relación para acceder a los datos del proveedor (ej: oferta.proveedor_rel.email)
+    proveedor_rel = db.relationship('Proveedor', backref='ofertas_enviadas')
+    # -----------------------------------------------------------
+
+    # Mantenemos este campo como "snapshot" o respaldo por si se borra el proveedor
     nombre_proveedor = db.Column(db.String(100))
+    
     fecha_oferta = db.Column(db.DateTime, default=datetime.now)
     monto_total = db.Column(db.Float)
     comentarios = db.Column(db.Text)
@@ -15,10 +25,16 @@ class OfertaProveedor(db.Model):
     items = db.relationship('ItemOfertado', backref='oferta', cascade="all, delete-orphan")
     
     def to_dict(self):
+        # Lógica para obtener el nombre: Prioriza la relación real, si no usa el texto guardado
+        nombre_mostrar = self.nombre_proveedor
+        if self.proveedor_rel:
+            nombre_mostrar = self.proveedor_rel.razon_social
+
         return {
             'id': self.id,
             'proceso_id': self.proceso_id,
-            'nombre_proveedor': self.nombre_proveedor,
+            'proveedor_id': self.proveedor_id,  # Devolvemos el ID también
+            'nombre_proveedor': nombre_mostrar,
             'fecha_oferta': self.fecha_oferta.isoformat(),
             'monto_total': self.monto_total,
             'comentarios': self.comentarios,

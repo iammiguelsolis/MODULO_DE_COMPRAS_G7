@@ -10,7 +10,10 @@ import ProveedorDetailPage from "./modules/proveedor/page/ProveedorDetailPage";
 import AnalisisProveedoresPage from "./modules/analisisProveedor/page/AnalisisProveedoresPage";
 import { ComparacionListPage } from "./modules/comparacion/pages/ComparacionListPage";
 import { ComparacionPage } from "./modules/comparacion/pages/ComparacionPage";
-import GenerarOrdenCompraPage from "./modules/ordenCompra/pages/GenerarOrdenCompra";
+import GenerarOrdenCompra from "./modules/ordenCompra/pages/GenerarOrdenCompra";
+import HistorialOrdenes from "./modules/ordenCompra/pages/HistorialOrdenes";
+import ComprasListPage from "./modules/compras/pages/ComprasListPage";
+import CompraDetailPage from "./modules/compras/pages/CompraDetailPage";
 
 function App() {
   return (
@@ -27,7 +30,8 @@ function App() {
 
           <Route path="/proveedores" element={<ProveedorPage />} />
           <Route path="/proveedores/:id" element={<ProveedorDetailPage />} />
-          <Route path="/compras" element={<h1>compras</h1>} />
+          <Route path="/compras" element={<ComprasListPage />} />
+          <Route path="/compras/:id" element={<CompraDetailPage />} />
 
           <Route path="/licitaciones" element={<LicitacionesListPage />} />
           <Route path="/licitacion/detail" element={<LicitacionDetailPage />} />
