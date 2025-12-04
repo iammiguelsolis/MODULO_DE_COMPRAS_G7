@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeftFromLine, Award, CheckCircle, Mail, FileText, Calculator, Building2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../../facturación/components/atoms';
-import { ProveedoresApi } from '../../../../services/solicitudYadquisicion/api';
+import { ProveedoresApi, AdquisicionesApi  } from '../../../../services/solicitudYadquisicion/api';
 import type { ProcesoDetalle, OfertaInput, Solicitud, ItemOfertaInput, OfertaOutput } from '../../../../services/solicitudYadquisicion/types';
 import type { Proveedor } from '../../../../services/solicitudYadquisicion/types';
 
@@ -41,6 +41,19 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
     comentarios: '',
     items: []
   });
+
+  const verDetalleOferta = async (idOferta: number) => {
+  try {
+    const response = await AdquisicionesApi.obtenerOferta(compra.id, idOferta);
+
+    // ✅ guardas la oferta real del backend
+    setSelectedOffer(response.oferta);
+
+  } catch (error) {
+    console.error("Error al obtener detalle de la oferta:", error);
+    alert("No se pudo cargar el detalle de la oferta");
+  }
+};
 
   // --- EFECTOS ---
 
@@ -288,7 +301,7 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
                     <div
                       key={oferta.id}
                       className={`p-4 rounded-lg border flex justify-between items-center transition-all cursor-pointer ${compra.ganador_id === oferta.id ? 'border-green-500 bg-green-50 shadow-md' : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'}`}
-                      onClick={() => setSelectedOffer(oferta)}
+                      onClick={() => verDetalleOferta(oferta.id)}
                     >
                       <div>
                         <div className="flex items-center gap-2">
