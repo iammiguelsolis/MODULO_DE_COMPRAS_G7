@@ -226,3 +226,17 @@ class AdquisicionService:
             "ofertas": [o.to_dict() for o in ofertas]   # ✅ USAMOS to_dict()
         }
 
+def obtener_oferta_por_adquisicion(self, id_compra, id_oferta):
+    compra = Compra.query.get(id_compra)
+    if not compra:
+        raise Exception("Proceso de compra no encontrado")
+
+    oferta = OfertaProveedor.query.get(id_oferta)
+    if not oferta:
+        raise Exception("Oferta no encontrada")
+
+    # ✅ VALIDACIÓN DE SEGURIDAD: que pertenezca a la compra
+    if oferta.proceso_id != compra.id:
+        raise Exception("Esta oferta no pertenece a esta adquisición")
+
+    return oferta.to_dict()
