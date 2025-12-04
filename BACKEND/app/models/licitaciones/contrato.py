@@ -13,7 +13,7 @@ class Contrato(db.Model):
     
     id_contrato = db.Column(db.Integer, primary_key=True, autoincrement=True)
     licitacion_id = db.Column(db.Integer, db.ForeignKey('licitaciones.id'), nullable=False)
-    proveedor_id = db.Column(db.Integer, db.ForeignKey('proveedores.id_proveedor'), nullable=False)
+    proveedor_id = db.Column(db.Integer, nullable=False)
     
     # Paso 1: Plantilla
     fecha_generacion_plantilla = db.Column(db.DateTime, default=datetime.now, nullable=False)
@@ -29,7 +29,11 @@ class Contrato(db.Model):
     
     # Relaciones
     licitacion = db.relationship('Licitacion', backref=db.backref('contrato', uselist=False))
-    proveedor = db.relationship('Proveedor', backref='contratos')
+    proveedor = db.relationship(
+        'Proveedor', 
+        primaryjoin='foreign(Contrato.proveedor_id) == remote(Proveedor.id_proveedor)',
+        backref='contratos'
+    )
     
     def __repr__(self):
         return f'<Contrato {self.id_contrato} - Lic:{self.licitacion_id} - {self.estado.value}>'

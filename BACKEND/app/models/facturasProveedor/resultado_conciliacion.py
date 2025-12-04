@@ -3,7 +3,6 @@ from datetime import datetime
 from .enums import EstadoConciliacion
 
 class ResultadoConciliacion(db.Model):
-    __bind_key__ = 'facturas_db'
     __tablename__ = 'resultados_conciliacion'
 
     id = db.Column(db.Integer, primary_key=True)

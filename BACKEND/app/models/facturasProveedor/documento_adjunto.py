@@ -3,7 +3,6 @@ from app.models.facturasProveedor.enums import DocTipo
 from datetime import datetime
 
 class DocumentoAdjunto(db.Model):
-    __bind_key__ = 'facturas_db'
     __tablename__ = 'documentos_adjuntos'
 
     id = db.Column(db.Integer, primary_key=True)

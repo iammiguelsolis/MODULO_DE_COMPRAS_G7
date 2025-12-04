@@ -1,7 +1,6 @@
 from app import db
 
 class LineaFactura(db.Model):
-    __bind_key__ = 'facturas_db'
     __tablename__ = 'lineas_factura'
 
     id = db.Column(db.Integer, primary_key=True)

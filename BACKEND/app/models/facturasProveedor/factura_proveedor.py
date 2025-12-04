@@ -10,7 +10,6 @@ class ModelABC(SQLAlchemyMeta, ABCMeta):
     pass
 
 class FacturaProveedor(db.Model, FacturaObservable, metaclass=ModelABC):
-    __bind_key__ = 'facturas_db'
     __tablename__ = 'facturas_proveedor'
 
     id = db.Column(db.Integer, primary_key=True)

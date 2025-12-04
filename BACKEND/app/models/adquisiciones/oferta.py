@@ -1,5 +1,6 @@
 from app.bdd import db
 from datetime import datetime
+
 class OfertaProveedor(db.Model):
     __tablename__ = 'ofertas_proveedor'
     

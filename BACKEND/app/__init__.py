@@ -24,8 +24,10 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"]=coneccion #%40 es @ pero escapado
 
     coneccion_facturas = coneccion.replace("modulo_de_compras","facturas")
+    coneccion_solicitudes = coneccion.replace("modulo_de_compras", "miguelPruebas")
     app.config["SQLALCHEMY_BINDS"] = {
-        'facturas_db': coneccion_facturas
+        'facturas_db': coneccion_facturas,
+        'solicitudes_db': coneccion_solicitudes
     }
 
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False

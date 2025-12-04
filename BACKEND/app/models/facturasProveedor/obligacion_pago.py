@@ -2,7 +2,6 @@ from app import db
 from .enums import Moneda, EstadoPago
 
 class ObligacionPago(db.Model):
-    __bind_key__ = 'facturas_db'
     __tablename__ = 'obligaciones_pago'
 
     id = db.Column(db.Integer, primary_key=True)

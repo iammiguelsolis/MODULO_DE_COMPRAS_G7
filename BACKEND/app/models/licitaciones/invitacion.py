@@ -10,9 +10,13 @@ class InvitacionProveedor(db.Model):
     
     id_invitacion = db.Column(db.Integer, primary_key=True)
     licitacion_id = db.Column(db.Integer, db.ForeignKey('licitaciones.id'), nullable=False)
-    proveedor_id = db.Column(db.Integer, db.ForeignKey('proveedores.id_proveedor'), nullable=False)
+    proveedor_id = db.Column(db.Integer, nullable=False)
     fecha_invitacion = db.Column(db.DateTime, default=datetime.now)
     
     # Relaciones
     licitacion = db.relationship('Licitacion', backref=db.backref('invitaciones', lazy=True))
-    proveedor = db.relationship('Proveedor', backref='invitaciones_licitacion')
+    proveedor = db.relationship(
+        'Proveedor', 
+        primaryjoin='foreign(InvitacionProveedor.proveedor_id) == remote(Proveedor.id_proveedor)',
+        backref='invitaciones_licitacion'
+    )

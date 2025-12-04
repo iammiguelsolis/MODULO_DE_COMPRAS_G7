@@ -4,7 +4,6 @@ from app.models.solicitudes.estados import Pendiente, Aprobada, Rechazada
 from app.patrones.clasificadores import ClasificadorPorMonto
 
 class Solicitud(db.Model):
-  
   __tablename__ = 'solicitudes'
   
   id = db.Column(db.Integer, primary_key=True)

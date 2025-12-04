@@ -7,11 +7,15 @@ class PropuestaProveedor(db.Model):
     __tablename__ = 'propuestas'
     
     id_propuesta = db.Column(db.Integer, primary_key=True)
-    licitacion_id = db.Column(db.Integer, db.ForeignKey('licitaciones.id'), nullable=False)
-    proveedor_id = db.Column(db.Integer, db.ForeignKey('proveedores.id_proveedor'), nullable=False)
+    licitacion_id = db.Column(db.Integer, db.ForeignKey('licitaciones.id', use_alter=True, name='fk_propuesta_licitacion'), nullable=False)
+    proveedor_id = db.Column(db.Integer, nullable=False)
     
     # Relación con Proveedor
-    proveedor = db.relationship('Proveedor', backref='propuestas')
+    proveedor = db.relationship(
+        'Proveedor', 
+        primaryjoin='foreign(PropuestaProveedor.proveedor_id) == remote(Proveedor.id_proveedor)',
+        backref='propuestas'
+    )
     
     fecha_presentacion = db.Column(db.DateTime, default=db.func.current_timestamp())
     

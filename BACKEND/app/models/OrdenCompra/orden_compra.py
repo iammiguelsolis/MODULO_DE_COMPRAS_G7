@@ -21,7 +21,7 @@ class OrdenCompra(db.Model):
     )
 
     # Proveedor (deben tener tabla proveedores)
-    id_proveedor = db.Column(db.Integer, db.ForeignKey("proveedores.id_proveedor"), nullable=False)
+    id_proveedor = db.Column(db.Integer, db.ForeignKey("proveedor.id_proveedor"), nullable=False)
     proveedor = relationship("Proveedor", backref="ordenes_compra")
 
     # Origen (RFQ / LICITACION / DIRECTA)

@@ -10,7 +10,6 @@ class ModelABC(SQLAlchemyMeta, ABCMeta):
     pass
 
 class FacturaTrazabilidad(db.Model, FacturaObserver, metaclass=ModelABC):
-    __bind_key__ = 'facturas_db'
     __tablename__ = 'factura_trazabilidad'
 
     id = db.Column(db.Integer, primary_key=True)
