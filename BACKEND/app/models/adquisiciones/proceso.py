@@ -15,15 +15,15 @@ class ProcesoAdquisicion(db.Model):
     solicitud_id = db.Column(db.Integer, db.ForeignKey('solicitudes.id'), unique=True)
     fecha_creacion = db.Column(db.DateTime, default=datetime.now)
     estado = db.Column(db.String(50), default=EstadoProceso.NUEVO)
-    
 
-    solicitud_origen = db.relationship('Solicitud', backref=db.backref('proceso_adquisicion', uselist=False))
+    solicitud_origen = db.relationship(
+        'Solicitud', 
+        backref=db.backref('proceso_adquisicion', uselist=False)
+    )
     
     tipo_proceso = db.Column(db.String(50))
 
-    # Oferta Ganadora (ID)
-    oferta_ganadora_id = db.Column(db.Integer, db.ForeignKey('ofertas_proveedor.id'), nullable=True)
-    
+    oferta_ganadora_id = db.Column(db.Integer, nullable=True)
 
     ofertas = db.relationship(
         'OfertaProveedor', 
@@ -32,16 +32,14 @@ class ProcesoAdquisicion(db.Model):
         lazy=True
     )
 
-    ganador = db.relationship(
-        'OfertaProveedor',
-        foreign_keys=[oferta_ganadora_id],
-        post_update=True 
-    )
-
     __mapper_args__ = {
         'polymorphic_identity': 'GENERICO',
         'polymorphic_on': tipo_proceso
     }
+
+    def seleccionar_ganador(self, oferta):
+        self.oferta_ganadora_id = oferta.id
+        self.estado = EstadoProceso.CERRADO
 
     def invitar_proveedores(self, lista_contactos, notificador):
         for contacto in lista_contactos:
