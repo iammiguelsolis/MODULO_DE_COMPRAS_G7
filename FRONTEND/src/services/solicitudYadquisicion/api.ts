@@ -7,7 +7,8 @@ import type {
   ProcesoDetalle, 
   CanalInvitacion, 
   OfertaInput, 
-  OfertaOutput 
+  OfertaOutput,
+  Proveedor 
 } from './types';
 
 const apiClient = axios.create({
@@ -96,6 +97,20 @@ export const AdquisicionesApi = {
       mensaje: string; 
       compra: ProcesoDetalle 
     }>(`/api/adquisiciones/${idCompra}/elegir-ganador`, { id_oferta: idOferta });
+    return response.data;
+  }
+};
+
+export const ProveedoresApi = {
+  // Listar todos los proveedores
+  listar: async () => {
+    const response = await apiClient.get<Proveedor[]>('/api/proveedores');
+    return response.data;
+  },
+
+  // Obtener uno por ID (Opcional, por si lo necesitas luego)
+  obtener: async (id: number) => {
+    const response = await apiClient.get<Proveedor>(`/api/proveedores/${id}`);
     return response.data;
   }
 };

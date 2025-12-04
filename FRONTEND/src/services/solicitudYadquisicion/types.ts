@@ -111,3 +111,17 @@ export interface ProcesoDetalle extends ProcesoResumen {
   ganador_id: number | null;
   ofertas: OfertaOutput[];
 }
+
+// ==========================================
+// PROVEEDORES
+// ==========================================
+
+export interface Proveedor {
+  id_proveedor: number;
+  razon_social: string;
+  ruc: string;
+  email: string;
+  pais: string;
+  telefono: string;
+  domicilio_legal: string;
+}

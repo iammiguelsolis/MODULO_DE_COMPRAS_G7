@@ -3,6 +3,9 @@ import { ArrowLeftFromLine, Users, FileText, Award, CheckCircle, Mail, Clock } f
 import PageHeader from '../../../../modules/licitaciones/components/molecules/PageHeader';
 import Button from '../../../../modules/licitaciones/components/atoms/Button';
 import type { ProcesoDetalle, OfertaInput, Solicitud } from '../../../../services/solicitudYadquisicion/types';
+import { useEffect } from 'react';
+import { ProveedoresApi } from '../../../../services/solicitudYadquisicion/api'; // Ajusta la ruta a tu api.ts
+import type { Proveedor } from '../../../../services/solicitudYadquisicion/types'; // Ajusta
 
 interface CompraDetailTemplateProps {
   compra: ProcesoDetalle;
@@ -22,14 +25,27 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showOfferModal, setShowOfferModal] = useState(false);
   const [selectedProviderIds, setSelectedProviderIds] = useState<number[]>([]);
+  const [proveedores, setProveedores] = useState<Proveedor[]>([]);
+  const [isLoadingProveedores, setIsLoadingProveedores] = useState(false);
+
+  useEffect(() => {
+    if (showInviteModal) {
+      cargarProveedores();
+    }
+  }, [showInviteModal]);
 
   // Mock data for available suppliers
-  const mockAvailableSuppliers = [
-    { id: 1, name: "Tech Solutions SAC", ruc: "20123456789", email: "ventas@techsolutions.com" },
-    { id: 2, name: "Computadoras del Perú SA", ruc: "20987654321", email: "contacto@computadoras.pe" },
-    { id: 3, name: "Digital Store EIRL", ruc: "20456789123", email: "info@digitalstore.com" },
-    { id: 4, name: "TechMart Perú S.A.C.", ruc: "20789123456", email: "ventas@techmart.pe" },
-  ];
+  const cargarProveedores = async () => {
+      setIsLoadingProveedores(true);
+      try {
+        const data = await ProveedoresApi.listar();
+        setProveedores(data);
+      } catch (error) {
+        console.error("Error al cargar proveedores", error);
+      } finally {
+        setIsLoadingProveedores(false);
+      }
+    };
 
   const handleInviteSubmit = () => {
     onInvitar(selectedProviderIds);
@@ -338,28 +354,33 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
             <h3 className="text-xl font-bold mb-2">Invitar Proveedores</h3>
             <p className="mb-6 text-sm text-gray-500">Seleccione los proveedores que desea invitar a este proceso.</p>
 
-            <div className="space-y-3 mb-6 max-h-60 overflow-y-auto">
-              {mockAvailableSuppliers.map(p => (
-                <div
-                  key={p.id}
-                  className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
-                    selectedProviderIds.includes(p.id) ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'
-                  }`}
-                  onClick={() => toggleProviderSelection(p.id)}
-                >
-                  <div className={`w-5 h-5 rounded border flex items-center justify-center ${
-                    selectedProviderIds.includes(p.id) ? 'bg-blue-600 border-blue-600' : 'border-gray-300'
-                  }`}>
-                    {selectedProviderIds.includes(p.id) && <CheckCircle size={14} className="text-white" />}
-                  </div>
-                  <div>
-                    <p className="font-medium text-gray-900">{p.name}</p>
-                    <p className="text-xs text-gray-500">{p.email}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
+              <div className="space-y-3 mb-6 max-h-60 overflow-y-auto">
+                {isLoadingProveedores ? (
+                  <div className="text-center py-4 text-gray-500">Cargando proveedores...</div>
+                ) : proveedores.length === 0 ? (
+                  <div className="text-center py-4 text-gray-500">No hay proveedores registrados.</div>
+                ) : (
+                  proveedores.map(p => (
+                    <div
+                      key={p.id_proveedor} // Usar el ID real del backend
+                      className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
+                        selectedProviderIds.includes(p.id_proveedor) ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'
+                      }`}
+                      onClick={() => toggleProviderSelection(p.id_proveedor)}
+                    >
+                      <div className={`w-5 h-5 rounded border flex items-center justify-center ${
+                        selectedProviderIds.includes(p.id_proveedor) ? 'bg-blue-600 border-blue-600' : 'border-gray-300'
+                      }`}>
+                        {selectedProviderIds.includes(p.id_proveedor) && <CheckCircle size={14} className="text-white" />}
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">{p.razon_social}</p> {/* Usar campos reales */}
+                        <p className="text-xs text-gray-500">{p.ruc} • {p.email}</p>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
             <div className="flex justify-end gap-3">
               <Button variant="secondary" onClick={() => setShowInviteModal(false)}>Cancelar</Button>
               <Button onClick={handleInviteSubmit} disabled={selectedProviderIds.length === 0}>
