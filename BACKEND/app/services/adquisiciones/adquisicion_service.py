@@ -104,36 +104,43 @@ class AdquisicionService:
             raise Exception("Proceso de compra no encontrado")
 
         if compra.estado == EstadoProceso.CERRADO:
-            raise Exception("La compra está cerrada.")
+            raise Exception("La compra está cerrada. No se pueden registrar más ofertas.")
 
-        # --- MODIFICACIÓN: Obtener Proveedor Real por ID ---
-        # Importamos aquí para evitar ciclos o asegurarnos que el modelo está disponible
         from app.models.proveedor_inventario.dominio_proveedor import Proveedor
-        
-        id_proveedor = data_json.get('id_proveedor')
-        nombre_proveedor_texto = data_json.get('proveedor') # Respaldo si no mandan ID (opcional)
 
-        # Validamos que el proveedor exista si mandan el ID
-        if id_proveedor:
-            proveedor_obj = Proveedor.query.get(id_proveedor)
-            if not proveedor_obj:
-                raise Exception(f"No existe un proveedor con el ID {id_proveedor}")
-            # Actualizamos el nombre con la razón social real de la BD
-            nombre_proveedor_texto = proveedor_obj.razon_social
-        # --------------------------------------------------
+        id_proveedor = data_json.get('id_proveedor')
+        nombre_proveedor_texto = data_json.get('proveedor')
+
+        if not id_proveedor:
+            raise Exception("Debe enviarse el ID del proveedor")
+
+        proveedor_obj = Proveedor.query.get(id_proveedor)
+        if not proveedor_obj:
+            raise Exception(f"No existe un proveedor con el ID {id_proveedor}")
+
+        nombre_proveedor_texto = proveedor_obj.razon_social
+
+        oferta_existente = OfertaProveedor.query.filter_by(
+            proceso_id=compra.id,
+            proveedor_id=id_proveedor
+        ).first()
+
+        if oferta_existente:
+            raise Exception("Este proveedor ya registró una oferta en este proceso.")
 
         oferta = OfertaProveedor(
             proceso_id=compra.id,
-            proveedor_id=id_proveedor,          # Guardamos la relación (FK)
-            nombre_proveedor=nombre_proveedor_texto, # Guardamos el nombre como histórico
+            proveedor_id=id_proveedor,
+            nombre_proveedor=nombre_proveedor_texto,
             monto_total=data_json['monto_total'],
             comentarios=data_json.get('comentarios', '')
         )
-        
+
         items_data = data_json.get('items', [])
+
         for item in items_data:
             tipo = item.get('tipo')
-            
+
             if tipo == 'MATERIAL':
                 nuevo_item = MaterialOfertado(
                     precio_oferta=item['precio'],
@@ -149,13 +156,16 @@ class AdquisicionService:
                     experiencia_tecnico=item.get('experiencia')
                 )
             else:
-                continue 
-            
+                continue
+
             oferta.items.append(nuevo_item)
 
-        compra.estado = EstadoProceso.EVALUANDO 
+        if compra.estado == EstadoProceso.INVITANDO:
+            compra.estado = EstadoProceso.EVALUANDO
+
         db.session.add(oferta)
         db.session.commit()
+
         return oferta
 
     def elegir_ganador(self, id_compra, id_oferta_ganadora):
@@ -184,33 +194,7 @@ class AdquisicionService:
         resultado = []
         for p in procesos:
 
-
             ofertas = OfertaProveedor.query.filter_by(proceso_id=p.id).all()
-
-            ofertas_serializadas = []
-            for o in ofertas:
-                items = []
-                for item in o.items:
-                    items.append({
-                        "id": item.id,
-                        "tipo": item.__class__.__name__,
-                        "precio": item.precio_oferta,
-                        "descripcion": item.descripcion,
-                        "extra": {
-                            "marca": getattr(item, "marca", None),
-                            "cantidad_disponible": getattr(item, "cantidad_disponible", None),
-                            "dias_ejecucion": getattr(item, "dias_ejecucion", None),
-                            "experiencia_tecnico": getattr(item, "experiencia_tecnico", None),
-                        }
-                    })
-
-                ofertas_serializadas.append({
-                    "id": o.id,
-                    "proveedor": o.nombre_proveedor,
-                    "monto_total": o.monto_total,
-                    "comentarios": o.comentarios,
-                    "items": items
-                })
 
             resultado.append({
                 "id": p.id,
@@ -219,11 +203,10 @@ class AdquisicionService:
                 "estado": p.estado,
                 "fecha_creacion": p.fecha_creacion,
                 "ganador_id": p.oferta_ganadora_id,
-                "ofertas": ofertas_serializadas
+                "ofertas": [o.to_dict() for o in ofertas]
             })
 
         return resultado
-
 
     def obtener_proceso(self, id_proceso):
 
@@ -233,31 +216,6 @@ class AdquisicionService:
 
         ofertas = OfertaProveedor.query.filter_by(proceso_id=p.id).all()
 
-        ofertas_serializadas = []
-        for o in ofertas:
-            items = []
-            for item in o.items:
-                items.append({
-                    "id": item.id,
-                    "tipo": item.__class__.__name__,
-                    "precio": item.precio_oferta,
-                    "descripcion": item.descripcion,
-                    "extra": {
-                        "marca": getattr(item, "marca", None),
-                        "cantidad_disponible": getattr(item, "cantidad_disponible", None),
-                        "dias_ejecucion": getattr(item, "dias_ejecucion", None),
-                        "experiencia_tecnico": getattr(item, "experiencia_tecnico", None),
-                    }
-                })
-
-            ofertas_serializadas.append({
-                "id": o.id,
-                "proveedor": o.nombre_proveedor,
-                "monto_total": o.monto_total,
-                "comentarios": o.comentarios,
-                "items": items
-            })
-
         return {
             "id": p.id,
             "solicitud_id": p.solicitud_id,
@@ -265,5 +223,30 @@ class AdquisicionService:
             "estado": p.estado,
             "fecha_creacion": p.fecha_creacion,
             "ganador_id": p.oferta_ganadora_id,
-            "ofertas": ofertas_serializadas
+            "ofertas": [o.to_dict() for o in ofertas]   # ✅ USAMOS to_dict()
         }
+
+    def obtener_oferta_por_adquisicion(self, id_compra, id_oferta):
+        compra = Compra.query.get(id_compra)
+        if not compra:
+            raise Exception("Proceso de compra no encontrado")
+
+        oferta = OfertaProveedor.query.get(id_oferta)
+        if not oferta:
+            raise Exception("Oferta no encontrada")
+
+        # ✅ VALIDACIÓN DE SEGURIDAD: que pertenezca a la compra
+        if oferta.proceso_id != compra.id:
+            raise Exception("Esta oferta no pertenece a esta adquisición")
+
+        return oferta.to_dict()
+      
+    def obtener_ofertas_por_adquisicion(self, id_compra):
+        compra = Compra.query.get(id_compra)
+        if not compra:
+            raise Exception("Proceso de compra no encontrado")
+
+        ofertas = OfertaProveedor.query.filter_by(proceso_id=id_compra).all()
+
+        return [oferta.to_dict() for oferta in ofertas]
+
