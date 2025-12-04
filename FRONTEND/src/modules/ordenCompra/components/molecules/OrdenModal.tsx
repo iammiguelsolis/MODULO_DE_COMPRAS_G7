@@ -6,10 +6,13 @@ import {
 import { Button } from '../atoms/Button';
 import type { ItemType, ProveedorType } from '../../lib/types';
 
+
+
 interface OrdenModalProps {
   isOpen: boolean;
   onClose: () => void;
-
+  onConfirm: () => void;
+  
   title: string;
   notes: string;
 
@@ -33,6 +36,7 @@ interface OrdenModalProps {
 export const OrdenModal: React.FC<OrdenModalProps> = ({
   isOpen,
   onClose,
+  onConfirm,
   title,
   notes,
   orderType,
@@ -252,15 +256,10 @@ export const OrdenModal: React.FC<OrdenModalProps> = ({
             Cancelar
           </Button>
 
-          <Button
-            variant="primary"
-            onClick={() => {
-              alert('Orden generada exitosamente!');
-              onClose();
-            }}
-          >
+          <Button variant="primary" onClick={onConfirm}>
             Confirmar y Generar Orden
           </Button>
+
 
         </div>
       </div>
