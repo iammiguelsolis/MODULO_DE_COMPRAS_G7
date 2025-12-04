@@ -4,22 +4,17 @@ import Modal from '../atoms/Modal';
 import Button from '../atoms/Button';
 import Alert from '../atoms/Alert';
 import { getContractTemplatePath, downloadFile } from '../../lib/documentTemplateUtils';
+import type { ProveedorDTO } from '../../lib/types';
 import './GenerateContractModal.css';
-
-interface WinnerProvider {
-    id: number;
-    name: string;
-    ruc: string;
-    email: string;
-}
 
 interface GenerateContractModalProps {
     isOpen: boolean;
     onClose: () => void;
     licitacionId: string;
     licitacionTitle: string;
-    winnerProvider?: WinnerProvider;
+    winnerProvider?: ProveedorDTO;
     onSaveContract?: (file: File) => void;
+    onDownloadTemplate?: () => void;
 }
 
 const GenerateContractModal: React.FC<GenerateContractModalProps> = ({
@@ -28,7 +23,8 @@ const GenerateContractModal: React.FC<GenerateContractModalProps> = ({
     licitacionId,
     licitacionTitle,
     winnerProvider,
-    onSaveContract
+    onSaveContract,
+    onDownloadTemplate
 }) => {
     const [contractFile, setContractFile] = useState<File | null>(null);
     const [isDragging, setIsDragging] = useState(false);
@@ -65,8 +61,13 @@ const GenerateContractModal: React.FC<GenerateContractModalProps> = ({
 
 
     const handleDownloadTemplate = () => {
-        const contractPath = getContractTemplatePath();
-        downloadFile(contractPath, 'Plantilla - Contrato Adjudicacion.docx');
+        if (onDownloadTemplate) {
+            onDownloadTemplate();
+        } else {
+            // Fallback legacy
+            const contractPath = getContractTemplatePath();
+            downloadFile(contractPath, 'Plantilla - Contrato Adjudicacion.docx');
+        }
     };
 
     if (!winnerProvider) return null;
@@ -94,7 +95,7 @@ const GenerateContractModal: React.FC<GenerateContractModalProps> = ({
                         </div>
                         <div className="winner-info-row">
                             <span className="winner-label">Proveedor:</span>
-                            <span className="winner-value">{winnerProvider.name}</span>
+                            <span className="winner-value">{winnerProvider.razon_social}</span>
                         </div>
                         <div className="winner-info-row">
                             <span className="winner-label">RUC:</span>

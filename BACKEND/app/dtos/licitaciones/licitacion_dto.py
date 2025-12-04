@@ -2,6 +2,7 @@ from dataclasses import dataclass
 from typing import List, Optional, Dict, Any
 from app.dtos.licitaciones.item_dto import ItemDTO
 from app.dtos.licitaciones.documento_dto import DocumentoRequeridoDTO
+from app.dtos.licitaciones.propuesta_dto import ProveedorDTO
 
 @dataclass
 class CrearLicitacionDTO:
@@ -23,6 +24,9 @@ class LicitacionResponseDTO:
     
     proveedor_ganador: Optional[Dict[str, Any]] = None
     contrato: Optional[Dict[str, Any]] = None
+    cantidad_invitaciones: int = 0
+    cantidad_propuestas: int = 0
+    proveedores_invitados: List[ProveedorDTO] = None
     
     @staticmethod
     def from_model(licitacion):
@@ -45,11 +49,11 @@ class LicitacionResponseDTO:
 
         # 3. Obtener proveedor ganador
         proveedor_data = None
-        if licitacion.propuesta_ganadora:
+        if licitacion.propuesta_ganadora and licitacion.propuesta_ganadora.proveedor:
             prov = licitacion.propuesta_ganadora.proveedor
             proveedor_data = {
                 'id_proveedor': prov.id_proveedor,
-                'nombre': prov.nombre,
+                'razon_social': prov.razon_social,
                 'ruc': prov.ruc,
                 'email': prov.email,
                 'telefono': prov.telefono
@@ -66,6 +70,24 @@ class LicitacionResponseDTO:
                 'estado': licitacion.contrato.estado.value
             }
 
+        # Calcular contadores y lista de invitados
+        cant_invitaciones = 0
+        invitados_dto = []
+        if hasattr(licitacion, 'invitaciones'):
+            cant_invitaciones = len(licitacion.invitaciones)
+            for inv in licitacion.invitaciones:
+                if inv.proveedor:
+                    invitados_dto.append(ProveedorDTO(
+                        id=inv.proveedor.id_proveedor,
+                        razon_social=inv.proveedor.razon_social,
+                        ruc=inv.proveedor.ruc,
+                        email=inv.proveedor.email
+                    ))
+            
+        cant_propuestas = 0
+        if licitacion.propuestas:
+            cant_propuestas = len(licitacion.propuestas)
+
         return LicitacionResponseDTO(
             id_licitacion=licitacion.id,
             titulo=licitacion.solicitud_origen.titulo if licitacion.solicitud_origen else "",
@@ -76,5 +98,8 @@ class LicitacionResponseDTO:
             items=items_dto,
             documentos_requeridos=docs_requeridos,
             proveedor_ganador=proveedor_data,
-            contrato=contrato_data
+            contrato=contrato_data,
+            cantidad_invitaciones=cant_invitaciones,
+            cantidad_propuestas=cant_propuestas,
+            proveedores_invitados=invitados_dto
         )

@@ -29,17 +29,22 @@ const LicitacionesTable: React.FC<LicitacionesTableProps> = ({ licitaciones }) =
                             licitaciones.map((lic) => (
                                 <tr key={lic.id}>
                                     <td className="font-medium">{lic.id}</td>
-                                    <td>{lic.nombre}</td>
-                                    <td>{new Date(lic.fechaCreacion + 'T00:00:00').toLocaleDateString('es-PE', { timeZone: 'UTC' })}</td>
+                                    <td>{lic.nombre || 'Sin título'}</td>
+                                    <td>
+                                        {lic.fechaCreacion
+                                            ? new Date(lic.fechaCreacion + 'T00:00:00').toLocaleDateString('es-PE', { timeZone: 'UTC' })
+                                            : 'N/A'
+                                        }
+                                    </td>
                                     <td suppressHydrationWarning>
-                                        S/ {lic.presupuestoMaximo.toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                        S/ {(lic.presupuestoMaximo ?? 0).toLocaleString('es-PE', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                                     </td>
                                     <td><StatusPill status={lic.estado} /></td>
                                     <td>
                                         <Button
                                             variant="secondary"
                                             size="sm"
-                                            onClick={() => navigate('/licitacion/detail')}
+                                            onClick={() => navigate(`/licitacion/${lic.id}`)}
                                         >
                                             <Eye size={16} />
                                             <span>Ver detalles</span>

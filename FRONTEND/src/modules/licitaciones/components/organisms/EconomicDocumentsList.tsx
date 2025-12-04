@@ -10,8 +10,6 @@ const EconomicDocumentsList: React.FC<EconomicDocumentsListProps> = ({ disabled 
     // Hardcoded economic documents (only 3)
     const documents = [
         { id: 'doc-econ-1', name: 'Propuesta_Economica.xlsx', size: '850 KB' },
-        { id: 'doc-econ-2', name: 'Estados_Financieros_Auditados.pdf', size: '3.1 MB' },
-        { id: 'doc-econ-3', name: 'Carta_Fianza.pdf', size: '1.2 MB' }
     ];
 
     const handleView = (docName: string) => {

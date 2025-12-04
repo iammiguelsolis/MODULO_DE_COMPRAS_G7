@@ -11,7 +11,7 @@ interface LicitacionItemsTableProps {
 
 const LicitacionItemsTable: React.FC<LicitacionItemsTableProps> = ({ items }) => {
     const calculateTotal = (item: Item): number => {
-        if (item.type === 'Producto') {
+        if (item.type === 'MATERIAL') {
             return (item.quantity || 0) * (item.price || 0);
         } else {
             return (item.estimatedHours || 0) * (item.hourlyRate || 0);
@@ -44,10 +44,10 @@ const LicitacionItemsTable: React.FC<LicitacionItemsTableProps> = ({ items }) =>
                                 <td><span className="item-type-badge">{item.type}</span></td>
                                 <td>{item.description}</td>
                                 <td className="text-center">
-                                    {item.type === 'Producto' ? item.quantity : item.estimatedHours}
+                                    {item.type === 'MATERIAL' ? item.quantity : item.estimatedHours}
                                 </td>
                                 <td className="text-right">
-                                    {formatCurrency(item.type === 'Producto' ? (item.price || 0) : (item.hourlyRate || 0))}
+                                    {formatCurrency(item.type === 'MATERIAL' ? (item.price || 0) : (item.hourlyRate || 0))}
                                 </td>
                                 <td className="text-right">{formatCurrency(calculateTotal(item))}</td>
                             </tr>

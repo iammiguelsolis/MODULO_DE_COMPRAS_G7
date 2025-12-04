@@ -5,21 +5,15 @@ import Button from '../atoms/Button';
 import NoteBox from '../atoms/NoteBox';
 import Select from '../atoms/Select';
 import Label from '../atoms/Label';
+import type { ProveedorDTO } from '../../lib/types';
 import './RegisterProposalModal.css';
-
-interface Supplier {
-    id: number;
-    name: string;
-    ruc: string;
-    email: string;
-}
 
 interface RegisterProposalModalProps {
     isOpen: boolean;
     onClose: () => void;
     licitacionId: string;
     licitacionTitle: string;
-    suppliers: Supplier[];
+    suppliers: ProveedorDTO[];
     onRegisterProposal?: (supplierId: number, files: File[]) => void;
 }
 
@@ -100,7 +94,7 @@ const RegisterProposalModal: React.FC<RegisterProposalModalProps> = ({
                             <option value="">-- Seleccione un proveedor --</option>
                             {suppliers.map(supplier => (
                                 <option key={supplier.id} value={supplier.id}>
-                                    {supplier.name} - RUC: {supplier.ruc}
+                                    {supplier.razon_social} - RUC: {supplier.ruc}
                                 </option>
                             ))}
                         </Select>
@@ -118,7 +112,7 @@ const RegisterProposalModal: React.FC<RegisterProposalModalProps> = ({
                             <div className="supplier-info-card">
                                 <div className="supplier-info-row">
                                     <span className="info-label">Proveedor:</span>
-                                    <span className="info-value">{selectedSupplier.name}</span>
+                                    <span className="info-value">{selectedSupplier.razon_social}</span>
                                 </div>
                                 <div className="supplier-info-row">
                                     <span className="info-label">RUC:</span>

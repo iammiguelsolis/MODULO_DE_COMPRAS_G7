@@ -14,8 +14,6 @@ class EstadoEnEvaluacion(EstadoLicitacionState):
             return EstadoEvaluacionEconomia(self.licitacion)
         else:
             # Si todas fueron rechazadas -> CANCELADA
-            # Esto podría ser automático o manual, según regla 5: "Si Propuestas_Validas == 0 -> CANCELADA"
-            # Asumimos que el servicio llama a siguiente() después de evaluar todas.
             return self.cancelar()
             
     def cancelar(self):
