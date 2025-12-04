@@ -71,10 +71,13 @@ export interface ItemOfertaInput {
 
 export interface ItemOfertaOutput {
   id: number;
-  tipo: string;
-  precio: number;
+  tipo_item: TipoItem;
+  precio_oferta: number;
   descripcion: string;
-  extra: ItemOfertaExtra;
+  marca?: string;
+  cantidad_disponible?: number;
+  dias_ejecucion?: number;
+  experiencia_tecnico?: string;
 }
 
 export interface OfertaInput {

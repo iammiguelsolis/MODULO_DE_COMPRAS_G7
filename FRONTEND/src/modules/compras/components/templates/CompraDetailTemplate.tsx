@@ -561,19 +561,37 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
                       <th className="px-4 py-2 text-right">Subtotal</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-100">
-                    {selectedOffer.items.map((item, idx) => (
-                      <tr key={idx}>
-                        <td className="px-4 py-2 font-medium text-gray-900">{item.descripcion}</td>
-                        <td className="px-4 py-2 text-center text-gray-600">{item.cantidad}</td>
-                        <td className="px-4 py-2 text-gray-600">{item.marca || '-'}</td>
-                        <td className="px-4 py-2 text-right text-gray-600">S/. {item.precio.toFixed(2)}</td>
-                        <td className="px-4 py-2 text-right font-bold text-gray-900">
-                          S/. {(item.precio * (item.cantidad || 0)).toFixed(2)}
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
+                    <tbody className="divide-y divide-gray-100">
+                      {selectedOffer.items.map((item, idx) => {
+                        const precio = Number(item.precio_oferta) || 0;
+                        const cantidad = Number(item.cantidad_disponible) || 1;
+                        const subtotal = precio * cantidad;
+
+                        return (
+                          <tr key={idx}>
+                            <td className="px-4 py-2 font-medium text-gray-900">
+                              {item.descripcion}
+                            </td>
+
+                            <td className="px-4 py-2 text-center text-gray-600">
+                              {cantidad}
+                            </td>
+
+                            <td className="px-4 py-2 text-gray-600">
+                              {item.marca || '-'}
+                            </td>
+
+                            <td className="px-4 py-2 text-right text-gray-600">
+                              S/. {precio.toFixed(2)}
+                            </td>
+
+                            <td className="px-4 py-2 text-right font-bold text-gray-900">
+                              S/. {subtotal.toFixed(2)}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
                 </table>
               </div>
             </div>
