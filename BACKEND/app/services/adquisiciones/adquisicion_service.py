@@ -4,28 +4,7 @@ from app.models.adquisiciones.proceso import Compra, ProcesoAdquisicion, EstadoP
 from app.models.adquisiciones.oferta import OfertaProveedor, MaterialOfertado, ServicioOfertado
 from app.patrones.notificadores import WhatsappFactory, CorreoFactory
 from app.patrones.clasificadores import ClasificadorPorMonto
-from app.services.licitaciones.licitacion_service import LicitacionService
-
-class AdquisicionService:
-    
-    def __init__(self):
-        self.clasificador = ClasificadorPorMonto()
-        self.licitacion_service = LicitacionService()
-        
-    def generar_proceso_compra(self, id_solicitud):
-
-        solicitud = Solicitud.query.get(id_solicitud)
-        if not solicitud:
-            raise Exception("Solicitud no encontrada")
-
-        total = solicitud.calcular_total() 
-        
-from app.bdd import db
-from app.models.solicitudes.solicitud import Solicitud
-from app.models.adquisiciones.proceso import Compra, ProcesoAdquisicion, EstadoProceso
-from app.patrones.clasificadores import ClasificadorPorMonto
-
-# IMPORTAMOS EL NUEVO SERVICIO
+from app.models.proveedor_inventario.dominio_proveedor import Proveedor 
 from app.services.licitaciones.licitacion_service import LicitacionService
 
 class AdquisicionService:
@@ -76,14 +55,37 @@ class AdquisicionService:
             
             return {
                 "tipo": "COMPRA",
-                "mensaje": "Proceso de Compra Directa iniciado exitosamente.",
+                "mensaje": "Proceso de Compra iniciado exitosamente.",
                 "data": nueva_compra
             }
 
-    def invitar_proveedores(self, id_compra, lista_proveedores, tipo_canal='EMAIL'):
-
+    def invitar_proveedores(self, id_compra, lista_ids_proveedores, tipo_canal='EMAIL'):
+        """
+        Recibe una lista de IDs de proveedores (integers), busca sus correos en la BD
+        y envía las invitaciones.
+        """
         compra = Compra.query.get(id_compra)
+        if not compra:
+            raise Exception("Proceso de compra no encontrado")
 
+        # 1. Resolver los IDs a Emails reales
+        lista_destinatarios = []
+        
+        for id_prov in lista_ids_proveedores:
+            proveedor = Proveedor.query.get(id_prov)
+            
+            if proveedor:
+                if proveedor.email:
+                    lista_destinatarios.append(proveedor.email)
+                else:
+                    print(f"Advertencia: El proveedor ID {id_prov} no tiene email registrado.")
+            else:
+                print(f"Advertencia: El proveedor ID {id_prov} no existe en la BD.")
+
+        if not lista_destinatarios:
+            raise Exception("No se encontraron destinatarios válidos (con email) para los IDs proporcionados.")
+
+        # 2. Configurar la factoría según el canal
         if tipo_canal == 'WHATSAPP':
             factory = WhatsappFactory()
         else:
@@ -91,21 +93,39 @@ class AdquisicionService:
             
         notificador = factory.crear_notificador()
 
-        compra.invitar_proveedores(lista_proveedores, notificador)
+        # 3. Delegar al modelo (que envía a la lista de strings/emails)
+        compra.invitar_proveedores(lista_destinatarios, notificador)
         db.session.commit()
         
         return compra
-
     def registrar_oferta(self, id_compra, data_json):
-
         compra = Compra.query.get(id_compra)
+        if not compra:
+            raise Exception("Proceso de compra no encontrado")
+
         if compra.estado == EstadoProceso.CERRADO:
             raise Exception("La compra está cerrada.")
 
+        # --- MODIFICACIÓN: Obtener Proveedor Real por ID ---
+        # Importamos aquí para evitar ciclos o asegurarnos que el modelo está disponible
+        from app.models.proveedor_inventario.dominio_proveedor import Proveedor
+        
+        id_proveedor = data_json.get('id_proveedor')
+        nombre_proveedor_texto = data_json.get('proveedor') # Respaldo si no mandan ID (opcional)
+
+        # Validamos que el proveedor exista si mandan el ID
+        if id_proveedor:
+            proveedor_obj = Proveedor.query.get(id_proveedor)
+            if not proveedor_obj:
+                raise Exception(f"No existe un proveedor con el ID {id_proveedor}")
+            # Actualizamos el nombre con la razón social real de la BD
+            nombre_proveedor_texto = proveedor_obj.razon_social
+        # --------------------------------------------------
 
         oferta = OfertaProveedor(
             proceso_id=compra.id,
-            nombre_proveedor=data_json['proveedor'],
+            proveedor_id=id_proveedor,          # Guardamos la relación (FK)
+            nombre_proveedor=nombre_proveedor_texto, # Guardamos el nombre como histórico
             monto_total=data_json['monto_total'],
             comentarios=data_json.get('comentarios', '')
         )
@@ -139,14 +159,20 @@ class AdquisicionService:
         return oferta
 
     def elegir_ganador(self, id_compra, id_oferta_ganadora):
-
         compra = Compra.query.get(id_compra)
+        if not compra:
+            raise Exception("Proceso de compra no encontrado")
+
         oferta = OfertaProveedor.query.get(id_oferta_ganadora)
+        if not oferta:
+            raise Exception("Oferta no encontrada")
         
         if oferta.proceso_id != compra.id:
-            raise Exception("La oferta no pertenece a esta compra.")
+            raise Exception("La oferta seleccionada no pertenece a esta compra.")
             
+        # Al seleccionar ganador, el estado pasa a CERRADO
         compra.seleccionar_ganador(oferta)
+        
         db.session.commit()
         
         return compra
