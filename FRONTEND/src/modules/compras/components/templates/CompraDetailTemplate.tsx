@@ -162,7 +162,7 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="mx-auto max-w-7xl">
+      <div className="mx-auto">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-start justify-between mb-3">

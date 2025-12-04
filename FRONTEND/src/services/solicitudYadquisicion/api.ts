@@ -106,6 +106,15 @@ export const AdquisicionesApi = {
       compra: ProcesoDetalle
     }>(`/api/adquisiciones/${idCompra}/cerrar-ofertas`);
     return response.data;
+  },
+
+    obtenerOferta: async (idCompra: number, idOferta: number) => {
+    const response = await apiClient.get<{
+      mensaje: string;
+      oferta: OfertaOutput;
+    }>(`/api/adquisiciones/${idCompra}/oferta/${idOferta}`);
+
+    return response.data;
   }
 };
 
@@ -123,4 +132,6 @@ export const ProveedoresApi = {
   }
 };
 
+
 export default apiClient;
+
