@@ -8,9 +8,8 @@ import type {
   CanalInvitacion, 
   OfertaInput, 
   OfertaOutput 
-} from '../types';
+} from './types';
 
-// Configuración del cliente HTTP
 const apiClient = axios.create({
   baseURL: 'http://127.0.0.1:5000',
   headers: {
@@ -26,7 +25,6 @@ apiClient.interceptors.response.use(
   }
 );
 
-// Servicios de Solicitudes
 export const SolicitudesApi = {
   crear: async (data: SolicitudInput) => {
     const response = await apiClient.post<{ id: number; mensaje: string }>('/api/solicitudes', data);
@@ -54,7 +52,6 @@ export const SolicitudesApi = {
   }
 };
 
-// Servicios de Adquisiciones
 export const AdquisicionesApi = {
   listar: async () => {
     const response = await apiClient.get<ProcesoResumen[]>('/api/adquisiciones');
