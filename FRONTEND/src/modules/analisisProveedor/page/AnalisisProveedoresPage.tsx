@@ -1,89 +1,77 @@
 import { useState } from "react";
-import AnalysisModeSelector from "../components/organisms/AnalysisModeSelector";
-import SupplierAnalysisTable from "../components/organisms/SupplierAnalysisTable";
-import SupplierDetailPanel from "../components/organisms/SupplierDetailPanel";
+import LaborConditionsTable from "../components/organisms/LabelConditionsTable";
+import ColorLegend from "../components/molecules/ColorLegend";
+import IndexInterpretation from "../components/molecules/IndexInterpretation";
 
-// Tipos
-export type AnalysisMode = "plazos" | "facturas";
-
-export interface SupplierAnalysis {
+export interface LaborConditionsAnalysis {
     id: number;
     proveedor: string;
-    // Modo Plazos
-    porcentajeEnPlazo?: number;
-    porcentajeRetraso?: number;
-    retrasosTotal?: string;
-    promedioDiasRetraso?: number;
-    // Modo Facturas
-    porcentajeFacturasCorrectas?: number;
-    porcentajeFacturasObservadas?: number;
-    observadasTotal?: string;
-    motivoPredominante?: string;
-    // Común
-    calificacion: number;
+    numeroTrabajadores: number;
+    indiceDenuncias: number;
+    tieneProcesos: boolean;
+    haTomaRepresalias: boolean;
 }
 
-// Datos de ejemplo
-const sampleDataPlazos: SupplierAnalysis[] = [
-    { id: 1, proveedor: "Tecnologías Andinas S.A.C.", porcentajeEnPlazo: 73, porcentajeRetraso: 27, retrasosTotal: "60/222", promedioDiasRetraso: 3, calificacion: 3 },
-    { id: 2, proveedor: "Lógico S.A.C.", porcentajeEnPlazo: 82, porcentajeRetraso: 18, retrasosTotal: "36/200", promedioDiasRetraso: 5, calificacion: 4 },
-    { id: 3, proveedor: "ElectroPerú SRL", porcentajeEnPlazo: 40, porcentajeRetraso: 60, retrasosTotal: "30/50", promedioDiasRetraso: 7, calificacion: 2 },
-    { id: 4, proveedor: "ServiHealth EIRL", porcentajeEnPlazo: 93, porcentajeRetraso: 7, retrasosTotal: "35/500", promedioDiasRetraso: 2, calificacion: 5 }
-];
-
-const sampleDataFacturas: SupplierAnalysis[] = [
-    { id: 1, proveedor: "Tecnologías Andinas S.A.C.", porcentajeFacturasCorrectas: 73, porcentajeFacturasObservadas: 27, observadasTotal: "60/222", motivoPredominante: "Fecha de emisión incorrecta", calificacion: 3 },
-    { id: 2, proveedor: "Lógico S.A.C.", porcentajeFacturasCorrectas: 82, porcentajeFacturasObservadas: 18, observadasTotal: "36/200", motivoPredominante: "Monto de pago incorrecto", calificacion: 4 },
-    { id: 3, proveedor: "ElectroPerú SRL", porcentajeFacturasCorrectas: 40, porcentajeFacturasObservadas: 60, observadasTotal: "30/50", motivoPredominante: "Factura de recepción incompleta", calificacion: 2 },
-    { id: 4, proveedor: "ServiHealth EIRL", porcentajeFacturasCorrectas: 93, porcentajeFacturasObservadas: 7, observadasTotal: "35/500", motivoPredominante: "Cantidad incorrecta", calificacion: 5 }
+// Datos de ejemplo (20 proveedores para probar paginación)
+const sampleData: LaborConditionsAnalysis[] = [
+    { id: 1, proveedor: "Tecnologías Andinas S.A.C.", numeroTrabajadores: 19, indiceDenuncias: 0.6, tieneProcesos: false, haTomaRepresalias: false },
+    { id: 2, proveedor: "Lógico S.A.C.", numeroTrabajadores: 20, indiceDenuncias: 0.4, tieneProcesos: true, haTomaRepresalias: false },
+    { id: 3, proveedor: "ElectroPerú SRL", numeroTrabajadores: 100, indiceDenuncias: 1.4, tieneProcesos: true, haTomaRepresalias: true },
+    { id: 4, proveedor: "ServiHealth EIRL", numeroTrabajadores: 40, indiceDenuncias: 2, tieneProcesos: false, haTomaRepresalias: false },
+    { id: 5, proveedor: "Construcciones del Norte SAC", numeroTrabajadores: 45, indiceDenuncias: 0.3, tieneProcesos: true, haTomaRepresalias: false },
+    { id: 6, proveedor: "Distribuidora Central EIRL", numeroTrabajadores: 12, indiceDenuncias: 1.8, tieneProcesos: false, haTomaRepresalias: true },
+    { id: 7, proveedor: "Servicios Integrales SAC", numeroTrabajadores: 30, indiceDenuncias: 0.7, tieneProcesos: true, haTomaRepresalias: false },
+    { id: 8, proveedor: "Transportes Rápidos SRL", numeroTrabajadores: 55, indiceDenuncias: 1.2, tieneProcesos: true, haTomaRepresalias: false },
+    { id: 9, proveedor: "Alimentos del Pacífico SAC", numeroTrabajadores: 80, indiceDenuncias: 0.2, tieneProcesos: true, haTomaRepresalias: false },
+    { id: 10, proveedor: "Textiles Andinos EIRL", numeroTrabajadores: 65, indiceDenuncias: 3.5, tieneProcesos: false, haTomaRepresalias: true },
+    { id: 11, proveedor: "Minería del Sur SAC", numeroTrabajadores: 150, indiceDenuncias: 2.8, tieneProcesos: false, haTomaRepresalias: true },
+    { id: 12, proveedor: "Agroindustrias Peruanas SRL", numeroTrabajadores: 90, indiceDenuncias: 0.5, tieneProcesos: true, haTomaRepresalias: false },
 ];
 
 const AnalisisProveedoresPage = () => {
-    const [mode, setMode] = useState<AnalysisMode>("plazos");
-    const [selectedSupplier, setSelectedSupplier] = useState<number | null>(null);
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 8;
 
-    const currentData = mode === "plazos" ? sampleDataPlazos : sampleDataFacturas;
-    const selectedIndex = selectedSupplier ? currentData.findIndex(s => s.id === selectedSupplier) : -1;
+    // Calcular paginación
+    const totalPages = Math.ceil(sampleData.length / itemsPerPage);
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const endIndex = startIndex + itemsPerPage;
+    const currentData = sampleData.slice(startIndex, endIndex);
 
-    const handlePrevious = () => {
-        if (selectedIndex > 0) {
-            setSelectedSupplier(currentData[selectedIndex - 1].id);
-        }
+    const handlePreviousPage = () => {
+        if (currentPage > 1) setCurrentPage(currentPage - 1);
     };
 
-    const handleNext = () => {
-        if (selectedIndex < currentData.length - 1) {
-            setSelectedSupplier(currentData[selectedIndex + 1].id);
-        }
+    const handleNextPage = () => {
+        if (currentPage < totalPages) setCurrentPage(currentPage + 1);
     };
 
     return (
         <div className="min-h-screen bg-gray-50 p-8">
             <div className="mx-auto px-4">
-                <h1 className="text-3xl font-bold text-gray-900 mb-6">Análisis de Proveedores</h1>
+                <h1 className="text-3xl font-bold text-gray-900 mb-6">Evaluación de proveedores</h1>
 
-                {/* Selector de modo */}
-                <AnalysisModeSelector mode={mode} onModeChange={setMode} />
+                {/* Título de la sección */}
+                <div className="mb-6">
+                    <h2 className="text-xl font-semibold text-blue-600 bg-blue-100 px-6 py-3 rounded-lg inline-block">
+                        Evaluación de condiciones laborales
+                    </h2>
+                </div>
 
                 {/* Tabla de análisis */}
-                <SupplierAnalysisTable
-                    mode={mode}
+                <LaborConditionsTable
                     suppliers={currentData}
-                    selectedId={selectedSupplier}
-                    onSelectSupplier={setSelectedSupplier}
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPreviousPage={handlePreviousPage}
+                    onNextPage={handleNextPage}
                 />
 
-                {/* Panel de detalle */}
-                {selectedSupplier && (
-                    <SupplierDetailPanel
-                        mode={mode}
-                        supplierId={selectedSupplier}
-                        onPrevious={handlePrevious}
-                        onNext={handleNext}
-                        hasPrevious={selectedIndex > 0}
-                        hasNext={selectedIndex < currentData.length - 1}
-                    />
-                )}
+                {/* Leyenda y explicación */}
+                <div className="mt-8 grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <ColorLegend />
+                    <IndexInterpretation />
+                </div>
             </div>
         </div>
     );
