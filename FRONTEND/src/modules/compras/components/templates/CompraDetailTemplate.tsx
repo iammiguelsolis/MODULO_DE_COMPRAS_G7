@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeftFromLine, Award, CheckCircle, Mail, FileText, Calculator, Building2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../../facturación/components/atoms';
-import { ProveedoresApi } from '../../../../services/solicitudYadquisicion/api'; 
+import { ProveedoresApi } from '../../../../services/solicitudYadquisicion/api';
 import type { ProcesoDetalle, OfertaInput, Solicitud, ItemOfertaInput } from '../../../../services/solicitudYadquisicion/types';
 import type { Proveedor } from '../../../../services/solicitudYadquisicion/types';
 
@@ -12,6 +12,7 @@ interface CompraDetailTemplateProps {
   onInvitar: (proveedoresIds: number[]) => void;
   onOfertar: (data: OfertaInput) => void;
   onAdjudicar: (idOferta: number) => void;
+  onCerrarOfertas: () => void;
 }
 
 const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
@@ -19,14 +20,15 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
   solicitud,
   onInvitar,
   onOfertar,
-  onAdjudicar
+  onAdjudicar,
+  onCerrarOfertas
 }) => {
   const navigate = useNavigate();
-  
+
   // --- ESTADOS ---
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showOfferModal, setShowOfferModal] = useState(false);
-  
+
   const [selectedProviderIds, setSelectedProviderIds] = useState<number[]>([]);
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
   const [isLoadingProveedores, setIsLoadingProveedores] = useState(false);
@@ -174,8 +176,8 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
                 <div className="absolute left-[19px] top-2 bottom-10 w-0.5 bg-gray-200 -z-10"></div>
 
                 {/* Step 1 */}
-                <TimelineStep 
-                  step={1} currentStep={currentStep} label="Nueva" desc="Invitando proveedores" 
+                <TimelineStep
+                  step={1} currentStep={currentStep} label="Nueva" desc="Invitando proveedores"
                   isActive={currentStep === 1}
                 >
                   {compra.estado === 'NUEVO' && (
@@ -186,14 +188,24 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
                 </TimelineStep>
 
                 {/* Step 2 */}
-                <TimelineStep 
-                  step={2} currentStep={currentStep} label="En invitación" desc="Registrando propuestas" 
+                <TimelineStep
+                  step={2} currentStep={currentStep} label="En invitación" desc="Registrando propuestas"
                   isActive={currentStep === 2}
                 >
                   {compra.estado === 'INVITANDO_PROVEEDORES' && (
-                    <button onClick={() => setShowOfferModal(true)} className="w-full mt-2 bg-white border border-blue-600 text-blue-600 py-2 rounded text-sm font-medium hover:bg-blue-50 flex justify-center gap-2 items-center">
-                      <FileText size={14} /> Registrar Oferta
-                    </button>
+                    <div className="space-y-2 mt-2">
+                      <button onClick={() => setShowOfferModal(true)} className="w-full bg-white border border-blue-600 text-blue-600 py-2 rounded text-sm font-medium hover:bg-blue-50 flex justify-center gap-2 items-center">
+                        <FileText size={14} /> Registrar Oferta
+                      </button>
+                      {compra.ofertas.length > 0 && (
+                        <button
+                          onClick={onCerrarOfertas}
+                          className="w-full bg-indigo-600 text-white py-2 rounded text-sm font-medium hover:bg-indigo-700 flex justify-center gap-2 items-center"
+                        >
+                          <CheckCircle size={14} /> Cerrar Recepción de Ofertas
+                        </button>
+                      )}
+                    </div>
                   )}
                 </TimelineStep>
 
@@ -208,7 +220,7 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
 
           {/* Right Column: General Info & Items */}
           <div className="lg:col-span-2 space-y-6">
-            
+
             {/* Items Table */}
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
               <h3 className="text-lg font-bold text-gray-900 mb-4">Ítems Solicitados</h3>
@@ -238,38 +250,38 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
 
             {/* Propuestas Recibidas */}
             <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
-                <h3 className="text-lg font-bold text-gray-900 mb-4">Ofertas Recibidas ({compra.ofertas.length})</h3>
-                {compra.ofertas.length === 0 ? (
-                    <div className="p-8 text-center bg-gray-50 rounded border border-dashed border-gray-300">
-                        <p className="text-gray-500">Aún no se han registrado ofertas.</p>
+              <h3 className="text-lg font-bold text-gray-900 mb-4">Ofertas Recibidas ({compra.ofertas.length})</h3>
+              {compra.ofertas.length === 0 ? (
+                <div className="p-8 text-center bg-gray-50 rounded border border-dashed border-gray-300">
+                  <p className="text-gray-500">Aún no se han registrado ofertas.</p>
+                </div>
+              ) : (
+                <div className="grid gap-4">
+                  {compra.ofertas.map(oferta => (
+                    <div key={oferta.id} className={`p-4 rounded-lg border flex justify-between items-center transition-all ${compra.ganador_id === oferta.id ? 'border-green-500 bg-green-50 shadow-md' : 'border-gray-200 hover:border-blue-300'}`}>
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-bold text-gray-900">{oferta.nombre_proveedor}</h4>
+                          {compra.ganador_id === oferta.id && <span className="bg-green-600 text-white text-xs px-2 py-0.5 rounded font-bold">GANADOR</span>}
+                        </div>
+                        <p className="text-sm text-gray-500 mt-1">{oferta.comentarios}</p>
+                        <div className="mt-2 text-xs text-gray-400">Items ofertados: {oferta.items.length}</div>
+                      </div>
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-gray-900">S/. {oferta.monto_total.toFixed(2)}</p>
+                        {compra.estado === 'EVALUANDO_OFERTAS' && (
+                          <button
+                            onClick={() => onAdjudicar(oferta.id)}
+                            className="mt-2 text-sm text-blue-600 font-medium hover:underline flex items-center justify-end gap-1"
+                          >
+                            <Award size={14} /> Adjudicar
+                          </button>
+                        )}
+                      </div>
                     </div>
-                ) : (
-                    <div className="grid gap-4">
-                        {compra.ofertas.map(oferta => (
-                            <div key={oferta.id} className={`p-4 rounded-lg border flex justify-between items-center transition-all ${compra.ganador_id === oferta.id ? 'border-green-500 bg-green-50 shadow-md' : 'border-gray-200 hover:border-blue-300'}`}>
-                                <div>
-                                    <div className="flex items-center gap-2">
-                                        <h4 className="font-bold text-gray-900">{oferta.nombre_proveedor}</h4>
-                                        {compra.ganador_id === oferta.id && <span className="bg-green-600 text-white text-xs px-2 py-0.5 rounded font-bold">GANADOR</span>}
-                                    </div>
-                                    <p className="text-sm text-gray-500 mt-1">{oferta.comentarios}</p>
-                                    <div className="mt-2 text-xs text-gray-400">Items ofertados: {oferta.items.length}</div>
-                                </div>
-                                <div className="text-right">
-                                    <p className="text-2xl font-bold text-gray-900">S/. {oferta.monto_total.toFixed(2)}</p>
-                                    {compra.estado === 'EVALUANDO_OFERTAS' && (
-                                        <button 
-                                            onClick={() => onAdjudicar(oferta.id)}
-                                            className="mt-2 text-sm text-blue-600 font-medium hover:underline flex items-center justify-end gap-1"
-                                        >
-                                            <Award size={14}/> Adjudicar
-                                        </button>
-                                    )}
-                                </div>
-                            </div>
-                        ))}
-                    </div>
-                )}
+                  ))}
+                </div>
+              )}
             </div>
 
           </div>
@@ -284,11 +296,11 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg overflow-hidden flex flex-col max-h-[80vh]">
             <div className="p-5 border-b bg-gray-50 flex justify-between items-center">
               <h3 className="font-bold text-lg text-gray-800 flex items-center gap-2">
-                <Mail className="text-blue-600" size={20}/> Invitar Proveedores
+                <Mail className="text-blue-600" size={20} /> Invitar Proveedores
               </h3>
-              <button onClick={() => setShowInviteModal(false)} className="text-gray-400 hover:text-red-500"><ArrowLeftFromLine size={20} className="rotate-180"/></button>
+              <button onClick={() => setShowInviteModal(false)} className="text-gray-400 hover:text-red-500"><ArrowLeftFromLine size={20} className="rotate-180" /></button>
             </div>
-            
+
             <div className="p-0 overflow-y-auto flex-1">
               {isLoadingProveedores ? (
                 <div className="p-8 text-center text-gray-500">Cargando lista de proveedores...</div>
@@ -297,8 +309,8 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
               ) : (
                 <div className="divide-y divide-gray-100">
                   {proveedores.map(p => (
-                    <div 
-                      key={p.id_proveedor} 
+                    <div
+                      key={p.id_proveedor}
                       onClick={() => toggleProviderSelection(p.id_proveedor)}
                       className={`p-4 flex items-center gap-4 cursor-pointer hover:bg-blue-50 transition-colors ${selectedProviderIds.includes(p.id_proveedor) ? 'bg-blue-50' : ''}`}
                     >
@@ -329,21 +341,21 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
       {showOfferModal && (
         <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[90vh]">
-            
+
             {/* Header Modal */}
             <div className="p-6 border-b bg-blue-600 text-white flex justify-between items-center">
               <div>
                 <h3 className="font-bold text-xl flex items-center gap-2">
-                  <FileText size={24}/> Registrar Oferta de Proveedor
+                  <FileText size={24} /> Registrar Oferta de Proveedor
                 </h3>
                 <p className="text-blue-100 text-sm mt-1">Ingrese los detalles económicos enviados por el proveedor.</p>
               </div>
-              <button onClick={() => setShowOfferModal(false)} className="text-white/70 hover:text-white"><ArrowLeftFromLine size={24} className="rotate-180"/></button>
+              <button onClick={() => setShowOfferModal(false)} className="text-white/70 hover:text-white"><ArrowLeftFromLine size={24} className="rotate-180" /></button>
             </div>
 
             <form onSubmit={handleOfferSubmit} className="flex-1 overflow-hidden flex flex-col">
               <div className="flex-1 overflow-y-auto p-6 space-y-6">
-                
+
                 {/* Sección 1: Selección de Proveedor */}
                 <div className="grid grid-cols-2 gap-6">
                   <div>
@@ -399,8 +411,8 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
                           </td>
                           <td className="px-4 py-2 text-center text-gray-600">{item.cantidad}</td>
                           <td className="px-4 py-2">
-                            <input 
-                              type="text" 
+                            <input
+                              type="text"
                               placeholder="Ej. Dell, HP..."
                               className="w-full border-gray-300 rounded px-2 py-1 text-sm focus:ring-blue-500 focus:border-blue-500"
                               value={item.marca}
@@ -408,8 +420,8 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
                             />
                           </td>
                           <td className="px-4 py-2">
-                            <input 
-                              type="number" 
+                            <input
+                              type="number"
                               className="w-full border-gray-300 rounded px-2 py-1 text-right text-sm focus:ring-blue-500 focus:border-blue-500"
                               value={item.precio}
                               onChange={(e) => handleItemChange(index, 'precio', parseFloat(e.target.value) || 0)}
@@ -438,7 +450,7 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
               {/* Footer Modal */}
               <div className="p-6 border-t bg-gray-50 flex justify-between items-center">
                 <div className="text-xs text-gray-500 flex items-center gap-1">
-                  <Calculator size={14}/> El total se calcula automáticamente.
+                  <Calculator size={14} /> El total se calcula automáticamente.
                 </div>
                 <div className="flex gap-3">
                   <Button type="button" variant="secondary" onClick={() => setShowOfferModal(false)}>Cancelar</Button>
@@ -460,7 +472,7 @@ const TimelineStep = ({ step, currentStep, label, desc, children, isActive }: an
   return (
     <div className="flex gap-4 pb-8 last:pb-0 relative">
       <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 border-2 transition-colors duration-300
-        ${isActive ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200' : 
+        ${isActive ? 'bg-blue-600 border-blue-600 text-white shadow-lg shadow-blue-200' :
           isPast ? 'bg-green-100 border-green-500 text-green-700' : 'bg-white border-gray-200 text-gray-300'}
       `}>
         {isPast ? <CheckCircle size={20} /> : <span className="font-bold">{step}</span>}

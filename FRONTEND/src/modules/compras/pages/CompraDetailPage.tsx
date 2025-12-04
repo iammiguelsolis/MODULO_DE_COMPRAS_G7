@@ -71,6 +71,20 @@ const CompraDetailPage = () => {
     }
   };
 
+  const handleCerrarOfertas = async () => {
+    if (!compra) return;
+    if (!window.confirm('¿Está seguro de cerrar la recepción de ofertas? Ya no se podrán recibir más propuestas.')) return;
+
+    try {
+      await AdquisicionesApi.cerrarOfertas(compra.id);
+      alert('Recepción de ofertas cerrada exitosamente');
+      fetchCompra();
+    } catch (err) {
+      console.error('Error closing offers:', err);
+      alert('Error al cerrar ofertas');
+    }
+  };
+
   if (loading) return <div className="p-8 text-center">Cargando detalles...</div>;
   if (error || !compra) return <div className="p-8 text-center text-red-600">{error || 'Compra no encontrada'}</div>;
 
@@ -81,6 +95,7 @@ const CompraDetailPage = () => {
       onInvitar={handleInvitar}
       onOfertar={handleOfertar}
       onAdjudicar={handleAdjudicar}
+      onCerrarOfertas={handleCerrarOfertas}
     />
   );
 };

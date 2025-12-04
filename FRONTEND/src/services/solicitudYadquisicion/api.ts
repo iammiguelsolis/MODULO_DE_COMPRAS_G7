@@ -1,14 +1,14 @@
 import axios from 'axios';
-import type { 
-  SolicitudInput, 
-  Solicitud, 
-  ProcesoResumen, 
-  TipoProceso, 
-  ProcesoDetalle, 
-  CanalInvitacion, 
-  OfertaInput, 
+import type {
+  SolicitudInput,
+  Solicitud,
+  ProcesoResumen,
+  TipoProceso,
+  ProcesoDetalle,
+  CanalInvitacion,
+  OfertaInput,
   OfertaOutput,
-  Proveedor 
+  Proveedor
 } from './types';
 
 const apiClient = axios.create({
@@ -60,10 +60,10 @@ export const AdquisicionesApi = {
   },
 
   generar: async (idSolicitud: number) => {
-    const response = await apiClient.post<{ 
-      tipo_proceso: TipoProceso; 
-      mensaje: string; 
-      proceso: ProcesoResumen 
+    const response = await apiClient.post<{
+      tipo_proceso: TipoProceso;
+      mensaje: string;
+      proceso: ProcesoResumen
     }>('/api/adquisiciones/generar', { id_solicitud: idSolicitud });
     return response.data;
   },
@@ -74,9 +74,9 @@ export const AdquisicionesApi = {
   },
 
   invitar: async (idCompra: number, proveedoresIds: number[], canal: CanalInvitacion = 'EMAIL') => {
-    const response = await apiClient.post<{ 
-      mensaje: string; 
-      compra: ProcesoDetalle 
+    const response = await apiClient.post<{
+      mensaje: string;
+      compra: ProcesoDetalle
     }>(`/api/adquisiciones/${idCompra}/invitar`, {
       proveedores: proveedoresIds,
       canal
@@ -85,18 +85,26 @@ export const AdquisicionesApi = {
   },
 
   ofertar: async (idCompra: number, data: OfertaInput) => {
-    const response = await apiClient.post<{ 
-      mensaje: string; 
-      oferta: OfertaOutput 
+    const response = await apiClient.post<{
+      mensaje: string;
+      oferta: OfertaOutput
     }>(`/api/adquisiciones/${idCompra}/ofertar`, data);
     return response.data;
   },
 
   adjudicar: async (idCompra: number, idOferta: number) => {
-    const response = await apiClient.put<{ 
-      mensaje: string; 
-      compra: ProcesoDetalle 
+    const response = await apiClient.put<{
+      mensaje: string;
+      compra: ProcesoDetalle
     }>(`/api/adquisiciones/${idCompra}/elegir-ganador`, { id_oferta: idOferta });
+    return response.data;
+  },
+
+  cerrarOfertas: async (idCompra: number) => {
+    const response = await apiClient.put<{
+      mensaje: string;
+      compra: ProcesoDetalle
+    }>(`/api/adquisiciones/${idCompra}/cerrar-ofertas`);
     return response.data;
   }
 };
