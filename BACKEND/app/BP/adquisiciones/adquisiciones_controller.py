@@ -108,3 +108,20 @@ def obtener_proceso(id_proceso):
         return jsonify(data), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
+      
+      
+@adquisiciones_bp.route('/<int:id_compra>/oferta/<int:id_oferta>', methods=['GET'])
+def obtener_oferta_por_adquisicion(id_compra, id_oferta):
+    try:
+        oferta = service.obtener_oferta_por_adquisicion(id_compra, id_oferta)
+
+        return jsonify({
+            "mensaje": "Oferta obtenida correctamente",
+            "oferta": oferta
+        }), 200
+
+    except Exception as e:
+        return jsonify({
+            "error": "Error al obtener la oferta",
+            "detalle": str(e)
+        }), 404

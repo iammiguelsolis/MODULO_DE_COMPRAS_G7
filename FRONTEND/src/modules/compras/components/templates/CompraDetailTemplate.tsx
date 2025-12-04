@@ -3,7 +3,7 @@ import { ArrowLeftFromLine, Award, CheckCircle, Mail, FileText, Calculator, Buil
 import { useNavigate } from 'react-router-dom';
 import { Button } from '../../../facturación/components/atoms';
 import { ProveedoresApi } from '../../../../services/solicitudYadquisicion/api';
-import type { ProcesoDetalle, OfertaInput, Solicitud, ItemOfertaInput } from '../../../../services/solicitudYadquisicion/types';
+import type { ProcesoDetalle, OfertaInput, Solicitud, ItemOfertaInput, OfertaOutput } from '../../../../services/solicitudYadquisicion/types';
 import type { Proveedor } from '../../../../services/solicitudYadquisicion/types';
 
 interface CompraDetailTemplateProps {
@@ -28,6 +28,7 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
   // --- ESTADOS ---
   const [showInviteModal, setShowInviteModal] = useState(false);
   const [showOfferModal, setShowOfferModal] = useState(false);
+  const [selectedOffer, setSelectedOffer] = useState<OfertaOutput | null>(null);
 
   const [selectedProviderIds, setSelectedProviderIds] = useState<number[]>([]);
   const [proveedores, setProveedores] = useState<Proveedor[]>([]);
@@ -284,7 +285,11 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
               ) : (
                 <div className="grid gap-4">
                   {compra.ofertas.map(oferta => (
-                    <div key={oferta.id} className={`p-4 rounded-lg border flex justify-between items-center transition-all ${compra.ganador_id === oferta.id ? 'border-green-500 bg-green-50 shadow-md' : 'border-gray-200 hover:border-blue-300'}`}>
+                    <div
+                      key={oferta.id}
+                      className={`p-4 rounded-lg border flex justify-between items-center transition-all cursor-pointer ${compra.ganador_id === oferta.id ? 'border-green-500 bg-green-50 shadow-md' : 'border-gray-200 hover:border-blue-300 hover:bg-blue-50'}`}
+                      onClick={() => setSelectedOffer(oferta)}
+                    >
                       <div>
                         <div className="flex items-center gap-2">
                           <h4 className="font-bold text-gray-900">{oferta.nombre_proveedor}</h4>
@@ -297,7 +302,10 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
                         <p className="text-2xl font-bold text-gray-900">S/. {oferta.monto_total.toFixed(2)}</p>
                         {compra.estado === 'EVALUANDO_OFERTAS' && (
                           <button
-                            onClick={() => onAdjudicar(oferta.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onAdjudicar(oferta.id);
+                            }}
                             className="mt-2 text-sm text-blue-600 font-medium hover:underline flex items-center justify-end gap-1"
                           >
                             <Award size={14} /> Adjudicar
@@ -395,23 +403,23 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
                       required
                     >
                       <option value={0}>-- Seleccione quién oferta --</option>
-                        {proveedores.map(p => {
-                          const yaOferto = compra.ofertas.some(
-                            oferta => oferta.proveedor_id === p.id_proveedor
-                          );
+                      {proveedores.map(p => {
+                        const yaOferto = compra.ofertas.some(
+                          oferta => oferta.proveedor_id === p.id_proveedor
+                        );
 
-                          console.log(compra);
+                        console.log(compra);
 
-                          return (
-                            <option
-                              key={p.id_proveedor}
-                              value={p.id_proveedor}
-                              disabled={yaOferto}
-                            >
-                              {p.razon_social} {yaOferto ? '(YA OFERTÓ)' : `(RUC: ${p.ruc})`}
-                            </option>
-                          );
-                        })}
+                        return (
+                          <option
+                            key={p.id_proveedor}
+                            value={p.id_proveedor}
+                            disabled={yaOferto}
+                          >
+                            {p.razon_social} {yaOferto ? '(YA OFERTÓ)' : `(RUC: ${p.ruc})`}
+                          </option>
+                        );
+                      })}
                     </select>
                   </div>
                   <div>
@@ -498,6 +506,68 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
                 </div>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* 3. Modal Detalle de Oferta */}
+      {selectedOffer && (
+        <div className="fixed inset-0 bg-gray-900/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl overflow-hidden flex flex-col max-h-[90vh]">
+            <div className="p-6 border-b bg-gray-50 flex justify-between items-center">
+              <div>
+                <h3 className="font-bold text-xl text-gray-900">Detalle de la Oferta</h3>
+                <p className="text-sm text-gray-500">{selectedOffer.nombre_proveedor}</p>
+              </div>
+              <button onClick={() => setSelectedOffer(null)} className="text-gray-400 hover:text-red-500">
+                <ArrowLeftFromLine size={24} className="rotate-180" />
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto">
+              <div className="mb-6 grid grid-cols-2 gap-4">
+                <div className="bg-blue-50 p-4 rounded-lg">
+                  <p className="text-sm text-blue-600 font-bold uppercase">Monto Total</p>
+                  <p className="text-2xl font-bold text-blue-900">S/. {selectedOffer.monto_total.toFixed(2)}</p>
+                </div>
+                <div className="bg-gray-50 p-4 rounded-lg">
+                  <p className="text-sm text-gray-600 font-bold uppercase">Comentarios</p>
+                  <p className="text-gray-900">{selectedOffer.comentarios || 'Sin comentarios'}</p>
+                </div>
+              </div>
+
+              <h4 className="font-bold text-gray-900 mb-3">Ítems Ofertados</h4>
+              <div className="border rounded-lg overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 text-gray-600">
+                    <tr>
+                      <th className="px-4 py-2 text-left">Ítem</th>
+                      <th className="px-4 py-2 text-center">Cant.</th>
+                      <th className="px-4 py-2 text-left">Marca</th>
+                      <th className="px-4 py-2 text-right">Precio Unit.</th>
+                      <th className="px-4 py-2 text-right">Subtotal</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {selectedOffer.items.map((item, idx) => (
+                      <tr key={idx}>
+                        <td className="px-4 py-2 font-medium text-gray-900">{item.descripcion}</td>
+                        <td className="px-4 py-2 text-center text-gray-600">{item.cantidad}</td>
+                        <td className="px-4 py-2 text-gray-600">{item.marca || '-'}</td>
+                        <td className="px-4 py-2 text-right text-gray-600">S/. {item.precio.toFixed(2)}</td>
+                        <td className="px-4 py-2 text-right font-bold text-gray-900">
+                          S/. {(item.precio * (item.cantidad || 0)).toFixed(2)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <div className="p-5 border-t bg-gray-50 flex justify-end">
+              <Button onClick={() => setSelectedOffer(null)}>Cerrar</Button>
+            </div>
           </div>
         </div>
       )}
