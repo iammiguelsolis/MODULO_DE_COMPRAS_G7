@@ -4,6 +4,7 @@ import LicitacionDetailTemplate from '../components/templates/LicitacionDetailTe
 import { useLicitacionDetail } from '../lib/hooks/useLicitacionDetail';
 import { useSupabaseUpload } from '../lib/hooks/useSupabaseUpload';
 import { proveedoresService } from '../lib/api/proveedores.service';
+import { downloadFile, getContractTemplatePath } from '../lib/documentTemplateUtils';
 import type { ProveedorDTO } from '../lib/types';
 
 const LicitacionDetailPage: React.FC = () => {
@@ -196,8 +197,11 @@ const LicitacionDetailPage: React.FC = () => {
         try {
             // Asumimos supervisor ID 1 por ahora o lo sacamos del contexto
             const supervisorId = 1;
-            const { plantilla_url } = await generarPlantillaContrato(supervisorId);
-            window.open(plantilla_url, '_blank');
+            await generarPlantillaContrato(supervisorId);
+
+            // Descargar la plantilla estática
+            const contractPath = getContractTemplatePath();
+            downloadFile(contractPath, 'Plantilla - Contrato Adjudicacion.docx');
         } catch (err: any) {
             alert(err.message);
         }
