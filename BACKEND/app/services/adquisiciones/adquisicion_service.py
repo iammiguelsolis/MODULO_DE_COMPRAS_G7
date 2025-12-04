@@ -240,3 +240,13 @@ class AdquisicionService:
             raise Exception("Esta oferta no pertenece a esta adquisición")
 
         return oferta.to_dict()
+      
+    def obtener_ofertas_por_adquisicion(self, id_compra):
+        compra = Compra.query.get(id_compra)
+        if not compra:
+            raise Exception("Proceso de compra no encontrado")
+
+        ofertas = OfertaProveedor.query.filter_by(proceso_id=id_compra).all()
+
+        return [oferta.to_dict() for oferta in ofertas]
+
