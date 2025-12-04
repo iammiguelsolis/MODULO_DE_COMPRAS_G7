@@ -72,7 +72,7 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
 
   return (
     <div className="min-h-screen bg-gray-50 p-6">
-      <div className="max-w-7xl mx-auto">
+      <div className="mx-auto">
         {/* Header */}
         <div className="mb-6">
           <div className="flex items-start justify-between mb-3">
@@ -333,7 +333,7 @@ const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
 
       {/* Invite Modal */}
       {showInviteModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
+        <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center z-50 backdrop-blur-sm">
           <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-2xl">
             <h3 className="text-xl font-bold mb-2">Invitar Proveedores</h3>
             <p className="mb-6 text-sm text-gray-500">Seleccione los proveedores que desea invitar a este proceso.</p>
