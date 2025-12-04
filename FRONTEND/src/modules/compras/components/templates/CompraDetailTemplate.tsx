@@ -1,0 +1,383 @@
+import React, { useState } from 'react';
+import { ArrowLeftFromLine, Users, FileText, Award, CheckCircle, Mail, Clock } from 'lucide-react';
+import PageHeader from '../../../../modules/licitaciones/components/molecules/PageHeader';
+import Button from '../../../../modules/licitaciones/components/atoms/Button';
+import type { ProcesoDetalle, OfertaInput, Solicitud } from '../../../../services/solicitudYadquisicion/types';
+
+interface CompraDetailTemplateProps {
+  compra: ProcesoDetalle;
+  solicitud: Solicitud | null;
+  onInvitar: (proveedoresIds: number[]) => void;
+  onOfertar: (data: OfertaInput) => void;
+  onAdjudicar: (idOferta: number) => void;
+}
+
+const CompraDetailTemplate: React.FC<CompraDetailTemplateProps> = ({
+  compra,
+  solicitud,
+  onInvitar,
+  onOfertar,
+  onAdjudicar
+}) => {
+  const [showInviteModal, setShowInviteModal] = useState(false);
+  const [showOfferModal, setShowOfferModal] = useState(false);
+  const [selectedProviderIds, setSelectedProviderIds] = useState<number[]>([]);
+
+  // Mock data for available suppliers
+  const mockAvailableSuppliers = [
+    { id: 1, name: "Tech Solutions SAC", ruc: "20123456789", email: "ventas@techsolutions.com" },
+    { id: 2, name: "Computadoras del Perú SA", ruc: "20987654321", email: "contacto@computadoras.pe" },
+    { id: 3, name: "Digital Store EIRL", ruc: "20456789123", email: "info@digitalstore.com" },
+    { id: 4, name: "TechMart Perú S.A.C.", ruc: "20789123456", email: "ventas@techmart.pe" },
+  ];
+
+  const handleInviteSubmit = () => {
+    onInvitar(selectedProviderIds);
+    setShowInviteModal(false);
+    setSelectedProviderIds([]);
+  };
+
+  const toggleProviderSelection = (id: number) => {
+    setSelectedProviderIds(prev =>
+      prev.includes(id) ? prev.filter(pId => pId !== id) : [...prev, id]
+    );
+  };
+
+  // Offer Form State
+  const [offerForm, setOfferForm] = useState<OfertaInput>({
+    id_proveedor: 0,
+    monto_total: 0,
+    comentarios: '',
+    items: []
+  });
+
+  const handleOfferSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onOfertar(offerForm);
+    setShowOfferModal(false);
+    setOfferForm({ id_proveedor: 0, monto_total: 0, comentarios: '', items: [] });
+  };
+
+  const getStatusStep = () => {
+    switch (compra.estado) {
+      case 'NUEVO': return 1;
+      case 'INVITANDO_PROVEEDORES': return 2;
+      case 'EVALUANDO_OFERTAS': return 3;
+      case 'CERRADO': return 4;
+      default: return 1;
+    }
+  };
+
+  const currentStep = getStatusStep();
+
+  return (
+    <div className="min-h-screen bg-gray-50 p-8">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 mb-2">
+              {solicitud?.titulo || `Proceso de Compra #${compra.id}`}
+            </h1>
+            <div className="flex items-center gap-4 text-sm text-gray-500">
+              <span>ID: {compra.id}</span>
+              <span>Fecha creación: {new Date(compra.fecha_creacion).toLocaleDateString()}</span>
+              <span>Comprador: {solicitud?.titulo ? 'Usuario Actual' : 'Sistema'}</span>
+            </div>
+          </div>
+          <Button variant="secondary" size="sm" onClick={() => window.history.back()}>
+            <ArrowLeftFromLine size={16} />
+            Volver
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column: Vertical Timeline */}
+          <div className="lg:col-span-1">
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+              <h3 className="font-semibold text-gray-900 mb-6">Flujo del proceso de compra</h3>
+
+              <div className="relative pl-4 border-l-2 border-gray-100 space-y-8">
+                {/* Step 1: Nueva */}
+                <div className="relative">
+                  <div className={`absolute -left-[21px] top-0 w-10 h-10 rounded-full flex items-center justify-center border-2 ${currentStep >= 1 ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-gray-300 text-gray-400'
+                    }`}>
+                    <span className="text-sm font-bold">1</span>
+                  </div>
+                  <div className="pl-6">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className={`font-medium ${currentStep >= 1 ? 'text-gray-900' : 'text-gray-500'}`}>Nueva</h4>
+                      {currentStep === 1 && <span className="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-full">Estado actual</span>}
+                    </div>
+                    <p className="text-sm text-gray-500 mb-3">Invitando proveedores</p>
+
+                    {compra.estado === 'NUEVO' && (
+                      <button
+                        onClick={() => setShowInviteModal(true)}
+                        className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <Mail size={16} />
+                        Invitar proveedores
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Step 2: En invitación */}
+                <div className="relative">
+                  <div className={`absolute -left-[21px] top-0 w-10 h-10 rounded-full flex items-center justify-center border-2 ${currentStep >= 2 ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-gray-300 text-gray-400'
+                    }`}>
+                    <span className="text-sm font-bold">2</span>
+                  </div>
+                  <div className="pl-6">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className={`font-medium ${currentStep >= 2 ? 'text-gray-900' : 'text-gray-500'}`}>En invitación</h4>
+                      {currentStep === 2 && <span className="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-full">Estado actual</span>}
+                    </div>
+                    <p className="text-sm text-gray-500 mb-3">Registrando propuesta de los proveedores</p>
+
+                    {compra.estado === 'INVITANDO_PROVEEDORES' && (
+                      <button
+                        onClick={() => setShowOfferModal(true)}
+                        className="w-full bg-white border border-blue-600 text-blue-600 py-2 px-4 rounded-lg text-sm font-medium hover:bg-blue-50 transition-colors flex items-center justify-center gap-2"
+                      >
+                        <FileText size={16} />
+                        Registrar Oferta
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Step 3: Con propuestas */}
+                <div className="relative">
+                  <div className={`absolute -left-[21px] top-0 w-10 h-10 rounded-full flex items-center justify-center border-2 ${currentStep >= 3 ? 'bg-blue-600 border-blue-600 text-white' : 'bg-white border-gray-300 text-gray-400'
+                    }`}>
+                    <span className="text-sm font-bold">3</span>
+                  </div>
+                  <div className="pl-6">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className={`font-medium ${currentStep >= 3 ? 'text-gray-900' : 'text-gray-500'}`}>Con propuestas</h4>
+                      {currentStep === 3 && <span className="bg-blue-600 text-white text-[10px] px-2 py-0.5 rounded-full">Estado actual</span>}
+                    </div>
+                    <p className="text-sm text-gray-500 mb-3">Evaluación y adjudicación</p>
+
+                    {compra.estado === 'EVALUANDO_OFERTAS' && (
+                      <div className="space-y-2">
+                        {compra.ofertas && compra.ofertas.length > 0 ? (
+                          compra.ofertas.map(oferta => (
+                            <div key={oferta.id} className="bg-gray-50 p-3 rounded border border-gray-200 text-sm">
+                              <div className="flex justify-between items-center mb-2">
+                                <span className="font-medium">{oferta.nombre_proveedor}</span>
+                                <span className="font-bold">S/. {oferta.monto_total}</span>
+                              </div>
+                              <button
+                                onClick={() => onAdjudicar(oferta.id)}
+                                className="text-blue-600 hover:underline text-xs"
+                              >
+                                Elegir Ganador
+                              </button>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-xs text-gray-400 italic">No hay ofertas registradas</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Step 4: Finalizada */}
+                <div className="relative">
+                  <div className={`absolute -left-[21px] top-0 w-10 h-10 rounded-full flex items-center justify-center border-2 ${currentStep >= 4 ? 'bg-green-600 border-green-600 text-white' : 'bg-white border-gray-300 text-gray-400'
+                    }`}>
+                    <span className="text-sm font-bold">4</span>
+                  </div>
+                  <div className="pl-6">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className={`font-medium ${currentStep >= 4 ? 'text-gray-900' : 'text-gray-500'}`}>Finalizada</h4>
+                      {currentStep === 4 && <span className="bg-green-600 text-white text-[10px] px-2 py-0.5 rounded-full">Estado actual</span>}
+                    </div>
+                    <p className="text-sm text-gray-500">Proceso de Compra finalizado</p>
+                    {compra.ganador_id && (
+                      <div className="mt-2 flex items-center gap-2 text-green-700 bg-green-50 p-2 rounded text-sm">
+                        <Award size={16} />
+                        <span className="font-medium">Ganador: {compra.ofertas.find(o => o.proveedor_id === compra.ganador_id)?.nombre_proveedor}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Right Column: General Info & Items */}
+          <div className="lg:col-span-2 space-y-6">
+            {/* General Info Card */}
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+              <h3 className="font-semibold text-gray-900 mb-6">Información General</h3>
+              <div className="space-y-4">
+                <div className="flex justify-between py-3 border-b border-gray-100">
+                  <span className="text-gray-500">Presupuesto Máximo</span>
+                  <span className="font-medium text-gray-900">S/. {solicitud?.total ? solicitud.total.toLocaleString() : '---'}</span>
+                </div>
+                <div className="flex justify-between py-3 border-b border-gray-100">
+                  <span className="text-gray-500">Solicitud de Origen</span>
+                  <span className="font-medium text-gray-900">Nº {compra.solicitud_id}</span>
+                </div>
+                <div className="flex justify-between py-3 border-b border-gray-100">
+                  <span className="text-gray-500">Estado</span>
+                  <span className={`font-medium ${compra.estado === 'CERRADO' ? 'text-green-600' : 'text-blue-600'}`}>
+                    {compra.estado.replace('_', ' ')}
+                  </span>
+                </div>
+                <div className="flex justify-between py-3 border-b border-gray-100">
+                  <span className="text-gray-500">Comprador</span>
+                  <span className="font-medium text-gray-900">Usuario Actual</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Items Table */}
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-200">
+              <h3 className="font-semibold text-gray-900 mb-6">Ítems</h3>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left">
+                  <thead className="bg-gray-50 text-gray-600 font-medium">
+                    <tr>
+                      <th className="px-4 py-3 rounded-l-lg">Tipo</th>
+                      <th className="px-4 py-3">Descripción</th>
+                      <th className="px-4 py-3 text-center">Cantidad / Horas</th>
+                      <th className="px-4 py-3 text-right">Precio Uni. / Tarifa</th>
+                      <th className="px-4 py-3 text-right rounded-r-lg">Total Item</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-100">
+                    {solicitud?.items && solicitud.items.length > 0 ? (
+                      solicitud.items.map((item) => (
+                        <tr key={item.id}>
+                          <td className="px-4 py-3">
+                            <span className="bg-gray-100 text-gray-700 px-2 py-1 rounded text-xs">
+                              {item.tipo_item}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3 font-medium text-gray-900">
+                            {item.nombre_material || item.nombre_servicio || '---'}
+                          </td>
+                          <td className="px-4 py-3 text-center">
+                            {item.cantidad || item.horas_estimadas || 0}
+                          </td>
+                          <td className="px-4 py-3 text-right">
+                            S/. {item.precio_unitario || item.tarifa_hora || 0}
+                          </td>
+                          <td className="px-4 py-3 text-right font-medium">
+                            S/. {item.subtotal}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
+                          No hay ítems registrados en la solicitud.
+                        </td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Invite Modal */}
+      {showInviteModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
+          <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-2xl">
+            <h3 className="text-xl font-bold mb-2">Invitar Proveedores</h3>
+            <p className="mb-6 text-sm text-gray-500">Seleccione los proveedores que desea invitar a este proceso.</p>
+
+            <div className="space-y-3 mb-6 max-h-60 overflow-y-auto">
+              {mockAvailableSuppliers.map(p => (
+                <div
+                  key={p.id}
+                  className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${selectedProviderIds.includes(p.id) ? 'border-blue-500 bg-blue-50' : 'border-gray-200 hover:bg-gray-50'
+                    }`}
+                  onClick={() => toggleProviderSelection(p.id)}
+                >
+                  <div className={`w-5 h-5 rounded border flex items-center justify-center ${selectedProviderIds.includes(p.id) ? 'bg-blue-600 border-blue-600' : 'border-gray-300'
+                    }`}>
+                    {selectedProviderIds.includes(p.id) && <CheckCircle size={14} className="text-white" />}
+                  </div>
+                  <div>
+                    <p className="font-medium text-gray-900">{p.name}</p>
+                    <p className="text-xs text-gray-500">{p.email}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex justify-end gap-3">
+              <Button variant="secondary" onClick={() => setShowInviteModal(false)}>Cancelar</Button>
+              <Button onClick={handleInviteSubmit} disabled={selectedProviderIds.length === 0}>
+                Invitar ({selectedProviderIds.length})
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Offer Modal */}
+      {showOfferModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 backdrop-blur-sm">
+          <div className="bg-white p-6 rounded-xl w-full max-w-md shadow-2xl">
+            <h3 className="text-xl font-bold mb-6">Registrar Oferta</h3>
+            <form onSubmit={handleOfferSubmit} className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Proveedor</label>
+                <select
+                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  value={offerForm.id_proveedor}
+                  onChange={e => setOfferForm({ ...offerForm, id_proveedor: Number(e.target.value) })}
+                  required
+                >
+                  <option value={0}>Seleccione un proveedor...</option>
+                  {mockAvailableSuppliers.map(p => (
+                    <option key={p.id} value={p.id}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Monto Total (S/.)</label>
+                <input
+                  type="number"
+                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  value={offerForm.monto_total}
+                  onChange={e => setOfferForm({ ...offerForm, monto_total: Number(e.target.value) })}
+                  required
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Comentarios</label>
+                <textarea
+                  className="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  rows={3}
+                  value={offerForm.comentarios}
+                  onChange={e => setOfferForm({ ...offerForm, comentarios: e.target.value })}
+                  placeholder="Detalles adicionales de la oferta..."
+                />
+              </div>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" variant="secondary" onClick={() => setShowOfferModal(false)}>Cancelar</Button>
+                <Button type="submit">Registrar Oferta</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
+export default CompraDetailTemplate;
