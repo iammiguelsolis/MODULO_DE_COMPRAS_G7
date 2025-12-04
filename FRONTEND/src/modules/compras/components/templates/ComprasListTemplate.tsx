@@ -1,4 +1,3 @@
-
 import PageHeader from '../../../../modules/licitaciones/components/molecules/PageHeader';
 import FilterPanel from '../../../../modules/licitaciones/components/organisms/FilterPanel';
 import Pagination from '../../../../modules/licitaciones/components/molecules/Pagination';
@@ -43,14 +42,14 @@ const ComprasListTemplate = ({
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen bg-gray-50 p-8">
+    <div className="min-h-screen bg-gray-50 p-6">
       <div className="mx-auto">
         <PageHeader
           title="Gestión de Compras"
           description="Consulte el estado y avance de todos los procesos de compra."
-          className="mb-8"
+          className="mb-6"
         />
-        <div className="flex flex-col gap-6">
+        <div className="flex flex-col gap-4">
           <FilterPanel
             searchQuery={searchQuery}
             onSearchQueryChange={onSearchQueryChange}
@@ -64,56 +63,62 @@ const ComprasListTemplate = ({
             onClearFilters={onClearFilters}
           />
 
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-xl shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left text-gray-500">
-                <thead className="text-xs text-gray-700 uppercase bg-gray-50 border-b border-gray-200">
+              <table className="w-full text-sm">
+                <thead className="bg-blue-500 text-white">
                   <tr>
-                    <th className="px-6 py-3 font-medium">ID Proceso</th>
-                    <th className="px-6 py-3 font-medium">Solicitud ID</th>
-                    <th className="px-6 py-3 font-medium">Tipo</th>
-                    <th className="px-6 py-3 font-medium">Estado</th>
-                    <th className="px-6 py-3 font-medium">Fecha Creación</th>
-                    <th className="px-6 py-3 font-medium text-right">Acciones</th>
+                    <th className="px-6 py-4 text-left font-semibold text-xs uppercase tracking-wider">ID Proceso</th>
+                    <th className="px-6 py-4 text-left font-semibold text-xs uppercase tracking-wider">Solicitud ID</th>
+                    <th className="px-6 py-4 text-left font-semibold text-xs uppercase tracking-wider">Tipo</th>
+                    <th className="px-6 py-4 text-left font-semibold text-xs uppercase tracking-wider">Estado</th>
+                    <th className="px-6 py-4 text-left font-semibold text-xs uppercase tracking-wider">Fecha Creación</th>
+                    <th className="px-6 py-4 text-left font-semibold text-xs uppercase tracking-wider">Acciones</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-gray-200">
+                <tbody className="divide-y divide-gray-100 bg-white">
                   {compras.length > 0 ? (
                     compras.map((compra) => (
                       <tr key={compra.id} className="hover:bg-gray-50 transition-colors">
-                        <td className="px-6 py-4 font-medium text-gray-900">
-                          #{compra.id}
+                        <td className="px-6 py-4 font-semibold text-gray-900">
+                          {compra.id}
                         </td>
-                        <td className="px-6 py-4 text-gray-600">
+                        <td className="px-6 py-4 text-gray-700">
                           #{compra.solicitud_id}
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${compra.tipo_proceso === 'COMPRA'
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-purple-100 text-purple-800'
-                            }`}>
+                          <span className={`inline-flex items-center px-3 py-1 rounded-md text-xs font-semibold ${
+                            compra.tipo_proceso === 'COMPRA'
+                              ? 'bg-blue-100 text-blue-700'
+                              : 'bg-purple-100 text-purple-700'
+                          }`}>
                             {compra.tipo_proceso}
                           </span>
                         </td>
                         <td className="px-6 py-4">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${compra.estado === 'NUEVO' ? 'bg-gray-100 text-gray-800' :
-                              compra.estado === 'INVITANDO_PROVEEDORES' ? 'bg-yellow-100 text-yellow-800' :
-                                compra.estado === 'EVALUANDO_OFERTAS' ? 'bg-orange-100 text-orange-800' :
-                                  compra.estado === 'CERRADO' ? 'bg-green-100 text-green-800' :
-                                    'bg-gray-100 text-gray-800'
-                            }`}>
+                          <span className={`inline-flex items-center px-3 py-1 rounded-md text-xs font-semibold ${
+                            compra.estado === 'NUEVO' ? 'bg-blue-50 text-blue-600' :
+                            compra.estado === 'INVITANDO_PROVEEDORES' ? 'bg-blue-50 text-blue-600' :
+                            compra.estado === 'EVALUANDO_OFERTAS' ? 'bg-blue-50 text-blue-600' :
+                            compra.estado === 'CERRADO' ? 'bg-green-50 text-green-600' :
+                            'bg-gray-100 text-gray-700'
+                          }`}>
                             {compra.estado.replace('_', ' ')}
                           </span>
                         </td>
-                        <td className="px-6 py-4 text-gray-600">
+                        <td className="px-6 py-4 text-gray-700">
                           {new Date(compra.fecha_creacion).toLocaleDateString()}
                         </td>
-                        <td className="px-6 py-4 text-right">
+                        <td className="px-6 py-4">
                           <button
                             onClick={() => navigate(`/compras/${compra.id}`)}
-                            className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                            className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
                           >
-                            Ver detalle
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                            Ver detalles
                           </button>
                         </td>
                       </tr>
