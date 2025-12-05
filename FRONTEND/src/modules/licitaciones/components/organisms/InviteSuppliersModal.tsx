@@ -7,7 +7,7 @@ import Label from '../atoms/Label';
 import Input from '../atoms/Input';
 import Textarea from '../atoms/Textarea';
 import Checkbox from '../atoms/Checkbox';
-import { downloadMultipleFilesAsZip } from '../../lib/documentTemplateUtils';
+import { downloadMultipleFilesAsZip, getTemplatePathById } from '../../lib/documentTemplateUtils';
 import type { ProveedorDTO, DocumentoRequeridoDTO } from '../../lib/types';
 import './InviteSuppliersModal.css';
 
@@ -18,7 +18,6 @@ interface InviteSuppliersModalProps {
     licitacionTitle: string;
     estimatedAmount: number;
     maxBudget: number;
-    // TODO: MOCK - Debe venir de proveedoresService.listar()
     availableSuppliers: ProveedorDTO[];
     requiredDocuments: DocumentoRequeridoDTO[];
     onSuppliersInvited?: (suppliers: string[]) => void;
@@ -103,8 +102,12 @@ Juan Pérez - Módulo de Compras`;
         try {
             const files = requiredDocuments
                 .map(doc => {
-                    // Usar ruta_plantilla del DTO si existe, o construirla/buscarla
-                    const path = doc.ruta_plantilla;
+                    // Usar getTemplatePathById para mapear el ID a la ruta correcta del archivo
+                    const docId = doc.ruta_plantilla;
+                    if (!docId) return null;
+
+                    // Importar dinámicamente la función getTemplatePathById
+                    const path = getTemplatePathById(docId);
                     return path ? { path, name: doc.nombre } : null;
                 })
                 .filter((f): f is { path: string; name: string } => f !== null);

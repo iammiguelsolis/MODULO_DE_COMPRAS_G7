@@ -11,12 +11,39 @@ class CrearLicitacionDTO:
     fecha_limite: str
     comprador_id: int
 
+
+# DTO Ligero para la lista (sin items ni documentos para mejor rendimiento)
+@dataclass
+class LicitacionListItemDTO:
+    id_licitacion: int
+    titulo: str
+    estado: str
+    presupuesto_max: float
+    fecha_limite: Optional[str]
+    fecha_creacion: Optional[str]
+    solicitud_id: Optional[int]
+    
+    @staticmethod
+    def from_model(licitacion):
+        return LicitacionListItemDTO(
+            id_licitacion=licitacion.id,
+            titulo=licitacion.solicitud_origen.titulo if licitacion.solicitud_origen else "",
+            estado=licitacion.estado_actual.get_nombre(),
+            presupuesto_max=float(licitacion.presupuesto_max) if licitacion.presupuesto_max else 0.0,
+            fecha_limite=licitacion.fecha_limite.isoformat() if licitacion.fecha_limite else None,
+            fecha_creacion=licitacion.fecha_creacion.isoformat() if licitacion.fecha_creacion else None,
+            solicitud_id=licitacion.solicitud_id
+        )
+
+
 @dataclass
 class LicitacionResponseDTO:
     id_licitacion: int
     estado: str
     presupuesto_max: float
     fecha_limite: str
+    fecha_creacion: str
+    solicitud_id: Optional[int]
     items: List[ItemDTO]
     documentos_requeridos: List[DocumentoRequeridoDTO]
     titulo: str = ""
@@ -95,6 +122,8 @@ class LicitacionResponseDTO:
             estado=licitacion.estado_actual.get_nombre(),
             presupuesto_max=float(licitacion.presupuesto_max) if licitacion.presupuesto_max else 0.0,
             fecha_limite=licitacion.fecha_limite.isoformat() if licitacion.fecha_limite else None,
+            fecha_creacion=licitacion.fecha_creacion.isoformat() if licitacion.fecha_creacion else None,
+            solicitud_id=licitacion.solicitud_id,
             items=items_dto,
             documentos_requeridos=docs_requeridos,
             proveedor_ganador=proveedor_data,

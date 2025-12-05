@@ -243,6 +243,8 @@ const LicitacionDetailPage: React.FC = () => {
                 timestamps={licitacion.timestamps}
                 estimatedAmount={licitacion.estimatedAmount}
                 presupuestoMaximo={licitacion.presupuestoMaximo}
+                fechaLimite={licitacion.fechaLimite}
+                solicitudId={licitacion.solicitudId}
                 proveedoresCount={licitacion.providers?.length || 0}
                 propuestasRegistradas={propuestas.length}
                 propuestasAprobadasTecnicamente={propuestas.filter(p => p.estado_tecnico === 'APROBADO').length}

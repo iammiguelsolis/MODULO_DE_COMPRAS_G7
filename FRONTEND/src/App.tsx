@@ -35,7 +35,7 @@ function App() {
 
           <Route path="/licitaciones" element={<LicitacionesListPage />} />
           <Route path="/licitacion/:id" element={<LicitacionDetailPage />} />
-          <Route path="/licitaciones/crear" element={<LicitacionPage />} />
+          <Route path="/licitaciones/completar/:id" element={<LicitacionPage />} />
 
 
           <Route path="/ordenes" element={<GenerarOrdenCompra />} />

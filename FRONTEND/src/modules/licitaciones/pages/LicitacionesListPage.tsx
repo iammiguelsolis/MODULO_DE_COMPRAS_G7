@@ -6,6 +6,7 @@ import PendingRequestsModal from '../components/organisms/PendingRequestsModal';
 const LicitacionesListPage = () => {
     const {
         licitaciones,
+        totalItems,
         loading,
         error,
         filtros,
@@ -68,7 +69,7 @@ const LicitacionesListPage = () => {
                 onApplyFilters={handleApplyFilters}
                 onClearFilters={handleClearFilters}
                 currentPage={filtros.page}
-                totalItems={licitaciones.length} // Nota: Backend debería devolver total para paginación real, por ahora asumimos length
+                totalItems={totalItems}
                 itemsPerPage={filtros.per_page}
                 onPageChange={handlePageChange}
                 onOpenPendingRequests={() => setIsPendingModalOpen(true)}

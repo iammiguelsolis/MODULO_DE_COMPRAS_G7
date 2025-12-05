@@ -101,6 +101,7 @@ export interface LicitacionDetail {
   estimatedAmount: number;
   presupuestoMaximo: number;
   fechaLimite?: string; // Fecha límite para recibir propuestas
+  solicitudId?: number; // ID de la solicitud de origen
   items: Item[];
   requiredDocuments: DocumentoRequeridoDTO[];
   providers?: Provider[];
@@ -306,6 +307,17 @@ export interface ContratoDTO {
   estado: string;
 }
 
+// DTO Ligero para la lista (mejor rendimiento)
+export interface LicitacionListItemDTO {
+  id_licitacion: number;
+  titulo: string;
+  estado: string;
+  presupuesto_max: number;
+  fecha_limite: string | null;
+  fecha_creacion: string | null;
+  solicitud_id: number | null;
+}
+
 export interface LicitacionResponseDTO {
   id_licitacion: number;
   titulo: string;
@@ -313,9 +325,11 @@ export interface LicitacionResponseDTO {
   estado: string;
   presupuesto_max: number;
   fecha_limite: string | null;
+  fecha_creacion?: string;
+  solicitud_id?: number; // ID de la solicitud origen
   items: ItemDTO[];
   documentos_requeridos: DocumentoRequeridoDTO[];
-  proveedor_ganador?: any; // Ajustar según necesidad
+  proveedor_ganador?: any;
   contrato?: ContratoDTO;
   cantidad_invitaciones?: number;
   cantidad_propuestas?: number;

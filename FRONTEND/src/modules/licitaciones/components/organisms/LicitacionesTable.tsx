@@ -31,8 +31,8 @@ const LicitacionesTable: React.FC<LicitacionesTableProps> = ({ licitaciones }) =
                                     <td className="font-medium">{lic.id}</td>
                                     <td>{lic.nombre || 'Sin título'}</td>
                                     <td>
-                                        {lic.fechaCreacion
-                                            ? new Date(lic.fechaCreacion + 'T00:00:00').toLocaleDateString('es-PE', { timeZone: 'UTC' })
+                                        {lic.fechaCreacion && lic.fechaCreacion.trim() !== ''
+                                            ? new Date(lic.fechaCreacion).toLocaleDateString('es-PE')
                                             : 'N/A'
                                         }
                                     </td>
