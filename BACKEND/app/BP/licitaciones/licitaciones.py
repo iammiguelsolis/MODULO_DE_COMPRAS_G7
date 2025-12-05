@@ -42,8 +42,6 @@ def crear_licitacion():
     """
     try:
         data = request.get_json()
-        # Aquí se podría usar una librería de validación como Marshmallow
-        # Por simplicidad pasamos el dict directo al servicio
         nueva_licitacion = service.crear_licitacion(data)
         return jsonify(LicitacionResponseDTO.from_model(nueva_licitacion)), 201
     except Exception as e:

@@ -19,8 +19,7 @@ class LicitacionService:
                 fecha_limite = datetime.strptime(fecha_limite, '%Y-%m-%d')
 
             # Crear instancia base
-            # NOTA: Al heredar de ProcesoAdquisicion, el ID se genera automáticamente 
-            # en la tabla padre 'procesos_adquisicion'.
+            # NOTA: Al heredar de ProcesoAdquisicion, el ID se genera automáticamente en la tabla padre 'procesos_adquisicion'.
             licitacion = Licitacion(
                 presupuesto_max=data.get('presupuesto_max'),
                 fecha_limite=fecha_limite,
@@ -47,8 +46,6 @@ class LicitacionService:
 
             for doc in docs_default:
                 nuevo_doc = DocumentoRequerido(
-                    # CAMBIO IMPORTANTE: Usamos 'id' en lugar de 'id_licitacion'
-                    # debido a la herencia de ProcesoAdquisicion.
                     licitacion_id=licitacion.id, 
                     tipo=doc['tipo'],
                     nombre=doc['nombre'],
@@ -81,8 +78,6 @@ class LicitacionService:
                 query = query.filter(Licitacion._estado_nombre == filtros['estado'])
             
             if 'titulo' in filtros:
-                # Nota: Si el título está en la tabla Solicitud, aquí podrías necesitar un join.
-                # Asumimos que Licitacion tiene acceso al título o propiedad proxy.
                 query = query.filter(Licitacion.titulo.ilike(f"%{filtros['titulo']}%"))
 
             if 'id' in filtros:

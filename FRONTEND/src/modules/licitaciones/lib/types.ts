@@ -2,7 +2,7 @@ import React from "react";
 
 export interface Item {
   id: string;
-  type: "Producto" | "Servicio";
+  type: "MATERIAL" | "SERVICIO";
   description: string;
   quantity?: number;
   price?: number;
@@ -61,7 +61,7 @@ export interface DocumentCategory {
  */
 export interface Provider {
   id: number;
-  name: string;
+  razon_social: string;
   ruc: string;
   email: string;
 }
@@ -88,14 +88,26 @@ export interface LicitacionDetail {
   buyer: string;
   supervisor: string;
   currentStatus: LicitacionStatus;
-  timestamps: Partial<Record<LicitacionStatus, string>>;
+  timestamps: {
+    creacion: string;
+    aprobacion?: string;
+    invitacion?: string;
+    cierre_invitacion?: string;
+    inicio_evaluacion?: string;
+    fin_evaluacion?: string;
+    adjudicacion?: string;
+    contrato?: string;
+  };
   estimatedAmount: number;
   presupuestoMaximo: number;
   fechaLimite?: string; // Fecha límite para recibir propuestas
   items: Item[];
-  requiredDocuments: Documento[];
+  requiredDocuments: DocumentoRequeridoDTO[];
   providers?: Provider[];
+  invitedProviders?: Provider[];
   contract?: Contract;
+  cantidadInvitaciones?: number;
+  cantidadPropuestas?: number;
 }
 
 /**
@@ -187,6 +199,7 @@ export interface DocumentEvaluation {
   documentId: string;
   documentName: string;
   fileSize: string;
+  url?: string;
   status: DocumentEvaluationStatus; // null = no evaluado aún
 }
 
@@ -236,7 +249,75 @@ export interface EconomicEvaluation {
 /**
  * Resultado final con ganador
  */
-export interface EconomicEvaluationResults {
-  evaluations: EconomicEvaluation[];
-  winnerId?: number; // ID del proveedor ganador (mayor puntuación)
+// ==================================================================
+// BACKEND DTO TYPES
+// ==================================================================
+
+export interface ItemDTO {
+  id: number;
+  nombre: string;
+  cantidad: number;
+  tipo: "MATERIAL" | "SERVICIO";
+  comentario?: string;
+  precio_referencia: number;
+}
+
+export interface DocumentoRequeridoDTO {
+  id_requerido: number;
+  nombre: string;
+  tipo: string;
+  obligatorio: boolean;
+  ruta_plantilla?: string;
+}
+
+export interface ProveedorDTO {
+  id: number;
+  razon_social: string;
+  ruc: string;
+  email: string;
+}
+
+export interface DocumentoDTO {
+  id_documento: number;
+  nombre: string;
+  url_archivo: string;
+  tipo: string;
+  validado: boolean;
+  observaciones: string;
+  fecha_subida: string;
+}
+
+export interface PropuestaResponseDTO {
+  id_propuesta: number;
+  fecha_presentacion: string;
+  estado_tecnico: "PENDIENTE" | "APROBADO" | "RECHAZADO";
+  estado_economico: "PENDIENTE" | "APROBADO" | "RECHAZADO";
+  puntuacion_economica?: number;
+  es_ganadora: boolean;
+  proveedor: ProveedorDTO;
+  documentos: DocumentoDTO[];
+}
+
+export interface ContratoDTO {
+  id_contrato: number;
+  fecha_generacion: string;
+  plantilla_url: string;
+  documento_firmado_url?: string;
+  estado: string;
+}
+
+export interface LicitacionResponseDTO {
+  id_licitacion: number;
+  titulo: string;
+  comentarios: string;
+  estado: string;
+  presupuesto_max: number;
+  fecha_limite: string | null;
+  items: ItemDTO[];
+  documentos_requeridos: DocumentoRequeridoDTO[];
+  proveedor_ganador?: any; // Ajustar según necesidad
+  contrato?: ContratoDTO;
+  cantidad_invitaciones?: number;
+  cantidad_propuestas?: number;
+  proveedores_invitados?: ProveedorDTO[];
 }

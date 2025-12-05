@@ -3,8 +3,8 @@ from app.bdd import db
 from .orden_compra import OrdenCompra, LineaOC
 from .oc_enums import EstadoOC, TipoPago, Moneda
 
-# ESTE es el blueprint que Flask quiere importar
-oc_bp = Blueprint('orden_compra', __name__, url_prefix='/api/ordenes-compra')
+# blueprint que Flask quiere importar
+oc_bp = Blueprint('ordenes_compra', __name__, url_prefix='/api/ordenes-compra')
 
 
 # ---------- Helpers de serialización ----------
@@ -46,10 +46,41 @@ def serialize_orden(oc: OrdenCompra):
 
 @oc_bp.route('/', methods=['GET'])
 def listar_ordenes():
-    """Lista todas las órdenes de compra."""
-    ordenes = OrdenCompra.query.all()
-    data = [serialize_orden(oc) for oc in ordenes]
-    return jsonify(data), 200
+    """Lista todas las órdenes de compra.
+    Se pueden agregar filtros por estado y tipo_origen usando query params:   
+    """
+    estado_param = request.args.get('estado')        # ej: 'EN_PROCESO'
+    tipo_origen_param = request.args.get('tipo_origen')  # ej: 'RFQ', 'LICITACION', 'DIRECTA'
+
+    query = OrdenCompra.query
+
+    if estado_param:
+        try:
+            estado_enum = EstadoOC[estado_param]  # EstadoOC.EN_PROCESO, etc.
+            query = query.filter(OrdenCompra.estado == estado_enum)
+        except KeyError:
+            return jsonify({"error": f"Estado inválido: {estado_param}"}), 400
+
+    if tipo_origen_param:
+        query = query.filter(OrdenCompra.tipo_origen == tipo_origen_param.upper())
+
+    ordenes = query.order_by(OrdenCompra.fecha_creacion.desc()).all()
+
+    resultado = []
+    for oc in ordenes:
+        resultado.append({
+            "id": oc.id_orden_compra,
+            "numero_referencia": oc.numero_referencia,
+            "titulo": oc.titulo,
+            "proveedor": oc.proveedor.razon_social if hasattr(oc.proveedor, 'razon_social') else getattr(oc.proveedor, 'nombre', None),
+            "fecha_creacion": oc.fecha_creacion.isoformat() if oc.fecha_creacion else None,
+            "estado": oc.estado.value if oc.estado else None,
+            "tipo_origen": oc.tipo_origen,
+            "moneda": oc.moneda.value if hasattr(oc.moneda, 'value') else oc.moneda,
+            "total": oc.calcular_total()
+        })
+
+    return jsonify(resultado), 200
 
 
 @oc_bp.route('/<int:id_orden>', methods=['GET'])
@@ -127,11 +158,11 @@ def crear_orden():
 
         # Mapear modalidad a Enum TipoPago
         if modalidad_str == "TRANSFERENCIA":
-            modalidad_pago = TipoPago.transferencia
+            modalidad_pago = TipoPago.TRANSFERENCIA
         elif modalidad_str == "CREDITO":
-            modalidad_pago = TipoPago.credito
+            modalidad_pago = TipoPago.CREDITO
         else:
-            modalidad_pago = TipoPago.contado
+            modalidad_pago = TipoPago.CONTADO
 
         nueva_oc = OrdenCompra(
             tipo_origen=tipo_origen,
@@ -156,7 +187,7 @@ def crear_orden():
                 id_item=l.get("productId"),  # aquí está simplificado
                 precio_unitario=l.get("unitPrice", 0),
                 cantidad=l.get("quantity", 0),
-                estado=EstadoOC.Borrador,  # o algún estado de línea inicial
+                estado=EstadoOC.BORRADOR,  # o algún estado de línea inicial
             )
             nueva_oc.lineas.append(linea)
 
@@ -179,7 +210,7 @@ def cerrar_orden(id_orden):
     oc = OrdenCompra.query.get_or_404(id_orden)
 
     try:
-        oc.cambiar_estado(EstadoOC.Cerrada)
+        oc.cambiar_estado(EstadoOC.CERRADA)
         db.session.commit()
         return jsonify({
             "message": "Orden cerrada",

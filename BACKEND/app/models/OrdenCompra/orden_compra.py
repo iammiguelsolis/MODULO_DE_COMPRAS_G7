@@ -140,7 +140,7 @@ class LineaOC(db.Model):
     # Estado logístico
     estado = db.Column(
         db.Enum(EstadoLineaOC, values_callable=lambda x: [e.value for e in x]),
-        default=EstadoLineaOC.TODAVIA_NO_CULMINA_PLAZO,
+        default=EstadoLineaOC.Todavia_no_cp,
         nullable=False,
     )
 
