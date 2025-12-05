@@ -14,6 +14,7 @@ export interface FacturaProveedor {
   id: string;
   numero_factura: string;
   version: number;
+  proveedor_id?: number;
   proveedor_nombre: string;
   proveedor_ruc: string;
   fecha_emision: string;
@@ -32,18 +33,20 @@ export interface FacturaProveedor {
 export interface FacturaDetalle extends FacturaProveedor {
   serie: string;
   numero: string;
-  lineas_detalle?: LineaDetalle[];
+  lineas?: LineaDetalle[];
 }
 
 export interface LineaDetalle {
-  id: string;
-  item: number;
+  id?: string;
+  item?: number;
   descripcion: string;
   cantidad: number;
   precio_unitario: number;
-  descuento: number;
-  igv: number;
-  subtotal: number;
+  descuento?: number;
+  igv?: number;
+  impuestos_linea: number;
+  subtotal?: number;
+  total_linea: number;
   estado_conciliacion?: string;
 }
 
@@ -59,7 +62,7 @@ export interface Adjunto {
 export interface ResultadoConciliacion {
   id: string;
   factura_id: string;
-  estado: 'EXITOSA' | 'FALLIDA';
+  resultado: 'EXITOSA' | 'FALLIDA' | 'CON_DISCREPANCIA' | 'ERROR_ESTADO';
   discrepancias: string[];
   mensaje: string;
   fecha_conciliacion: string;
@@ -74,17 +77,19 @@ export interface TrazabilidadLog {
 }
 
 export interface CreateFacturaManual {
-  proveedor_nombre: string;
-  proveedor_ruc: string;
-  serie: string;
-  numero: string;
-  fecha_emision: string;
-  fecha_vencimiento: string;
+  numeroFactura: string;
+  proveedorId: number;
+  fechaEmision: string;
+  fechaVencimiento: string;
   moneda: string;
-  sub_total: number;
-  igv: number;
-  total: number;
-  orden_compra_id?: string;
+  ordenCompraId?: string;
+  lineas: {
+    descripcion: string;
+    cantidad: number;
+    precioUnitario: number;
+    impuestosLinea: number;
+    totalLinea: number;
+  }[];
 }
 
 // ============= API FUNCTIONS =============
@@ -104,7 +109,7 @@ export const crearFacturaManual = async (data: CreateFacturaManual): Promise<Fac
 // Crear factura con prellenado automático
 export const crearFacturaPrellenado = async (file: File): Promise<FacturaProveedor> => {
   const formData = new FormData();
-  formData.append('archivo', file);
+  formData.append('file', file);
   
   const response = await api.post('/prellenado', formData, {
     headers: {

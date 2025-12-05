@@ -209,21 +209,72 @@ def actualizar_factura(id_factura):
     if not factura:
         return jsonify({"error": "Factura no encontrada"}), 404
     
+    # Solo permitir edición de facturas en BORRADOR
+    if factura.estado != EstadoFactura.BORRADOR:
+        return jsonify({"error": "Solo se pueden editar facturas en estado BORRADOR"}), 400
+    
     data = request.get_json()
     
-    # Actualización de campos permitidos
-    # Por ahora, el requerimiento principal es la Orden de Compra
-    if 'ordenCompraId' in data:
-        factura.orden_compra_id = data.get('ordenCompraId')
-        
-    # Aquí se podrían agregar más campos si fuera necesario
-    
     try:
+        # Actualizar campos básicos
+        if 'ordenCompraId' in data:
+            factura.orden_compra_id = data.get('ordenCompraId')
+        
+        if 'numeroFactura' in data:
+            factura.numero_factura = data.get('numeroFactura')
+        
+        if 'proveedorId' in data:
+            factura.proveedor_id = data.get('proveedorId')
+        
+        # Actualizar fechas
+        if 'fechaEmision' in data:
+            factura.fecha_emision = datetime.strptime(data.get('fechaEmision'), '%Y-%m-%d').date()
+        
+        if 'fechaVencimiento' in data:
+            factura.fecha_vencimiento = datetime.strptime(data.get('fechaVencimiento'), '%Y-%m-%d').date()
+        
+        # Actualizar moneda
+        if 'moneda' in data:
+            moneda_str = data.get('moneda')
+            factura.moneda = Moneda[moneda_str]
+        
+        # Actualizar líneas si se proporcionan
+        if 'lineas' in data:
+            # Eliminar líneas existentes
+            LineaFactura.query.filter_by(factura_id=factura.id).delete()
+            
+            # Agregar nuevas líneas
+            lineas_json = data.get('lineas', [])
+            subtotal_acumulado = 0.0
+            impuestos_acumulados = 0.0
+            total_acumulado = 0.0
+            
+            for item in lineas_json:
+                linea = LineaFactura()
+                linea.descripcion = item.get('descripcion')
+                linea.cantidad = item.get('cantidad')
+                linea.precio_unitario = item.get('precioUnitario')
+                linea.impuestos_linea = item.get('impuestosLinea', 0)
+                linea.total_linea = item.get('totalLinea')
+                linea.factura_id = factura.id
+                
+                subtotal_acumulado += float(linea.precio_unitario * linea.cantidad)
+                impuestos_acumulados += float(linea.impuestos_linea)
+                total_acumulado += float(linea.total_linea)
+                
+                db.session.add(linea)
+            
+            # Actualizar totales
+            factura.subtotal = subtotal_acumulado
+            factura.impuestos = impuestos_acumulados
+            factura.total = total_acumulado
+        
         db.session.commit()
         return jsonify(factura.to_dict()), 200
     except Exception as e:
         db.session.rollback()
         return jsonify({"error": str(e)}), 500
+
 
 
 #-------------------- 4.0 OBTENER ADJUNTOS (GET /facturas-proveedor/{id}/adjuntos) -----------------

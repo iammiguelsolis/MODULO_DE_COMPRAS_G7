@@ -1,6 +1,15 @@
 import type { Licitacion, SolicitudPendiente } from "./types";
 import { estados_li } from "./constants";
 
+// ============================================================================
+// MOCK DATA
+// ============================================================================
+// TODO: Los proveedores están mockeados en LicitacionDetailTemplate.tsx
+// (líneas 133 y 360 con mockSuppliersForRegistration y mockAvailableSuppliers)
+// Cuando el módulo de proveedores esté disponible, crear proveedoresService.ts
+// y llamar a GET /api/proveedores para obtener la lista real.
+// ============================================================================
+
 export const allLicitaciones: Licitacion[] = Array.from(
   { length: 400 },
   (_, i) => {

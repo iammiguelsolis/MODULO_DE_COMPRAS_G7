@@ -64,8 +64,8 @@ const FileUploader: React.FC<FileUploaderProps> = ({
         onDragLeave={handleDragLeave}
         className={`rounded-xl p-12 text-center transition-all cursor-pointer ${
           isDragging
-            ? 'bg-linear-to-br from-blue-100 to-indigo-100 border-2 border-blue-500 border-dashed'
-            : 'bg-linear-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100'
+            ? 'bg-gradient-to-br from-blue-100 to-indigo-100 border-2 border-blue-500 border-dashed'
+            : 'bg-gradient-to-br from-blue-50 to-indigo-50 hover:from-blue-100 hover:to-indigo-100'
         }`}
       >
         {selectedFile ? (

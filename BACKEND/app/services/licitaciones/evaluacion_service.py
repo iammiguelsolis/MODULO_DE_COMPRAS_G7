@@ -140,7 +140,7 @@ class EvaluacionService:
             
             db.session.commit()
             return {
-                "mensaje": f"Licitación adjudicada al proveedor {ganador.proveedor.nombre}",
+                "mensaje": f"Licitación adjudicada al proveedor {ganador.proveedor.razon_social}",
                 "ganador_id": ganador.id_propuesta
             }
         except Exception as e:

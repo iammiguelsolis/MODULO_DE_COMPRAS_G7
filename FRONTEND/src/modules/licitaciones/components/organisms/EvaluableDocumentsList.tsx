@@ -15,18 +15,7 @@ const EvaluableDocumentsList: React.FC<EvaluableDocumentsListProps> = ({
     onEvaluationChange,
     disabled = false
 }) => {
-    // Hardcoded documents - flat list without categories
-    const documents = [
-        { id: 'doc-legal-1', name: 'RUC_y_Ficha_RUC.pdf', size: '1.2 MB' },
-        { id: 'doc-legal-2', name: 'DNI_Representante_Legal.pdf', size: '850 KB' },
-        { id: 'doc-legal-3', name: 'Acta_Constitucion.pdf', size: '2.1 MB' },
-        { id: 'doc-tech-1', name: 'Ficha_Tecnica_Laptops_HP.pdf', size: '2.5 MB' },
-        { id: 'doc-tech-2', name: 'Certificacion_ISO_9001.pdf', size: '1.8 MB' },
-        { id: 'doc-tech-3', name: 'Catalogo_Productos_2025.pdf', size: '5.2 MB' },
-        { id: 'doc-fin-1', name: 'Propuesta_Economica.xlsx', size: '850 KB' },
-        { id: 'doc-fin-2', name: 'Estados_Financieros.pdf', size: '3.1 MB' },
-        { id: 'doc-fin-3', name: 'Carta_Fianza.pdf', size: '1.2 MB' }
-    ];
+    const documents = Array.from(evaluations.values());
 
     return (
         <div className={`evaluable-documents-list ${disabled ? 'disabled' : ''}`}>
@@ -41,19 +30,23 @@ const EvaluableDocumentsList: React.FC<EvaluableDocumentsListProps> = ({
 
             {!disabled && (
                 <div className="documents-items-container">
-                    {documents.map(doc => {
-                        const evaluation = evaluations.get(doc.id);
-                        return (
+                    {documents.length > 0 ? (
+                        documents.map(doc => (
                             <EvaluableDocumentItem
-                                key={doc.id}
-                                documentName={doc.name}
-                                fileSize={doc.size}
-                                status={evaluation?.status || null}
-                                onStatusChange={(status) => onEvaluationChange(doc.id, status)}
+                                key={doc.documentId}
+                                documentName={doc.documentName}
+                                fileSize={doc.fileSize}
+                                status={doc.status}
+                                onStatusChange={(status) => onEvaluationChange(doc.documentId, status)}
                                 disabled={disabled}
+                            // TODO: Pass URL to item if supported
                             />
-                        );
-                    })}
+                        ))
+                    ) : (
+                        <div className="documents-empty-state">
+                            <p>No hay documentos registrados para este proveedor.</p>
+                        </div>
+                    )}
                 </div>
             )}
         </div>
