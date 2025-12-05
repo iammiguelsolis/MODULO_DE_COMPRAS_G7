@@ -58,6 +58,6 @@ def create_app():
     app.register_blueprint(solicitudes_bp) 
     app.register_blueprint(adquisiciones_bp)
     register_licitaciones_blueprints(app)
-    #app.register_blueprint(oc_bp)
+    app.register_blueprint(oc_bp)
 
     return app
