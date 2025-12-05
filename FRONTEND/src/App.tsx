@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import MainLayaout from "./global/layaouts/MainLayaout";
 import Solicitud from "./modules/solicitudes/page/Solicitud";
 import FacturacionApp from "./modules/facturación/page/FacturasProveedoresPage";
@@ -14,15 +14,16 @@ import GenerarOrdenCompra from "./modules/ordenCompra/pages/GenerarOrdenCompra";
 import HistorialOrdenes from "./modules/ordenCompra/pages/HistorialOrdenes";
 import ComprasListPage from "./modules/compras/pages/ComprasListPage";
 import CompraDetailPage from "./modules/compras/pages/CompraDetailPage";
+import Login from "./modules/auth/pages/Login";
 
 function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
 
         <Route element={<MainLayaout />}>
-
-          <Route path="/" element={<h1>Home</h1>} />
 
           <Route path="/solicitudes" element={<Solicitud />} />
 
