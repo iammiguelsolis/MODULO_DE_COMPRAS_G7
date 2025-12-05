@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Plus, Trash2 } from 'lucide-react';
 import Input from '../atoms/Input';
 import Select from '../atoms/Select';
@@ -6,7 +6,8 @@ import Button from '../atoms/Button';
 import FileUploader from '../molecules/FileUploader';
 import Spinner from '../atoms/Spinner';
 import NotificationModal from '../molecules/NotificationModal';
-import { crearFacturaManual, crearFacturaPrellenado } from '../../services/api';
+import { crearFacturaManual, crearFacturaPrellenado, obtenerProveedores } from '../../services/api';
+import type { Proveedor } from '../../../../services/proveedor/types';
 
 interface InvoiceFormModalProps {
   onClose: () => void;
@@ -24,8 +25,27 @@ interface LineaDetalle {
 const InvoiceFormModal: React.FC<InvoiceFormModalProps> = ({ onClose, onSuccess }) => {
   const [mode, setMode] = useState<'manual' | 'auto'>('manual');
   const [loading, setLoading] = useState(false);
+  const [proveedores, setProveedores] = useState<Proveedor[]>([]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   
+  useEffect(() => {
+    const cargarProveedores = async () => {
+      try {
+        const data = await obtenerProveedores();
+        setProveedores(data);
+      } catch (error) {
+        console.error('Error cargando proveedores:', error);
+        setNotification({
+          isOpen: true,
+          type: 'error',
+          title: 'Error',
+          message: 'No se pudieron cargar los proveedores.'
+        });
+      }
+    };
+    cargarProveedores();
+  }, []);
+
   // Notification State
   const [notification, setNotification] = useState<{
     isOpen: boolean;
@@ -275,12 +295,17 @@ const InvoiceFormModal: React.FC<InvoiceFormModalProps> = ({ onClose, onSuccess 
                       />
                     </div>
                     <div className="col-span-4">
-                      <Input
-                        label="ID Proveedor"
-                        type="number"
+                      <Select
+                        label="Proveedor"
                         value={formData.proveedorId}
                         onChange={(e) => setFormData({ ...formData, proveedorId: e.target.value })}
-                        placeholder="50"
+                        options={[
+                          { value: '', label: 'Seleccione un proveedor' },
+                          ...proveedores.map(p => ({
+                            value: p.id.toString(),
+                            label: `${p.id} - ${p.razonSocial}`
+                          }))
+                        ]}
                         required
                       />
                     </div>

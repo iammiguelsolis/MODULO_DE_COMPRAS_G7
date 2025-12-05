@@ -22,8 +22,10 @@ import {
   enviarACuentasPorPagar,
   listarFacturas,
   subirAdjunto,
-  eliminarAdjunto
+  eliminarAdjunto,
+  obtenerProveedores
 } from '../../services/api';
+import type { Proveedor } from '../../../../services/proveedor/types';
 
 
 // Helper function para convertir fecha a formato yyyy-MM-dd
@@ -54,7 +56,7 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
   const [adjuntos, setAdjuntos] = useState<Adjunto[]>([]);
   const [conciliaciones, setConciliaciones] = useState<ResultadoConciliacion[]>([]);
   const [trazabilidad, setTrazabilidad] = useState<TrazabilidadLog[]>([]);
-  
+  const [proveedores, setProveedores] = useState<Proveedor[]>([]);
   const [activeTab, setActiveTab] = useState<'general' | 'items' | 'attachments' | 'conciliation'>('general');
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState({
@@ -64,7 +66,9 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
     fechaVencimiento: '',
     moneda: 'PEN',
     ordenCompraId: '',
-    lineas: [] as LineaDetalle[]
+    lineas: [] as LineaDetalle[],
+    proveedorNombre: '',
+    proveedorRuc: '',
   });
 
   // Notification state
@@ -106,6 +110,24 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
   }, [facturaId]);
 
   useEffect(() => {
+    const cargarProveedores = async () => {
+      try {
+        const data = await obtenerProveedores();
+        setProveedores(data);
+      } catch (error) {
+        console.error('Error cargando proveedores:', error);
+        setNotification({
+          isOpen: true,
+          type: 'error',
+          title: 'Error',
+          message: 'No se pudieron cargar los proveedores.'
+        });
+      }
+    };
+    cargarProveedores();
+  }, []);
+
+  useEffect(() => {
     // Cargar datos cuando cambia la versión seleccionada
     if (versionSeleccionada) {
       loadVersionData(versionSeleccionada);
@@ -116,7 +138,12 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
     try {
       setLoading(true);
       const facturaData = await obtenerFacturaDetalle(facturaId);
-      
+
+      const proveedor = proveedores.find(p => p.id === facturaData.proveedor_id);
+
+      console.log(proveedor?.razonSocial)
+      console.log(proveedor?.ruc)
+
       // Obtener todas las versiones de esta factura
       const todasFacturas = await listarFacturas();
       const versiones = todasFacturas
@@ -124,7 +151,10 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
         .sort((a, b) => b.version - a.version); // Ordenar de mayor a menor
 
       setTodasLasVersiones(versiones);
-      setFactura(facturaData);
+      setFactura({...facturaData,
+        proveedor_nombre: proveedor?.razonSocial || '',
+        proveedor_ruc: proveedor?.ruc || '',
+      });
       setEditData({
         numeroFactura: facturaData.numero_factura,
         proveedorId: facturaData.proveedor_id || 0,
@@ -132,7 +162,9 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
         fechaVencimiento: formatDateForInput(facturaData.fecha_vencimiento || ''),
         moneda: facturaData.moneda,
         ordenCompraId: facturaData.orden_compra_id || '',
-        lineas: facturaData.lineas || []
+        lineas: facturaData.lineas || [],
+        proveedorNombre: facturaData.proveedor_nombre || proveedor?.razonSocial || '',
+        proveedorRuc: facturaData.proveedor_ruc || proveedor?.ruc || '',
       });
 
       // Cargar datos adicionales
@@ -170,7 +202,9 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
         fechaVencimiento: formatDateForInput(facturaData.fecha_vencimiento || ''),
         moneda: facturaData.moneda,
         ordenCompraId: facturaData.orden_compra_id || '',
-        lineas: facturaData.lineas || []
+        lineas: facturaData.lineas || [],
+        proveedorNombre: facturaData.proveedor_nombre || '',
+        proveedorRuc: facturaData.proveedor_ruc || '',
       });
     } catch (error) {
       console.error('Error cargando versión:', error);
@@ -191,7 +225,9 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
         fechaVencimiento: factura.fecha_vencimiento || '',
         moneda: factura.moneda,
         ordenCompraId: factura.orden_compra_id || '',
-        lineas: factura.lineas || []
+        lineas: factura.lineas || [],
+        proveedorNombre: factura.proveedor_nombre || '',
+        proveedorRuc: factura.proveedor_ruc || '',
       });
     }
   };
@@ -519,22 +555,38 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
                       onChange={(e) => setEditData({ ...editData, numeroFactura: e.target.value })}
                       disabled={!editMode}
                     />
-                    <Input
-                      label="Proveedor ID"
-                      type="number"
+                    <Select
+                      label="Proveedor"
                       value={editMode ? editData.proveedorId.toString() : (factura.proveedor_id?.toString() || '0')}
-                      onChange={(e) => setEditData({ ...editData, proveedorId: parseInt(e.target.value) })}
+                      onChange={(e) => {
+                        const proveedorId = parseInt(e.target.value);
+                        const proveedorSeleccionado = proveedores.find(p => p.id === proveedorId);
+                        setEditData({ 
+                          ...editData, 
+                          proveedorId,
+                          proveedorNombre: proveedorSeleccionado?.razonSocial || '',  // ← AGREGAR
+                          proveedorRuc: proveedorSeleccionado?.ruc || ''              // ← AGREGAR
+                        });
+                      }}
                       disabled={!editMode}
+                      options={[
+                        { value: '0', label: 'Seleccione un proveedor' },
+                        ...proveedores.map(p => ({
+                          value: p.id.toString(),
+                          label: `${p.id} - ${p.razonSocial}`
+                        }))
+                      ]}
+                      required
                     />
                     <Input
                       label="Proveedor Nombre"
-                      value={factura.proveedor_nombre}
+                      value={editMode ? editData.proveedorNombre : factura.proveedor_nombre || ''}
                       onChange={() => {}}
                       disabled
                     />
                     <Input
                       label="RUC"
-                      value={factura.proveedor_ruc}
+                      value={editMode ? editData.proveedorRuc : factura.proveedor_ruc || ''}
                       onChange={() => {}}
                       disabled
                     />
