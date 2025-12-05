@@ -3,11 +3,8 @@ from app.bdd import db
 from .orden_compra import OrdenCompra, LineaOC
 from .oc_enums import EstadoOC, TipoPago, Moneda
 
-# blueprint que Flask quiere importar
 oc_bp = Blueprint('ordenes_compra', __name__, url_prefix='/api/ordenes-compra')
 
-
-# ---------- Helpers de serialización ----------
 
 def serialize_linea(linea: LineaOC):
     return {
@@ -19,18 +16,19 @@ def serialize_linea(linea: LineaOC):
         "estado": linea.estado.value if linea.estado else None,
     }
 
-
 def serialize_orden(oc: OrdenCompra):
     return {
         "id_orden_compra": oc.id_orden_compra,
         "numero_referencia": oc.numero_referencia,
         "fecha_creacion": oc.fecha_creacion.isoformat() if oc.fecha_creacion else None,
         "estado": oc.estado.value if oc.estado else None,
-        "tipo_origen": oc.tipo_origen,
+        
+        "tipo_origen": oc.tipo_origen.value if oc.tipo_origen else None,
+        
         "id_proveedor": oc.id_proveedor,
         "id_solicitud": oc.id_solicitud,
         "id_notificacion_inventario": oc.id_notificacion_inventario,
-        "moneda": oc.moneda.value if oc.moneda else None,
+        "moneda": oc.moneda.value if hasattr(oc.moneda, 'value') else oc.moneda,
         "condiciones_pago_dias_plazo": oc.condiciones_pago_dias_plazo,
         "condiciones_pago_modalidad": oc.condiciones_pago_modalidad.value if oc.condiciones_pago_modalidad else None,
         "terminos_entrega": oc.terminos_entrega,
@@ -46,17 +44,14 @@ def serialize_orden(oc: OrdenCompra):
 
 @oc_bp.route('/', methods=['GET'])
 def listar_ordenes():
-    """Lista todas las órdenes de compra.
-    Se pueden agregar filtros por estado y tipo_origen usando query params:   
-    """
-    estado_param = request.args.get('estado')        # ej: 'EN_PROCESO'
-    tipo_origen_param = request.args.get('tipo_origen')  # ej: 'RFQ', 'LICITACION', 'DIRECTA'
+    estado_param = request.args.get('estado')       
+    tipo_origen_param = request.args.get('tipo_origen')
 
     query = OrdenCompra.query
 
     if estado_param:
         try:
-            estado_enum = EstadoOC[estado_param]  # EstadoOC.EN_PROCESO, etc.
+            estado_enum = EstadoOC[estado_param]
             query = query.filter(OrdenCompra.estado == estado_enum)
         except KeyError:
             return jsonify({"error": f"Estado inválido: {estado_param}"}), 400
@@ -72,10 +67,11 @@ def listar_ordenes():
             "id": oc.id_orden_compra,
             "numero_referencia": oc.numero_referencia,
             "titulo": oc.titulo,
+            "tipo_origen": oc.tipo_origen.value if oc.tipo_origen else None,
+            
             "proveedor": oc.proveedor.razon_social if hasattr(oc.proveedor, 'razon_social') else getattr(oc.proveedor, 'nombre', None),
             "fecha_creacion": oc.fecha_creacion.isoformat() if oc.fecha_creacion else None,
             "estado": oc.estado.value if oc.estado else None,
-            "tipo_origen": oc.tipo_origen,
             "moneda": oc.moneda.value if hasattr(oc.moneda, 'value') else oc.moneda,
             "total": oc.calcular_total()
         })
