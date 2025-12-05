@@ -27,12 +27,11 @@ class Proveedor(db.Model):
     razon_social = db.Column(db.String(100), nullable = False)
     ruc = db.Column(db.String(20), nullable = False)
     pais = db.Column(db.String(100), nullable = True)
-    email = db.Column(db.String(100), nullable = False)
     telefono = db.Column(db.String(20), nullable = False)
     domicilio_legal = db.Column(db.String(100), nullable = False)
     fecha_registro = db.Column(db.Date, nullable=False)
     esta_suspendido = db.Column(db.Boolean, default=False)
-
+    # ya no tiene email debido a que existe la tabla contacto_proveedor 
     confiabilidad_en_entregas = db.Column(
         db.Enum(EscalaCalificacion, values_callable=lambda x: [e.value for e in x]),
         nullable=False
