@@ -13,7 +13,7 @@ import { ProveedorModal } from '../components/molecules/ProveedorModal';
 
 import type { ItemType, ProveedorType } from '../lib/types';
 import { ORDER_TYPES, CURRENCIES } from '../lib/constants';
-import axios from "axios";
+import { ordenCompraService } from '../lib/ordenCompraService';
 
 const GenerarOrdenCompra: React.FC = () => {
   // ROUTER
@@ -146,9 +146,11 @@ const GenerarOrdenCompra: React.FC = () => {
 
   const enviarOrden = async () => {
     try {
+      if (!selectedSupplier) return;
+
       const payload = {
         tipoOrigen: orderType,
-        proveedorId: selectedSupplier?.id || null,
+        proveedorId: selectedSupplier.id,
         solicitudId: solicitudId || undefined,
         notificacionInventarioId: notificacionInventarioId || undefined,
 
@@ -162,28 +164,19 @@ const GenerarOrdenCompra: React.FC = () => {
         observaciones: notes,
         titulo: title,
 
-        lineas: items.map((i) => ({
-          productId: i.productId,
-          name: i.name,
-          quantity: i.quantity,
-          unitPrice: i.unitPrice,
-          description: i.description
-        }))
+        lineas: items
       };
 
       console.log("📤 Enviando al backend:", payload);
 
-      const response = await axios.post(
-        "http://127.0.0.1:5000/api/ordenes-compra/",
-        payload
-      );
+      const response = await ordenCompraService.createOrden(payload);
 
-      alert("✔ Orden creada: " + response.data.data.numero_referencia);
+      alert("✔ Orden creada: " + response.data.numero_referencia);
       setIsOrdenModalOpen(false);
 
     } catch (error: any) {
       console.error("❌ Error enviando orden:", error);
-      alert("❌ Error: " + (error.response?.data?.error || "Error desconocido"));
+      alert("❌ Error: " + (error.message || "Error desconocido"));
     }
   };
 
@@ -227,7 +220,7 @@ const GenerarOrdenCompra: React.FC = () => {
                     label="Tipo de Orden"
                     options={ORDER_TYPES}
                     value={orderType}
-                    onChange={() => {}}
+                    onChange={() => { }}
                     disabled
                   />
 

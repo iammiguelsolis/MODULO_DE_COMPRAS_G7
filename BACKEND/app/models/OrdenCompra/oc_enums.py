@@ -1,11 +1,11 @@
 from enum import Enum
 
 class EstadoOC(Enum):
-    Borrador = "BORRADOR"
-    En_Proceso = "EN_PROCESO"
-    Enviada = "ENVIADA"
-    Cerrada = "CERRADA"
-    Cancelada = "CANCELADA"
+    BORRADOR = "BORRADOR"
+    EN_PROCESO = "EN_PROCESO"
+    ENVIADA = "ENVIADA"
+    CERRADA = "CERRADA"
+    CANCELADA = "CANCELADA"
 
 class EstadoLineaOC(Enum):
     Todavia_no_cp = "TODAVIA_NO_CULMINA_PLAZO"
@@ -16,9 +16,9 @@ class EstadoLineaOC(Enum):
     No_permite_entrega_parcial = "NO_PERMITE_ENTREGA_PARCIAL"
 
 class TipoPago(Enum):
-    contado = "AL_CONTADO"
-    transferencia = "TRANSFERENCIA"
-    credito = "CREDITO"
+    CONTADO = "AL_CONTADO"
+    TRANSFERENCIA = "TRANSFERENCIA"
+    CREDITO = "CREDITO"
 
 class TipoOrigen(Enum):
     RFQ = "RFQ"
