@@ -24,7 +24,7 @@ export interface FacturaProveedor {
   sub_total: number;
   igv: number;
   total: number;
-  estado: 'BORRADOR' | 'EN_CONCILIACION' | 'APROBADA';
+  estado: 'BORRADOR' | 'EN_CONCILIACION' | 'APROBADA' | 'ENVIADA_CXP';
   orden_compra_id?: string;
   origen: 'MANUAL' | 'AUTOMATICO';
   created_at: string;
@@ -110,7 +110,7 @@ export const crearFacturaManual = async (data: CreateFacturaManual): Promise<Fac
 // Crear factura con prellenado automático
 export const crearFacturaPrellenado = async (file: File): Promise<FacturaProveedor> => {
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append('archivo', file);  // ✅ Cambiar 'file' a 'archivo' para coincidir con el backend
   
   const response = await api.post('/prellenado', formData, {
     headers: {

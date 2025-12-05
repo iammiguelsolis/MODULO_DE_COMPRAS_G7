@@ -20,6 +20,7 @@ def create_app():
     app = Flask(__name__)
 
     CORS(app, resources={r"/*": {"origins": "*"}})
+    CORS(app)
 
     app.secret_key = '3zM8c.1Z9>@2_x$!;Y`:3u?5'
     app.config["SQLALCHEMY_DATABASE_URI"]=coneccion #%40 es @ pero escapado

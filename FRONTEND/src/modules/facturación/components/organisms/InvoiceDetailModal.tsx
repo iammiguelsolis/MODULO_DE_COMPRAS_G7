@@ -151,6 +151,11 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
         .sort((a, b) => b.version - a.version); // Ordenar de mayor a menor
 
       setTodasLasVersiones(versiones);
+
+      if (versiones.length > 0) {
+        setVersionSeleccionada(versiones[0].id);
+      }
+
       setFactura({...facturaData,
         proveedor_nombre: proveedor?.razonSocial || '',
         proveedor_ruc: proveedor?.ruc || '',
@@ -168,7 +173,7 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
       });
 
       // Cargar datos adicionales
-      await loadVersionData(facturaId);
+      await loadVersionData(versiones.length > 0 ? versiones[0].id : facturaId);
     } catch (error) {
       console.error('Error cargando datos:', error);
       setNotification({
