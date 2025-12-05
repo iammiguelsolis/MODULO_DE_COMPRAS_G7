@@ -30,7 +30,7 @@ class OrdenCompra(db.Model):
         nullable=False,
     )
     id_origen = db.Column(db.Integer, nullable=False)  # id de RFQ o Licitación o notificación
-    id_solicitud = db.Column(db.Integer, db.ForeignKey("solicitudes.id_solicitud"), nullable=True)
+    id_solicitud = db.Column(db.Integer, db.ForeignKey("solicitudes.id"), nullable=True)
     solicitud = relationship("Solicitud", backref="ordenes_compra")
 
     # Para orden directa desde inventario
