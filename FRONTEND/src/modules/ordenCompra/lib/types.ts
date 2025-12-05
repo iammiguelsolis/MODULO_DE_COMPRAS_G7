@@ -107,3 +107,15 @@ export interface OrdenCompraRequest {
   observaciones?: string;
   titulo?: string;
 }
+
+export interface OrdenHistorial {
+  id: number;
+  numero_referencia: string;
+  titulo: string;
+  proveedor: string | null;
+  fecha_creacion: string | null;
+  estado: string | null;
+  tipo_origen: string | null;
+  moneda: string | null;
+  total: number;
+}
