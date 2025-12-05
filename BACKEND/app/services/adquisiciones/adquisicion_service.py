@@ -3,7 +3,7 @@ from app.models.solicitudes.solicitud import Solicitud
 from app.models.adquisiciones.proceso import Compra, ProcesoAdquisicion, EstadoProceso
 from app.models.adquisiciones.oferta import OfertaProveedor, MaterialOfertado, ServicioOfertado
 from app.patrones.notificadores import WhatsappFactory, CorreoFactory
-from app.patrones.clasificadores import ClasificadorPorMonto
+from app.patrones.clasificadores import ClasificadorPor10000
 from app.models.proveedor_inventario.dominio_proveedor import Proveedor 
 from app.services.licitaciones.licitacion_service import LicitacionService
 from app.models.OrdenCompra.oc_services import OrdenCompraService
@@ -11,7 +11,7 @@ from app.models.OrdenCompra.oc_services import OrdenCompraService
 class AdquisicionService:
     
     def __init__(self):
-        self.clasificador = ClasificadorPorMonto()
+        self.clasificador = ClasificadorPor10000()
         # Instanciamos el servicio de licitaciones
         self.licitacion_service = LicitacionService() 
 
