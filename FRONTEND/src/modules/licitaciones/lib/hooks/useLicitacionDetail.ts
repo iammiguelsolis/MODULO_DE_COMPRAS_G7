@@ -65,6 +65,7 @@ const adaptLicitacionToDetail = (
           uploadedAt: dto.contrato.fecha_generacion,
           licitacionId: String(dto.id_licitacion),
           providerId: 0,
+          url: dto.contrato.documento_firmado_url,
         }
       : undefined,
     cantidadInvitaciones: dto.cantidad_invitaciones,

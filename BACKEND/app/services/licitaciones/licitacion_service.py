@@ -27,10 +27,10 @@ class LicitacionService:
             db.session.add(licitacion)
             db.session.flush() 
 
-            # Crear documento requerido por defecto (Propuesta Económica SIEMPRE es obligatoria)
             from app.models.licitaciones.documentos import DocumentoRequerido
             from app.enums.licitaciones.tipo_documento import TipoDocumento
             
+            # La propuesta es siempre obligatoria
             docs_default = [
                 {
                     'tipo': TipoDocumento.ECONOMICO,

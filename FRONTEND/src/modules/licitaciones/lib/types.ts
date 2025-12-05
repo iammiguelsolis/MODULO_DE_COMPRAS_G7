@@ -76,6 +76,7 @@ export interface Contract {
   uploadedAt: string;
   licitacionId: string;
   providerId: number;
+  url?: string;
 }
 
 /**

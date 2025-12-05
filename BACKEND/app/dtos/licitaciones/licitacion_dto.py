@@ -12,7 +12,7 @@ class CrearLicitacionDTO:
     comprador_id: int
 
 
-# DTO Ligero para la lista (sin items ni documentos para mejor rendimiento)
+# DTO Ligero para la lista
 @dataclass
 class LicitacionListItemDTO:
     id_licitacion: int
@@ -97,7 +97,6 @@ class LicitacionResponseDTO:
                 'estado': licitacion.contrato.estado.value
             }
 
-        # Calcular contadores y lista de invitados
         cant_invitaciones = 0
         invitados_dto = []
         if hasattr(licitacion, 'invitaciones'):

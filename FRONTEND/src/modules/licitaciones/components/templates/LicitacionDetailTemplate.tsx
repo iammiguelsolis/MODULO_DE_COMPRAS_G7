@@ -62,6 +62,7 @@ interface LicitacionDetailTemplateProps {
     onGuardarContrato: (file: File) => void;
 
     onEnviarOrdenCompra: () => void;
+    onDownloadContract?: () => void;
 
     isCancelledNoEconomicApprovals?: boolean;
     onApprove?: () => void;
@@ -101,6 +102,7 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
     onGenerarContrato,
     onGuardarContrato,
     onEnviarOrdenCompra,
+    onDownloadContract,
     isCancelledNoEconomicApprovals,
     onApprove,
     onReject,
@@ -291,6 +293,7 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                         onIniciarEvaluacionEconomica={handleIniciarEvaluacionEconomica}
                         onGenerarContrato={handleGenerarContrato}
                         onEnviarOrdenCompra={handleSendToPurchaseOrderClick}
+                        onDownloadContract={onDownloadContract}
                         isCancelledNoEconomicApprovals={isCancelledNoEconomicApprovals}
                     />
                 </div>

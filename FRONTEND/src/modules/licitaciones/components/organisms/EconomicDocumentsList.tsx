@@ -12,14 +12,8 @@ const EconomicDocumentsList: React.FC<EconomicDocumentsListProps> = ({
     disabled = false,
     documents = []
 }) => {
-    // Filtrar solo documentos económicos/financieros
-    const economicDocs = documents.filter(doc =>
-        doc.tipo === 'ECONOMICO' ||
-        doc.nombre.toLowerCase().includes('economica') ||
-        doc.nombre.toLowerCase().includes('financier') ||
-        doc.nombre.toLowerCase().includes('fianza') ||
-        doc.nombre.toLowerCase().includes('estados')
-    );
+    // Mostrar todos los documentos presentados
+    const economicDocs = documents;
 
     const handleView = (url: string) => {
         if (url) {
