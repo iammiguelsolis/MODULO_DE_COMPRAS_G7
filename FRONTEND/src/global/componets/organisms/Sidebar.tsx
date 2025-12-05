@@ -1,9 +1,10 @@
-import React from 'react';
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from 'react';
+import { useNavigate, useLocation } from "react-router-dom";
 import { FileText, Users, Package, Network, ShoppingCart, DollarSign, Scale, BarChart2 } from 'lucide-react';
 import { MenuItem } from '../molecules/MenuItem';
 import Logo from '../../../assets/logo.svg';
 
+// La imagen se mantiene estática (hardcoded)
 const UserImage = "https://i.pinimg.com/236x/86/37/32/8637324331fea244495f9da93176a373.jpg";
 
 interface MenuItemType {
@@ -24,8 +25,44 @@ const menuItems: MenuItemType[] = [
 ];
 
 const Sidebar: React.FC = () => {
-  const [activeItem, setActiveItem] = React.useState<string>("solicitudes");
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Estado para el item activo
+  const [activeItem, setActiveItem] = useState<string>("solicitudes");
+  
+  // Estado para los datos del usuario
+  const [userData, setUserData] = useState({
+    nombreCompleto: 'Cargando...',
+    puesto: ''
+  });
+
+  // Efecto para leer del LocalStorage al cargar
+  useEffect(() => {
+    // Sincronizar item activo con la URL actual
+    const path = location.pathname.replace('/', '');
+    if (path) setActiveItem(path);
+
+    // Obtener usuario guardado en el Login
+    const storedUser = localStorage.getItem('user');
+    
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        setUserData({
+          // Concatenamos nombre y apellido según tu JSON
+          nombreCompleto: `${parsedUser.nombres} ${parsedUser.apellidoPaterno}`, 
+          puesto: parsedUser.nombrePuesto
+        });
+      } catch (error) {
+        console.error("Error al leer datos del usuario", error);
+        setUserData({ nombreCompleto: 'Usuario', puesto: 'Invitado' });
+      }
+    } else {
+        // Si no hay usuario, podrías redirigir al login
+        // navigate('/'); 
+    }
+  }, [location]);
 
   const handleClick = (id: string) => {
     setActiveItem(id);
@@ -33,16 +70,16 @@ const Sidebar: React.FC = () => {
   };
 
   return (
-    <aside className='w-64 h-screen bg-blue-500 flex flex-col shadow-xl gap-4'>
+    <aside className='w-64 h-screen bg-blue-500 flex flex-col shadow-xl text-white font-sans'>
 
       {/* LOGO */}
-      <div className='flex items-center justify-center mt-8 gap-4 cursor-pointer mr-3'>
-        <img src={Logo} alt="Logo" className='w-10 h-auto' />
-        <h1 className='text-2xl font-bold text-white'>COMPRAS</h1>
+      <div className='flex items-center justify-center mt-8 mb-4 gap-3 cursor-pointer'>
+        <img src={Logo} alt="Logo" className='w-8 h-8' />
+        <h1 className='text-2xl font-bold tracking-wide'>COMPRAS</h1>
       </div>
 
       {/* MENÚ */}
-      <nav className='flex-1 py-6'>
+      <nav className='flex-1 py-4 px-2 space-y-1 overflow-y-auto'>
         {menuItems.map((item) => (
           <MenuItem
             key={item.id}
@@ -54,19 +91,24 @@ const Sidebar: React.FC = () => {
         ))}
       </nav>
 
-      <hr className='border-white border-1'>
-      </hr>
+      <div className="px-6">
+        <hr className='border-blue-400/50' />
+      </div>
 
-      {/* USUARIO ABAJO */}
-      <div className='flex items-center mb-4 mx-auto'>
+      {/* USUARIO ABAJO (Datos dinámicos + Imagen estática) */}
+      <div className='flex items-center p-6 gap-3'>
         <img
           src={UserImage}
           alt="Usuario"
-          className='w-20 h-20 rounded-full border-2 border-white object-cover'
+          className='w-16 h-16 rounded-full border-2 border-white/80 object-cover shadow-sm'
         />
-        <div className='ml-4'>
-          <h2 className='text-white font-bold text-lg mt-2'>Samnuel Luque</h2>
-          <p className='text-white text-sm opacity-80'>Comprador</p>
+        <div className='flex flex-col overflow-hidden'>
+          <h2 className='text-white font-semibold text-sm truncate' title={userData.nombreCompleto}>
+            {userData.nombreCompleto}
+          </h2>
+          <p className='text-blue-100 text-xs truncate capitalize opacity-90'>
+            {userData.puesto}
+          </p>
         </div>
       </div>
 
