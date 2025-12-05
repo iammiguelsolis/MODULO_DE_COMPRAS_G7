@@ -18,6 +18,8 @@ interface InviteSuppliersModalProps {
     licitacionTitle: string;
     estimatedAmount: number;
     maxBudget: number;
+    fechaLimite?: string;
+    items?: Array<{ description: string; quantity?: number; estimatedHours?: number }>;
     availableSuppliers: ProveedorDTO[];
     requiredDocuments: DocumentoRequeridoDTO[];
     onSuppliersInvited?: (suppliers: string[]) => void;
@@ -30,6 +32,8 @@ const InviteSuppliersModal: React.FC<InviteSuppliersModalProps> = ({
     licitacionId,
     licitacionTitle,
     maxBudget,
+    fechaLimite,
+    items = [],
     availableSuppliers,
     requiredDocuments,
     onSuppliersInvited,
@@ -63,22 +67,33 @@ const InviteSuppliersModal: React.FC<InviteSuppliersModalProps> = ({
 
     const emailSubject = `Invitación a Licitación - ${licitacionTitle}`;
 
+    // Formatear items para el correo
+    const itemsDescripcion = items.length > 0
+        ? items.map(i => `   - ${i.description}, ${i.quantity ? `Cantidad: ${i.quantity}` : `Horas: ${i.estimatedHours}`}`).join('\n')
+        : '   - Ver detalles en documentación adjunta';
+
+    // Formatear fecha límite
+    const fechaLimiteFormateada = fechaLimite
+        ? new Date(fechaLimite).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })
+        : 'Ver documentación adjunta';
+
     const emailBody = `Estimado Proveedor,
 
-Le invitamos a participar en el proceso de licitación para la ${licitacionTitle}
+Le invitamos a participar en el proceso de licitación para ${licitacionTitle}
 
 Detalles de la licitación:
 • Licitación N°: ${licitacionId}
-• Descripción: Laptop G10, Cantidad: 15
+• Ítems solicitados:
+${itemsDescripcion}
 • Presupuesto Máximo: S/ ${maxBudget.toLocaleString('es-PE', { minimumFractionDigits: 2 })}
-• Fecha límite para recibir propuestas: 10 Nov 2025
+• Fecha límite para recibir propuestas: ${fechaLimiteFormateada}
 
 Adjunto encontrará las plantillas de la documentación requerida para su propuesta.
 
 Por favor, envíe su propuesta completa antes de la fecha límite indicada.
 
 Atentamente,
-Juan Pérez - Módulo de Compras`;
+Samuel Luque - Módulo de Compras`;
 
 
     const handleOpenGmail = () => {

@@ -191,8 +191,6 @@ const TechnicalEvaluationModal: React.FC<TechnicalEvaluationModalProps> = ({
 
                 <div className="evaluation-modal-body">
                     <div className="evaluation-left-column">
-                        {/* Checklist is less relevant if we evaluate uploaded docs directly, 
-                            but we can show required docs as reference */}
                         <div className="required-docs-reference">
                             <h4>Documentos Requeridos</h4>
                             {Object.entries(

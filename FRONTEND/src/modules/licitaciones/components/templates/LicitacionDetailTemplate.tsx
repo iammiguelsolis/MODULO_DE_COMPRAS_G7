@@ -358,6 +358,8 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                 licitacionTitle={nombre}
                 estimatedAmount={estimatedAmount}
                 maxBudget={presupuestoMaximo}
+                fechaLimite={fechaLimite}
+                items={displayItems}
                 availableSuppliers={proveedoresDisponibles}
                 requiredDocuments={documentosRequeridos}
             />
@@ -436,6 +438,7 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                 licitacionId={String(id)}
                 licitacionTitle={nombre}
                 winnerProvider={propuestas.find(p => p.es_ganadora)?.proveedor}
+                requiredDocuments={documentosRequeridos}
                 onSaveContract={handleSaveContract}
                 onDownloadTemplate={onGenerarContrato}
             />

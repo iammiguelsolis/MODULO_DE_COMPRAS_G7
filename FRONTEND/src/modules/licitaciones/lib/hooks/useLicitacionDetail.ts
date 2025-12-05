@@ -33,6 +33,12 @@ const adaptLicitacionToDetail = (
     }
   });
 
+  // Calcular estimatedAmount sumando los totales de los items
+  const totalItemsAmount = mappedItems.reduce(
+    (sum, item) => sum + (item.total || 0),
+    0
+  );
+
   return {
     id: String(dto.id_licitacion),
     nombre: dto.titulo,
@@ -44,7 +50,7 @@ const adaptLicitacionToDetail = (
       creacion: dto.fecha_creacion || new Date().toISOString(),
       // Mapear otros timestamps si el backend los enviara
     },
-    estimatedAmount: dto.presupuesto_max,
+    estimatedAmount: totalItemsAmount,
     presupuestoMaximo: dto.presupuesto_max,
     fechaLimite: dto.fecha_limite || undefined,
     solicitudId: dto.solicitud_id, // Guardar el ID de la solicitud origen
