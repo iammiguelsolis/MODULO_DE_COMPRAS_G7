@@ -18,7 +18,6 @@ class OrdenCompraIntegrationService:
             raise ValueError("Licitación no encontrada")
             
         # Cambiar estado a FINALIZADA
-        # Asumimos que la transición es válida desde CON_CONTRATO
         licitacion.cambiar_estado(EstadoFinalizada(licitacion))
         
         db.session.commit()

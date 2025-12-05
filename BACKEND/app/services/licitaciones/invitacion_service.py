@@ -59,7 +59,6 @@ class InvitacionService:
 
         try:
             # Avanzar estado: NUEVA -> EN_INVITACION
-            # Esto asume que el estado actual es NUEVA y tiene implementado siguiente()
             licitacion.siguiente_estado()
             db.session.commit()
             return {"success": True, "mensaje": "Periodo de invitación finalizado. Estado actualizado."}

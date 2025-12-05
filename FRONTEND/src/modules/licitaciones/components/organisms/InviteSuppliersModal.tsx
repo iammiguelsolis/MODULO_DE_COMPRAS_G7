@@ -7,7 +7,7 @@ import Label from '../atoms/Label';
 import Input from '../atoms/Input';
 import Textarea from '../atoms/Textarea';
 import Checkbox from '../atoms/Checkbox';
-import { downloadMultipleFilesAsZip } from '../../lib/documentTemplateUtils';
+import { downloadMultipleFilesAsZip, getTemplatePathById } from '../../lib/documentTemplateUtils';
 import type { ProveedorDTO, DocumentoRequeridoDTO } from '../../lib/types';
 import './InviteSuppliersModal.css';
 
@@ -18,7 +18,8 @@ interface InviteSuppliersModalProps {
     licitacionTitle: string;
     estimatedAmount: number;
     maxBudget: number;
-    // TODO: MOCK - Debe venir de proveedoresService.listar()
+    fechaLimite?: string;
+    items?: Array<{ description: string; quantity?: number; estimatedHours?: number }>;
     availableSuppliers: ProveedorDTO[];
     requiredDocuments: DocumentoRequeridoDTO[];
     onSuppliersInvited?: (suppliers: string[]) => void;
@@ -31,6 +32,8 @@ const InviteSuppliersModal: React.FC<InviteSuppliersModalProps> = ({
     licitacionId,
     licitacionTitle,
     maxBudget,
+    fechaLimite,
+    items = [],
     availableSuppliers,
     requiredDocuments,
     onSuppliersInvited,
@@ -64,22 +67,33 @@ const InviteSuppliersModal: React.FC<InviteSuppliersModalProps> = ({
 
     const emailSubject = `Invitación a Licitación - ${licitacionTitle}`;
 
+    // Formatear items para el correo
+    const itemsDescripcion = items.length > 0
+        ? items.map(i => `   - ${i.description}, ${i.quantity ? `Cantidad: ${i.quantity}` : `Horas: ${i.estimatedHours}`}`).join('\n')
+        : '   - Ver detalles en documentación adjunta';
+
+    // Formatear fecha límite
+    const fechaLimiteFormateada = fechaLimite
+        ? new Date(fechaLimite).toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' })
+        : 'Ver documentación adjunta';
+
     const emailBody = `Estimado Proveedor,
 
-Le invitamos a participar en el proceso de licitación para la ${licitacionTitle}
+Le invitamos a participar en el proceso de licitación para ${licitacionTitle}
 
 Detalles de la licitación:
 • Licitación N°: ${licitacionId}
-• Descripción: Laptop G10, Cantidad: 15
+• Ítems solicitados:
+${itemsDescripcion}
 • Presupuesto Máximo: S/ ${maxBudget.toLocaleString('es-PE', { minimumFractionDigits: 2 })}
-• Fecha límite para recibir propuestas: 10 Nov 2025
+• Fecha límite para recibir propuestas: ${fechaLimiteFormateada}
 
 Adjunto encontrará las plantillas de la documentación requerida para su propuesta.
 
 Por favor, envíe su propuesta completa antes de la fecha límite indicada.
 
 Atentamente,
-Juan Pérez - Módulo de Compras`;
+Samuel Luque - Módulo de Compras`;
 
 
     const handleOpenGmail = () => {
@@ -103,8 +117,12 @@ Juan Pérez - Módulo de Compras`;
         try {
             const files = requiredDocuments
                 .map(doc => {
-                    // Usar ruta_plantilla del DTO si existe, o construirla/buscarla
-                    const path = doc.ruta_plantilla;
+                    // Usar getTemplatePathById para mapear el ID a la ruta correcta del archivo
+                    const docId = doc.ruta_plantilla;
+                    if (!docId) return null;
+
+                    // Importar dinámicamente la función getTemplatePathById
+                    const path = getTemplatePathById(docId);
                     return path ? { path, name: doc.nombre } : null;
                 })
                 .filter((f): f is { path: string; name: string } => f !== null);

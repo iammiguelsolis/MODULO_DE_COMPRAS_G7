@@ -5,18 +5,10 @@ import { Input } from '../components/atoms/Input';
 import { Select } from '../components/atoms/Select';
 import { Button } from '../components/atoms/Button';
 import { ordenCompraService } from '../lib/ordenCompraService';
+import { mockOrdenes } from "../lib/mockOrdenes";
+import type { OrdenHistorial } from "../lib/types"; 
 
-interface OrdenHistorial {
-  id: number;
-  numero_referencia: string;
-  titulo: string;
-  proveedor: string | null;
-  fecha_creacion: string | null;
-  estado: string | null;
-  tipo_origen: string | null;
-  moneda: string | null;
-  total: number;
-}
+
 
 const ESTADOS = [
   { value: '', label: 'Todos' },
@@ -49,6 +41,7 @@ const HistorialOrdenes: React.FC = () => {
         tipo_origen: origenFiltro
       });
       setOrdenes(data);
+      setOrdenes(data);
     } catch (error) {
       console.error('Error cargando órdenes:', error);
     } finally {
@@ -60,6 +53,11 @@ const HistorialOrdenes: React.FC = () => {
     cargarOrdenes();
   }, [estadoFiltro, origenFiltro]);
 
+  useEffect(() => {
+    // SIMULACIÓN: en vez de fetch al backend, usamos el mock
+    setOrdenes(mockOrdenes);
+  }, []);
+
   const ordenesFiltradas = ordenes.filter((oc) => {
     if (!busqueda.trim()) return true;
     const texto = (
@@ -69,6 +67,8 @@ const HistorialOrdenes: React.FC = () => {
     ).toLowerCase();
     return texto.includes(busqueda.toLowerCase());
   });
+
+  
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">

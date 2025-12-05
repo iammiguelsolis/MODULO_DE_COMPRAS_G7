@@ -4,7 +4,7 @@ import Modal from '../atoms/Modal';
 import Button from '../atoms/Button';
 import Alert from '../atoms/Alert';
 import { getContractTemplatePath, downloadFile } from '../../lib/documentTemplateUtils';
-import type { ProveedorDTO } from '../../lib/types';
+import type { ProveedorDTO, DocumentoRequeridoDTO } from '../../lib/types';
 import './GenerateContractModal.css';
 
 interface GenerateContractModalProps {
@@ -13,6 +13,7 @@ interface GenerateContractModalProps {
     licitacionId: string;
     licitacionTitle: string;
     winnerProvider?: ProveedorDTO;
+    requiredDocuments?: DocumentoRequeridoDTO[];
     onSaveContract?: (file: File) => void;
     onDownloadTemplate?: () => void;
 }
@@ -23,6 +24,7 @@ const GenerateContractModal: React.FC<GenerateContractModalProps> = ({
     licitacionId,
     licitacionTitle,
     winnerProvider,
+    requiredDocuments = [],
     onSaveContract,
     onDownloadTemplate
 }) => {
@@ -111,42 +113,19 @@ const GenerateContractModal: React.FC<GenerateContractModalProps> = ({
                     <div className="annex-docs-section">
                         <h4 className="annex-docs-title">Documentos Anexos al Contrato</h4>
                         <div className="annex-docs-grid">
-                            <div className="annex-doc-item">
-                                <CheckCircle size={16} className="annex-check" />
-                                RUC y Ficha RUC
-                            </div>
-                            <div className="annex-doc-item">
-                                <CheckCircle size={16} className="annex-check" />
-                                DNI del Representante Legal
-                            </div>
-                            <div className="annex-doc-item">
-                                <CheckCircle size={16} className="annex-check" />
-                                Acta de Constitución
-                            </div>
-                            <div className="annex-doc-item">
-                                <CheckCircle size={16} className="annex-check" />
-                                Ficha Técnica del Producto
-                            </div>
-                            <div className="annex-doc-item">
-                                <CheckCircle size={16} className="annex-check" />
-                                Certificaciones de Calidad (ISO)
-                            </div>
-                            <div className="annex-doc-item">
-                                <CheckCircle size={16} className="annex-check" />
-                                Catálogos y Brochures
-                            </div>
-                            <div className="annex-doc-item">
-                                <CheckCircle size={16} className="annex-check" />
-                                Propuesta Económica
-                            </div>
-                            <div className="annex-doc-item">
-                                <CheckCircle size={16} className="annex-check" />
-                                Estados Financieros Auditados
-                            </div>
-                            <div className="annex-doc-item">
-                                <CheckCircle size={16} className="annex-check" />
-                                Carta de Fianza
-                            </div>
+                            {requiredDocuments.length > 0 ? (
+                                requiredDocuments.map((doc, index) => (
+                                    <div key={index} className="annex-doc-item">
+                                        <CheckCircle size={16} className="annex-check" />
+                                        {doc.nombre}
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="annex-doc-item">
+                                    <CheckCircle size={16} className="annex-check" />
+                                    No hay documentos requeridos específicos
+                                </div>
+                            )}
                         </div>
                     </div>
 

@@ -3,39 +3,20 @@ import SupplierFilters from '../components/organisms/SupplierFilters';
 import SupplierTable from '../components/organisms/SupplierTable';
 import { useState, useMemo, useEffect } from 'react';
 import AddSupplierModal from '../components/organisms/AddSupplierModal';
-
-interface Supplier {
-    id: number;
-    razonSocial: string;
-    ruc: string;
-    rubro: string;
-    pais: string;
-    clasificacion: number;
-    estado: string;
-}
-
-interface ProveedorAPI {
-    id: number;
-    razonSocial: string;
-    ruc: string;
-    rubro: string;
-    pais: string;
-    estado: string;
-    email: string;
-    clasificacion?: number;
-}
+import { ProveedoresApi } from '../../../services/proveedor/api';
+import type { Proveedor } from '../../../services/proveedor/types';
 
 // Datos de ejemplo (fallback cuando no hay backend)
-const sampleSuppliers: Supplier[] = [
-    { id: 1, razonSocial: "Proveedor A SAC", ruc: "20123456789", rubro: "Tecnología", pais: "Perú", clasificacion: 4.5, estado: "ACTIVO" },
-    { id: 2, razonSocial: "Proveedor B LTDA", ruc: "20987654321", rubro: "Alimentos", pais: "Chile", clasificacion: 3, estado: "INACTIVO" },
-    { id: 3, razonSocial: "Proveedor C SA", ruc: "20456789123", rubro: "Construcción", pais: "Argentina", clasificacion: 5, estado: "ACTIVO" },
-    { id: 4, razonSocial: "Proveedor D Corp", ruc: "20111222333", rubro: "Tecnología", pais: "Perú", clasificacion: 4, estado: "PENDIENTE" }
+const sampleSuppliers: Proveedor[] = [
+    { id: 1, razonSocial: "Proveedor A SAC", ruc: "20123456789", pais: "Perú", clasificacion: 4.5, estado: "ACTIVO", email: "a@test.com", telefono: "999888777", direccion: "Av. Test 123" },
+    { id: 2, razonSocial: "Proveedor B LTDA", ruc: "20987654321", pais: "Chile", clasificacion: 3, estado: "INACTIVO", email: "b@test.com", telefono: "999888777", direccion: "Av. Test 456" },
+    { id: 3, razonSocial: "Proveedor C SA", ruc: "20456789123", pais: "Argentina", clasificacion: 5, estado: "ACTIVO", email: "c@test.com", telefono: "999888777", direccion: "Av. Test 789" },
+    { id: 4, razonSocial: "Proveedor D Corp", ruc: "20111222333", pais: "Perú", clasificacion: 4, estado: "PENDIENTE", email: "d@test.com", telefono: "999888777", direccion: "Av. Test 012" }
 ];
 
 const ProveedorPage = () => {
     const [showNewProviderModal, setShowNewProviderModal] = useState(false);
-    const [suppliers, setSuppliers] = useState<Supplier[]>([]);
+    const [suppliers, setSuppliers] = useState<Proveedor[]>([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
@@ -52,36 +33,8 @@ const ProveedorPage = () => {
         setError(null);
 
         try {
-            // IMPORTANTE: Reemplaza esta URL cuando tengas el backend
-            const API_BASE_URL = "http://localhost:8080/api"; // 👈 CAMBIA ESTO
-
-            // Construir parámetros de query para la API
-            const params = new URLSearchParams();
-            if (filters.status) params.append("estado", filters.status);
-            if (filters.search) params.append("busqueda", filters.search);
-
-            const url = `${API_BASE_URL}/proveedores?${params.toString()}`;
-
-            const response = await fetch(url);
-
-            if (!response.ok) {
-                throw new Error(`Error ${response.status}: ${response.statusText}`);
-            }
-
-            const data: ProveedorAPI[] = await response.json();
-
-            // Mapear los datos de la API al formato que usa tu tabla
-            const mappedData: Supplier[] = data.map((proveedor) => ({
-                id: proveedor.id,
-                razonSocial: proveedor.razonSocial, // API usa "razonSocial", tu tabla usa "proveedor"
-                ruc: proveedor.ruc,
-                rubro: proveedor.rubro,
-                pais: proveedor.pais,
-                clasificacion: proveedor.clasificacion || 0, // Si la API no devuelve clasificación
-                estado: proveedor.estado
-            }));
-
-            setSuppliers(mappedData);
+            const data = await ProveedoresApi.listar();
+            setSuppliers(data);
         } catch (err) {
             console.error("Error al cargar proveedores:", err);
             const errorMessage = err instanceof Error ? err.message : "Error desconocido";
@@ -93,20 +46,32 @@ const ProveedorPage = () => {
         }
     };
 
-    // Cargar proveedores al montar el componente y cuando cambien los filtros de API
+    // Cargar proveedores al montar el componente
     useEffect(() => {
         fetchSuppliers();
-    }, [filters.status, filters.search]);
+    }, []);
 
-    // Filtrado en FRONTEND (país y clasificación)
+    // Filtrado en FRONTEND (todos los filtros funcionan aquí)
     const filteredSuppliers = useMemo(() => {
         return suppliers.filter((s) => {
+            // Filtro de búsqueda (por razón social o RUC)
+            const matchSearch =
+                filters.search === "" ||
+                s.razonSocial.toLowerCase().includes(filters.search.toLowerCase()) ||
+                s.ruc.includes(filters.search);
+
+            // Filtro de estado
+            const matchStatus = filters.status === "" || s.estado === filters.status;
+
+            // Filtro de país
             const matchCountry = filters.country === "" || s.pais === filters.country;
+
+            // Filtro de clasificación (rating)
             const matchRating = filters.rating === 0 || Math.floor(s.clasificacion) >= Math.floor(filters.rating);
 
-            return matchCountry && matchRating;
+            return matchSearch && matchStatus && matchCountry && matchRating;
         });
-    }, [suppliers, filters.country, filters.rating]);
+    }, [suppliers, filters]);
 
     return (
         <>

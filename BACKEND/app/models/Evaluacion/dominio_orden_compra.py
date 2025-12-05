@@ -35,7 +35,7 @@ class LineaOC(db.Model):
         db.Enum(EstadoLineaOC, values_callable=lambda x: [e.value for e in x]),
         nullable=False
     )
-    ########################        Agregado EVA #####################
+
     cantidad_recibida_entrega_parcial = db.Column(db.Integer)
     fecha_efectiva_entrega_parcial = db.Column(db.Date, nullable=True)
     fecha_efectiva_entrega_final = db.Column(db.Date, nullable=False)
@@ -47,7 +47,7 @@ class LineaOC(db.Model):
 
     def verificar_estado():
         pass
-    ########################        Agregado EVA #####################
+
 class DetallesLineaOC:
     """Lógica de negocio y validación para los detalles de una línea de orden de compra."""
 

@@ -27,6 +27,22 @@ export const licitacionesService = {
     return response.data;
   },
 
+  // Completar detalles de licitación (presupuesto, fecha límite, documentos)
+  completarDetalles: async (
+    id: number,
+    data: {
+      presupuesto_max: number;
+      fecha_limite: string;
+      documentos_requeridos?: string[];
+    }
+  ) => {
+    const response = await apiClient.put(
+      `/api/licitaciones/${id}/completar-detalles`,
+      data
+    );
+    return response.data;
+  },
+
   // === FASE: NUEVA ===
   invitarProveedores: async (id: number, proveedores: number[]) => {
     const response = await apiClient.post(

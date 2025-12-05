@@ -30,6 +30,7 @@ interface LicitacionTimelineProps {
     onReject?: () => void;
     isApproved?: boolean;
     supervisorName?: string;
+    onDownloadContract?: () => void;
 }
 
 // Mapeo del orden de los estados
@@ -64,7 +65,8 @@ const LicitacionTimeline: React.FC<LicitacionTimelineProps> = ({
     onEnviarOrdenCompra,
     isCancelledNoProposals = false,
     isCancelledNoApprovals = false,
-    isCancelledNoEconomicApprovals = false
+    isCancelledNoEconomicApprovals = false,
+    onDownloadContract
 }) => {
     // Determinar el índice del estado actual
     const currentIndex = statusOrder.indexOf(currentStatus);
@@ -289,7 +291,14 @@ const LicitacionTimeline: React.FC<LicitacionTimelineProps> = ({
                 timestamp={timestamps['FINALIZADA']}
                 statusText={getStatusText('FINALIZADA')}
                 isFinalState={true}
-            />
+            >
+                {currentStatus === 'FINALIZADA' && onDownloadContract && (
+                    <Button variant="primary" size="sm" onClick={onDownloadContract}>
+                        <FileText size={16} />
+                        Descargar contrato
+                    </Button>
+                )}
+            </TimelineItem>
         </div>
     );
 };

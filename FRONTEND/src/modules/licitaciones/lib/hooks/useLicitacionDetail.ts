@@ -4,35 +4,59 @@ import type {
   LicitacionDetail,
   LicitacionResponseDTO,
   LicitacionStatus,
+  Item,
 } from "../types";
 
 const adaptLicitacionToDetail = (
   dto: LicitacionResponseDTO
 ): LicitacionDetail => {
+  // Mapear items según su tipo
+  const mappedItems: Item[] = dto.items.map((i) => {
+    if (i.tipo === "SERVICIO") {
+      return {
+        id: String(i.id),
+        type: "SERVICIO" as const,
+        description: i.nombre,
+        estimatedHours: i.cantidad, // Para servicios, cantidad = horas
+        hourlyRate: i.precio_referencia, // Para servicios, precio = tarifa
+        total: i.cantidad * i.precio_referencia,
+      };
+    } else {
+      return {
+        id: String(i.id),
+        type: "MATERIAL" as const,
+        description: i.nombre,
+        quantity: i.cantidad,
+        price: i.precio_referencia,
+        total: i.cantidad * i.precio_referencia,
+      };
+    }
+  });
+
+  // Calcular estimatedAmount sumando los totales de los items
+  const totalItemsAmount = mappedItems.reduce(
+    (sum, item) => sum + (item.total || 0),
+    0
+  );
+
   return {
     id: String(dto.id_licitacion),
     nombre: dto.titulo,
-    createdDate: new Date().toISOString(), // Backend no envía fecha creación en DTO
+    createdDate: dto.fecha_creacion || new Date().toISOString(),
     buyer: "Usuario Actual", // Backend no envía comprador
     supervisor: "Supervisor", // Backend no envía supervisor
     currentStatus: dto.estado as LicitacionStatus,
     timestamps: {
-      creacion: new Date().toISOString(),
+      creacion: dto.fecha_creacion || new Date().toISOString(),
       // Mapear otros timestamps si el backend los enviara
     },
-    estimatedAmount: dto.presupuesto_max, // Asumimos igual al max
+    estimatedAmount: totalItemsAmount,
     presupuestoMaximo: dto.presupuesto_max,
     fechaLimite: dto.fecha_limite || undefined,
-    items: dto.items.map((i) => ({
-      id: String(i.id),
-      type: i.tipo as "MATERIAL" | "SERVICIO",
-      description: i.nombre,
-      quantity: i.cantidad,
-      price: i.precio_referencia,
-      total: i.cantidad * i.precio_referencia, // Calculamos total ya que backend no lo manda en este DTO
-    })),
+    solicitudId: dto.solicitud_id, // Guardar el ID de la solicitud origen
+    items: mappedItems,
     requiredDocuments: dto.documentos_requeridos,
-    providers: [], // Backend no envía lista de invitados en detalle
+    providers: [],
     contract: dto.contrato
       ? {
           id: String(dto.contrato.id_contrato),
@@ -40,7 +64,8 @@ const adaptLicitacionToDetail = (
           fileSize: "Unknown",
           uploadedAt: dto.contrato.fecha_generacion,
           licitacionId: String(dto.id_licitacion),
-          providerId: 0, // No disponible en contrato DTO simple
+          providerId: 0,
+          url: dto.contrato.documento_firmado_url,
         }
       : undefined,
     cantidadInvitaciones: dto.cantidad_invitaciones,

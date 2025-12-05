@@ -44,8 +44,8 @@ interface LicitacionDetailTemplateProps {
     propuestasAprobadasTecnicamente?: number;
     propuestasAprobadasEconomicamente?: number;
     fechaLimite?: string;
+    solicitudId?: number; // ID de la solicitud de origen
 
-    // Callbacks
     onInvitarProveedores: (proveedores: number[]) => void;
     onFinalizarInvitacion: () => void;
     onRegistrarPropuesta: (proveedorId: number, files: File[]) => void;
@@ -62,16 +62,16 @@ interface LicitacionDetailTemplateProps {
     onGuardarContrato: (file: File) => void;
 
     onEnviarOrdenCompra: () => void;
+    onDownloadContract?: () => void;
 
     isCancelledNoEconomicApprovals?: boolean;
     onApprove?: () => void;
     onReject?: () => void;
 
-    // Data
     propuestas?: PropuestaResponseDTO[];
     documentosRequeridos?: DocumentoRequeridoDTO[];
-    items?: Item[]; // Items ya están en formato Item[] desde adapter
-    proveedoresDisponibles?: ProveedorDTO[]; // TODO: Cargar de proveedoresService cuando esté disponible
+    items?: Item[];
+    proveedoresDisponibles?: ProveedorDTO[];
     invitedProviders?: ProveedorDTO[];
 }
 
@@ -84,6 +84,8 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
     timestamps,
     estimatedAmount,
     presupuestoMaximo,
+    fechaLimite,
+    solicitudId,
     proveedoresCount,
     propuestasRegistradas,
     propuestasAprobadasTecnicamente,
@@ -100,13 +102,14 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
     onGenerarContrato,
     onGuardarContrato,
     onEnviarOrdenCompra,
+    onDownloadContract,
     isCancelledNoEconomicApprovals,
     onApprove,
     onReject,
     propuestas = [],
     documentosRequeridos = [],
     items = [],
-    proveedoresDisponibles = [], // TODO: Será poblado cuando proveedoresService esté listo
+    proveedoresDisponibles = [],
     invitedProviders = []
 }) => {
     // Modal states
@@ -122,10 +125,8 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
     const [showGenerateContractModal, setShowGenerateContractModal] = useState(false);
     const [showSendToPurchaseOrderModal, setShowSendToPurchaseOrderModal] = useState(false);
 
-    // Items are already in the correct Item[] format from the adapter
     const displayItems = items;
 
-    // Adapter: Convertir timestamps del backend al formato esperado por Timeline
     const timelineTimestamps: Partial<Record<LicitacionStatus, string>> = {
         PENDIENTE: timestamps.creacion,
         NUEVA: timestamps.aprobacion,
@@ -135,11 +136,10 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
         EVALUACION_ECONOMIA: timestamps.fin_evaluacion,
         ADJUDICADA: timestamps.adjudicacion,
         CON_CONTRATO: timestamps.contrato,
-        FINALIZADA: timestamps.contrato, // TODO: Usar timestamp específico cuando esté disponible
+        FINALIZADA: timestamps.contrato,
         CANCELADA: undefined
     };
 
-    // Handlers
     const handleApproveClick = () => {
         setShowApprovalModal(true);
     };
@@ -241,7 +241,6 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
         onEnviarOrdenCompra();
     };
 
-    // Group required documents by type for display
     const docsByType = documentosRequeridos.reduce((acc, doc) => {
         if (!acc[doc.tipo]) {
             acc[doc.tipo] = [];
@@ -255,7 +254,6 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
             type === 'TECNICO' ? 'Propuesta Técnica' :
                 type === 'ECONOMICO' ? 'Documentación Financiera' : type,
         documents: docs,
-        // icon: ... (optional, handled by component or default)
     }));
 
     return (
@@ -295,6 +293,7 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                         onIniciarEvaluacionEconomica={handleIniciarEvaluacionEconomica}
                         onGenerarContrato={handleGenerarContrato}
                         onEnviarOrdenCompra={handleSendToPurchaseOrderClick}
+                        onDownloadContract={onDownloadContract}
                         isCancelledNoEconomicApprovals={isCancelledNoEconomicApprovals}
                     />
                 </div>
@@ -302,8 +301,8 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                 <div className="licitacion-detail-right-col">
                     <LicitacionGeneralInfo
                         presupuestoMaximo={`S/. ${presupuestoMaximo.toLocaleString('es-PE', { minimumFractionDigits: 2 })}`}
-                        solicitudOrigen={`#${id}`}
-                        fechaLimite={timestamps.cierre_invitacion || 'No especificada'}
+                        solicitudOrigen={solicitudId ? `#${solicitudId}` : 'N/A'}
+                        fechaLimite={fechaLimite ? new Date(fechaLimite).toLocaleDateString('es-PE') : 'No especificada'}
                         comprador={buyer}
                     />
 
@@ -334,7 +333,6 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                 </div>
             </div>
 
-            {/* Modals */}
             <ApprovalModal
                 isOpen={showApprovalModal}
                 onClose={() => setShowApprovalModal(false)}
@@ -363,6 +361,8 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                 licitacionTitle={nombre}
                 estimatedAmount={estimatedAmount}
                 maxBudget={presupuestoMaximo}
+                fechaLimite={fechaLimite}
+                items={displayItems}
                 availableSuppliers={proveedoresDisponibles}
                 requiredDocuments={documentosRequeridos}
             />
@@ -376,7 +376,7 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                 supervisor={supervisor}
                 estimatedAmount={estimatedAmount}
                 maxBudget={presupuestoMaximo}
-                invitedSuppliers={[]} // TODO: Track invited suppliers
+                invitedSuppliers={[]}
             />
 
             <RegisterProposalModal
@@ -397,8 +397,8 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                 supervisorName={supervisor}
                 estimatedAmount={estimatedAmount}
                 maxBudget={presupuestoMaximo}
-                suppliersWithProposals={[]} // TODO: Track suppliers
-                suppliersWithoutDocs={0} // TODO: Track
+                suppliersWithProposals={[]}
+                suppliersWithoutDocs={0}
             />
 
             <SendToEvaluationModal
@@ -410,7 +410,7 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                 supervisor={supervisor}
                 estimatedAmount={estimatedAmount}
                 maxBudget={presupuestoMaximo}
-                suppliersWithProposals={[]} // TODO: Track suppliers
+                suppliersWithProposals={[]}
             />
 
             <TechnicalEvaluationModal
@@ -441,6 +441,7 @@ const LicitacionDetailTemplate: React.FC<LicitacionDetailTemplateProps> = ({
                 licitacionId={String(id)}
                 licitacionTitle={nombre}
                 winnerProvider={propuestas.find(p => p.es_ganadora)?.proveedor}
+                requiredDocuments={documentosRequeridos}
                 onSaveContract={handleSaveContract}
                 onDownloadTemplate={onGenerarContrato}
             />
