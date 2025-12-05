@@ -120,75 +120,10 @@ def crear_orden():
     data = request.get_json() or {}
 
     try:
-        tipo_origen = data.get("tipoOrigen")
-        proveedor_id = data.get("proveedorId")
-        solicitud_id = data.get("solicitudId")
-        notif_id = data.get("notificacionInventarioId")
-        moneda_str = data.get("moneda", "PEN")
-        fecha_entrega_str = data.get("fechaEntregaEsperada")
-        condiciones_pago = data.get("condicionesPago", {})
-        terminos_entrega = data.get("terminosEntrega")
-        observaciones = data.get("observaciones")
-        titulo = data.get("titulo") or "Orden de compra"
-
-        lineas_data = data.get("lineas", [])
-
-        # Validaciones simples
-        if not tipo_origen:
-            return jsonify({"error": "tipoOrigen es obligatorio"}), 400
-        if not proveedor_id and tipo_origen != "DIRECTA":
-            return jsonify({"error": "proveedorId es obligatorio para RFQ y LICITACION"}), 400
-        if not fecha_entrega_str:
-            return jsonify({"error": "fechaEntregaEsperada es obligatoria"}), 400
-        if not lineas_data:
-            return jsonify({"error": "Debe enviar al menos una línea"}), 400
-
-        # Crear instancia de OrdenCompra
-        from datetime import datetime
-
-        moneda = Moneda(moneda_str)  # asume Moneda.PEN.value == "PEN", etc.
-        fecha_entrega = datetime.fromisoformat(fecha_entrega_str).date()
-
-        modalidad_str = condiciones_pago.get("modalidad", "CONTADO")
-        dias_plazo = condiciones_pago.get("diasPlazo", 0)
-
-        # Mapear modalidad a Enum TipoPago
-        if modalidad_str == "TRANSFERENCIA":
-            modalidad_pago = TipoPago.TRANSFERENCIA
-        elif modalidad_str == "CREDITO":
-            modalidad_pago = TipoPago.CREDITO
-        else:
-            modalidad_pago = TipoPago.CONTADO
-
-        nueva_oc = OrdenCompra(
-            tipo_origen=tipo_origen,
-            id_proveedor=proveedor_id,
-            id_solicitud=solicitud_id,
-            id_notificacion_inventario=notif_id,
-            moneda=moneda,
-            condiciones_pago_dias_plazo=dias_plazo,
-            condiciones_pago_modalidad=modalidad_pago,
-            terminos_entrega=terminos_entrega,
-            fecha_entrega_esperada=fecha_entrega,
-            titulo=titulo,
-            observaciones=observaciones
-        )
-
-        # Generar número de referencia
-        nueva_oc.generar_numero_referencia()
-
-        # Crear líneas
-        for l in lineas_data:
-            linea = LineaOC(
-                id_item=l.get("productId"),  # aquí está simplificado
-                precio_unitario=l.get("unitPrice", 0),
-                cantidad=l.get("quantity", 0),
-                estado=EstadoOC.BORRADOR,  # o algún estado de línea inicial
-            )
-            nueva_oc.lineas.append(linea)
-
-        db.session.add(nueva_oc)
-        db.session.commit()
+        # Usar el servicio para crear la orden
+        from .oc_services import OrdenCompraService
+        
+        nueva_oc = OrdenCompraService.crear_desde_frontend(data)
 
         return jsonify({
             "message": "Orden creada correctamente",
@@ -196,6 +131,10 @@ def crear_orden():
         }), 201
 
     except Exception as e:
+        # db.session.rollback() # El servicio ya hace commit, y si falla levanta excepcion.
+        # Si el servicio falla antes del commit, el rollback global de flask o del servicio maneja.
+        # Pero por seguridad en la ruta podemos hacer rollback si algo queda 'dangling', 
+        # aunque el servicio debería ser atómico.
         db.session.rollback()
         return jsonify({"error": str(e)}), 400
 

@@ -21,7 +21,7 @@ export interface RFQData {
   id: string;
   proveedorGanadorId: string;
   items: ItemType[];
-  moneda: 'USD' | 'PEN';
+  moneda: "USD" | "PEN";
 }
 
 export interface LicitacionData {
@@ -29,7 +29,7 @@ export interface LicitacionData {
   numeroContrato: string;
   proveedor: ProveedorType;
   items: ItemType[];
-  moneda: 'USD' | 'PEN';
+  moneda: "USD" | "PEN";
   fechaEntregaContrato: string;
   isReadOnly: true; // Siempre true para licitaciones
 }
@@ -56,7 +56,7 @@ export interface ProductRowProps {
 export interface SummaryCardProps {
   totalAmount: number;
   currency: string;
-  orderType: 'RFQ' | 'LICITACION' | 'DIRECTA';
+  orderType: "RFQ" | "LICITACION" | "DIRECTA";
   itemsCount: number;
   supplierName?: string;
   onCreateOrder: () => void;
@@ -68,13 +68,13 @@ export interface OrdenModalProps {
   onClose: () => void;
   title: string;
   notes: string;
-  orderType: 'RFQ' | 'LICITACION' | 'DIRECTA';
+  orderType: "RFQ" | "LICITACION" | "DIRECTA";
   currency: string;
   items: ItemType[];
   totalAmount: number;
   supplier: ProveedorType | null;
   expectedDelivery: string;
-  paymentMode: 'CONTADO' | 'TRANSFERENCIA' | 'CREDITO';
+  paymentMode: "CONTADO" | "TRANSFERENCIA" | "CREDITO";
   paymentDays: number;
   deliveryTerms: string;
   solicitudId?: string;
@@ -88,19 +88,19 @@ export interface ProveedorModalProps {
   selectedSupplier: ProveedorType | null;
 }
 
-
 export interface CondicionesPago {
   diasPlazo: number;
-  modalidad: 'CONTADO' | 'TRANSFERENCIA' | 'CREDITO';
+  modalidad: "CONTADO" | "TRANSFERENCIA" | "CREDITO";
 }
 
 export interface OrdenCompraRequest {
-  tipoOrigen: 'RFQ' | 'LICITACION' | 'DIRECTA';
+  tipoOrigen: "RFQ" | "LICITACION" | "DIRECTA";
+  idOrigen?: string | number; // ID de Licitación o RFQ
   proveedorId: string;
-  solicitudId?: string;  // Para RFQ/Licitación
-  notificacionInventarioId?: string;  // Para DIRECTA
+  solicitudId?: string; // Para RFQ/Licitación
+  notificacionInventarioId?: string; // Para DIRECTA
   lineas: ItemType[];
-  moneda: 'USD' | 'PEN';
+  moneda: "USD" | "PEN";
   fechaEntregaEsperada: string;
   condicionesPago: CondicionesPago;
   terminosEntrega: string;
