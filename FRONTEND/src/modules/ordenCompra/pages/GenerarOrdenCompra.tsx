@@ -57,21 +57,32 @@ const GenerarOrdenCompra: React.FC = () => {
   // CARGAR AUTOMÁTICAMENTE DATOS DESDE LICITACIÓN, RFQ O DIRECTA
   // --------------------------------------------------------------
   useEffect(() => {
-    if (!tipoRuta || !datosOrigen) return;
+    if (datosOrigen) {
+      if (datosOrigen.contrato || datosOrigen.id_solicitud) {
+        setOrderType("LICITACION");
+        setSelectedSupplier(datosOrigen.proveedor);
+        setItems(datosOrigen.items ?? []);
+        setSolicitudId(datosOrigen.id_solicitud);
+        setExpectedDelivery(datosOrigen.contrato?.fecha_firmado || "");
+        setTitle(datosOrigen.titulo || "");
+        setNotes(datosOrigen.notas || "");
+        return;
+      }
+
+      // Otros casos (RFQ, Directa) podrían manejarse aquí si envían state
+    }
+
+    if (!tipoRuta) return;
 
     setOrderType(tipoRuta);
 
-    // LICITACIÓN
-    if (tipoRuta === "LICITACION") {
-      setSelectedSupplier(datosOrigen.proveedor);
-      setItems(datosOrigen.items ?? []);
-      setSolicitudId(datosOrigen.id_solicitud);
-      setExpectedDelivery(datosOrigen.contrato?.fecha_firmado || "");
-      return;
+    // LICITACIÓN (Legacy via query param)
+    if (tipoRuta === "LICITACION" && datosOrigen) {
+      // ... (ya manejado arriba, pero por si acaso)
     }
 
     // RFQ
-    if (tipoRuta === "RFQ") {
+    if (tipoRuta === "RFQ" && datosOrigen) {
       setSelectedSupplier(datosOrigen.proveedor || null);
       setItems(datosOrigen.items ?? []);
       setSolicitudId(datosOrigen.id_solicitud);
@@ -79,7 +90,7 @@ const GenerarOrdenCompra: React.FC = () => {
     }
 
     // DIRECTA (notificación inventario)
-    if (tipoRuta === "DIRECTA") {
+    if (tipoRuta === "DIRECTA" && datosOrigen) {
       setNotificacionInventarioId(datosOrigen.notificacionId);
 
       setItems([

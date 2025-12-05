@@ -1,6 +1,6 @@
-import { PlusCircle, Loader2 } from 'lucide-react'; 
+import { PlusCircle, Loader2 } from 'lucide-react';
 import { useState } from 'react';
-import { useNavigate } from 'react-router-dom'; 
+import { useNavigate } from 'react-router-dom';
 import { Input } from '../components/atoms/Input';
 import { TextArea } from '../components/atoms/TextArea';
 import { Button } from '../components/atoms/Button';
@@ -10,7 +10,7 @@ import { Select } from '../components/atoms/Select';
 import { RequestModal } from '../components/molecules/RequestModal';
 
 // --- IMPORTANTE: Agregamos AdquisicionesApi ---
-import { SolicitudesApi, AdquisicionesApi } from '../../../services/solicitudYadquisicion/api'; 
+import { SolicitudesApi, AdquisicionesApi } from '../../../services/solicitudYadquisicion/api';
 import type { SolicitudInput, ItemSolicitudInput, TipoItem } from '../../../services/solicitudYadquisicion/types';
 
 interface ItemType {
@@ -25,9 +25,9 @@ const Solicitud: React.FC = () => {
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
   const [requestType, setRequestType] = useState<'material' | 'servicio'>('material');
-  
+
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const [items, setItems] = useState<ItemType[]>([
     { id: '1', name: '', quantity: 50, price: '$ 20.00' },
   ]);
@@ -82,7 +82,7 @@ const Solicitud: React.FC = () => {
 
   // Cálculo visual para la UI (El backend tiene la palabra final)
   const getPurchaseType = (total: number) => {
-    return total >= 10000 ? 'LICITACIÓN' : 'COMPRA'; 
+    return total >= 10000 ? 'LICITACIÓN' : 'COMPRA';
   };
 
   // --- INTEGRACIÓN Y REDIRECCIÓN ---
@@ -100,9 +100,9 @@ const Solicitud: React.FC = () => {
         const precio = parsePrice(item.price);
         const baseItem = {
           tipo: tipoBackend,
-          nombre: item.name, 
-          cantidad: item.quantity, 
-          comentario: "" 
+          nombre: item.name,
+          cantidad: item.quantity,
+          comentario: ""
         };
         if (tipoBackend === 'MATERIAL') {
           return { ...baseItem, precio_unitario: precio };
@@ -130,9 +130,18 @@ const Solicitud: React.FC = () => {
 
       // 5. REDIRECCIÓN INTELIGENTE
       setIsModalOpen(false);
-      
+
       if (procesoRes.tipo_proceso === 'LICITACION') {
-        navigate('/licitaciones/crear', { state: { procesoId: procesoRes.proceso.id } });
+        navigate(`/licitaciones/completar/${procesoRes.proceso.id}`, {
+          state: {
+            licitacionId: procesoRes.proceso.id,
+            titulo: title,
+            notas: notes,
+            items: items,
+            montoTotal: calculateTotal(),
+            requestType: requestType
+          }
+        });
       } else {
         navigate('/compras', { state: { procesoId: procesoRes.proceso.id } });
       }
@@ -188,7 +197,7 @@ const Solicitud: React.FC = () => {
               processType={totalAmount >= 10000 ? 'Tipo de Proceso: Licitación' : 'Tipo de Proceso: Simple'}
               processDescription={totalAmount >= 10000 ? 'Esta solicitud supera el límite. Se iniciará un proceso de licitación.' : 'Compra simple de bajo monto.'}
               purchaseType={purchaseType}
-              onCreateRequest={() => setIsModalOpen(true)} 
+              onCreateRequest={() => setIsModalOpen(true)}
             />
           </div>
         </div>
@@ -202,7 +211,7 @@ const Solicitud: React.FC = () => {
               Agregar Ítem
             </Button>
           </div>
-          
+
           <div className="mb-6 max-w-xs">
             <Select
               label="Tipo de Solicitud"
@@ -251,7 +260,7 @@ const Solicitud: React.FC = () => {
         items={items}
         totalAmount={totalAmount}
         purchaseType={purchaseType}
-        onConfirm={handleSubmit} 
+        onConfirm={handleSubmit}
         isLoading={isLoading}
       />
     </div>

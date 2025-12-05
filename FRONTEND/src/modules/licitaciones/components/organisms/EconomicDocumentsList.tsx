@@ -1,23 +1,33 @@
 import React from 'react';
 import EvaluableDocumentItem from '../molecules/EvaluableDocumentItem';
+import type { DocumentoDTO } from '../../lib/types';
 import './EconomicDocumentsList.css';
 
 interface EconomicDocumentsListProps {
     disabled?: boolean;
+    documents?: DocumentoDTO[];
 }
 
-const EconomicDocumentsList: React.FC<EconomicDocumentsListProps> = ({ disabled = false }) => {
-    // Hardcoded economic documents (only 3)
-    const documents = [
-        { id: 'doc-econ-1', name: 'Propuesta_Economica.xlsx', size: '850 KB' },
-    ];
+const EconomicDocumentsList: React.FC<EconomicDocumentsListProps> = ({
+    disabled = false,
+    documents = []
+}) => {
+    // Mostrar todos los documentos presentados
+    const economicDocs = documents;
 
-    const handleView = (docName: string) => {
-        console.log(`[Mock] Ver documento: ${docName}`);
+    const handleView = (url: string) => {
+        if (url) {
+            window.open(url, '_blank');
+        }
     };
 
-    const handleDownload = (docName: string) => {
-        console.log(`[Mock] Descargar documento: ${docName}`);
+    const handleDownload = (url: string, fileName: string) => {
+        if (url) {
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = fileName;
+            link.click();
+        }
     };
 
     return (
@@ -31,17 +41,24 @@ const EconomicDocumentsList: React.FC<EconomicDocumentsListProps> = ({ disabled 
                 </div>
             )}
 
-            {!disabled && (
+            {!disabled && economicDocs.length === 0 && (
+                <div className="econ-docs-empty-state">
+                    <p>No se encontraron documentos económicos</p>
+                    <p className="empty-subtext">El proveedor no ha presentado documentos de tipo económico/financiero</p>
+                </div>
+            )}
+
+            {!disabled && economicDocs.length > 0 && (
                 <div className="econ-docs-items-container">
-                    {documents.map(doc => (
+                    {economicDocs.map(doc => (
                         <EvaluableDocumentItem
-                            key={doc.id}
-                            documentName={doc.name}
-                            fileSize={doc.size}
+                            key={doc.id_documento}
+                            documentName={doc.nombre}
+                            fileSize="Ver archivo"
                             status={null}
-                            onStatusChange={() => { }} // No-op, economic docs don't have status evaluation
-                            onView={() => handleView(doc.name)}
-                            onDownload={() => handleDownload(doc.name)}
+                            onStatusChange={() => { }}
+                            onView={() => handleView(doc.url_archivo)}
+                            onDownload={() => handleDownload(doc.url_archivo, doc.nombre)}
                             disabled={disabled}
                             showEvaluationButtons={false}
                         />

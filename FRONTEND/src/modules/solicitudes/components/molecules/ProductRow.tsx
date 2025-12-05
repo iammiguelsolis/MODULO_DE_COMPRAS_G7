@@ -10,7 +10,7 @@ interface ItemType {
 
 interface ProductRowProps {
   item: ItemType;
-  requestType: 'producto' | 'servicio';
+  requestType: 'material' | 'servicio';
   onChange: (id: string, field: keyof ItemType, value: string | number) => void;
   onDelete: (id: string) => void;
 }
@@ -28,14 +28,14 @@ export const ProductRow: React.FC<ProductRowProps> = ({ item, requestType, onCha
       <div className="col-span-2">
         <Input
           type="number"
-          placeholder={requestType === 'producto' ? '50' : '0'}
+          placeholder={requestType === 'material' ? '50' : '0'}
           value={item.quantity}
           onChange={(e) => onChange(item.id, 'quantity', parseFloat(e.target.value) || 0)}
         />
       </div>
       <div className="col-span-3">
         <Input
-          placeholder={requestType === 'producto' ? '$ 20.00' : '$ 0.00'}
+          placeholder={requestType === 'material' ? '$ 20.00' : '$ 0.00'}
           value={item.price}
           onChange={(e) => onChange(item.id, 'price', e.target.value)}
         />

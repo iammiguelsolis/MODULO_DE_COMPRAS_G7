@@ -215,7 +215,10 @@ const EconomicEvaluationModal: React.FC<EconomicEvaluationModalProps> = ({
                             onSelectSupplier={handleSelectSupplier}
                         />
 
-                        <EconomicDocumentsList disabled={!selectedPropuestaId} />
+                        <EconomicDocumentsList
+                            disabled={!selectedPropuestaId}
+                            documents={selectedPropuesta?.documentos}
+                        />
 
                         {selectedPropuestaId && (
                             <>

@@ -7,7 +7,8 @@ interface ReadOnlyItemProps {
 }
 
 const ReadOnlyItem: React.FC<ReadOnlyItemProps> = ({ item }) => {
-    const total = item.type === 'Producto'
+    const isProducto = item.type === 'MATERIAL';
+    const total = isProducto
         ? (item.quantity || 0) * (item.price || 0)
         : (item.estimatedHours || 0) * (item.hourlyRate || 0);
 
@@ -15,7 +16,7 @@ const ReadOnlyItem: React.FC<ReadOnlyItemProps> = ({ item }) => {
         <tr className="readonly-item-row">
             <td><span className="item-type-badge">{item.type}</span></td>
             <td>{item.description}</td>
-            {item.type === 'Producto' ? (
+            {isProducto ? (
                 <>
                     <td className="text-center">{item.quantity}</td>
                     <td className="text-right">S/ {item.price?.toFixed(2)}</td>

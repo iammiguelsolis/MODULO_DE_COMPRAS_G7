@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import LicitacionDetailTemplate from '../components/templates/LicitacionDetailTemplate';
 import { useLicitacionDetail } from '../lib/hooks/useLicitacionDetail';
 import { useSupabaseUpload } from '../lib/hooks/useSupabaseUpload';
@@ -217,13 +217,54 @@ const LicitacionDetailPage: React.FC = () => {
         }
     };
 
+    const navigate = useNavigate();
+
     // Handler Final
     const handleEnviarOrdenCompra = async () => {
         try {
             await finalizar();
-            alert('Licitación finalizada y enviada a órdenes de compra');
+
+            // Preparar datos para Orden de Compra
+            const winnerProposal = propuestas.find(p => p.es_ganadora);
+
+            // Mapear items al formato de Orden de Compra
+            const orderItems = licitacion?.items.map(item => ({
+                id: item.id,
+                productId: '',
+                name: item.description,
+                quantity: item.type === 'SERVICIO' ? (item.estimatedHours || 1) : (item.quantity || 1),
+                unitPrice: item.type === 'SERVICIO' ? (item.hourlyRate || 0) : (item.price || 0),
+                description: item.description
+            })) || [];
+
+            const orderData = {
+                proveedor: winnerProposal ? {
+                    id: String(winnerProposal.proveedor.id),
+                    name: winnerProposal.proveedor.razon_social,
+                    email: winnerProposal.proveedor.email,
+                    ruc: winnerProposal.proveedor.ruc,
+                    phone: '',
+                    address: ''
+                } : null,
+                items: orderItems,
+                id_solicitud: licitacion?.solicitudId ? String(licitacion.solicitudId) : '',
+                contrato: { fecha_firmado: "2025-12-27" },
+                titulo: licitacion?.nombre || '',
+                notas: `Generado desde Licitación #${id}`
+            };
+
+            navigate('/ordenes', { state: orderData });
+
         } catch (err: any) {
             alert(err.message);
+        }
+    };
+
+    const handleDownloadContract = () => {
+        if (licitacion?.contract?.url) {
+            downloadFile(licitacion.contract.url, `Contrato_Licitacion_${id}.docx`);
+        } else {
+            alert('No hay contrato disponible para descargar');
         }
     };
 
@@ -243,6 +284,8 @@ const LicitacionDetailPage: React.FC = () => {
                 timestamps={licitacion.timestamps}
                 estimatedAmount={licitacion.estimatedAmount}
                 presupuestoMaximo={licitacion.presupuestoMaximo}
+                fechaLimite={licitacion.fechaLimite}
+                solicitudId={licitacion.solicitudId}
                 proveedoresCount={licitacion.providers?.length || 0}
                 propuestasRegistradas={propuestas.length}
                 propuestasAprobadasTecnicamente={propuestas.filter(p => p.estado_tecnico === 'APROBADO').length}
@@ -266,6 +309,7 @@ const LicitacionDetailPage: React.FC = () => {
                 onGuardarContrato={handleGuardarContrato}
 
                 onEnviarOrdenCompra={handleEnviarOrdenCompra}
+                onDownloadContract={handleDownloadContract}
 
                 // Props adicionales para los modales que necesitan datos
                 documentosRequeridos={licitacion.requiredDocuments}

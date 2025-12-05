@@ -24,9 +24,7 @@ class ContratoService:
             raise ValueError("La licitación no tiene propuesta ganadora asignada")
             
         try:
-            # Lógica simulada de generación de documento (docxtpl)
-            # En producción: usare docxtpl para llenar template y guardar en S3/Local
-            # nombre_archivo = f"contrato_plantilla_{id_licitacion}.docx"
+            # Lógica simulada de generación de documento
             url_plantilla = "contrato-adjudicacion"
             
             # Verificar si ya existe contrato previo para actualizar o crear nuevo

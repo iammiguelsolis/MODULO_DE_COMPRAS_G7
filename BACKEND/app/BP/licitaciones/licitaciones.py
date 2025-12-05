@@ -1,6 +1,6 @@
 from flask import Blueprint, request, jsonify
 from app.services.licitaciones.licitacion_service import LicitacionService
-from app.dtos.licitaciones.licitacion_dto import LicitacionResponseDTO
+from app.dtos.licitaciones.licitacion_dto import LicitacionResponseDTO, LicitacionListItemDTO
 
 licitaciones_bp = Blueprint('licitaciones', __name__, url_prefix='/api/licitaciones')
 service = LicitacionService()
@@ -9,7 +9,7 @@ service = LicitacionService()
 def listar_licitaciones():
     """
     GET /api/licitaciones
-    Lista todas las licitaciones.
+    Lista todas las licitaciones con paginación
     """
     try:
         filters = {
@@ -28,9 +28,16 @@ def listar_licitaciones():
         page = request.args.get('page', 1, type=int)
         per_page = request.args.get('per_page', 10, type=int)
         
-        licitaciones = service.listar_todas(filters, page, per_page)
-        response = [LicitacionResponseDTO.from_model(l) for l in licitaciones]
-        return jsonify(response), 200
+        result = service.listar_todas(filters, page, per_page)
+        # Usar DTO ligero para la lista
+        items = [LicitacionListItemDTO.from_model(l) for l in result['items']]
+        
+        return jsonify({
+            'items': items,
+            'total': result['total'],
+            'page': page,
+            'per_page': per_page
+        }), 200
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -58,5 +65,31 @@ def obtener_licitacion(id):
         if not licitacion:
             return jsonify({'error': 'Licitación no encontrada'}), 404
         return jsonify(LicitacionResponseDTO.from_model(licitacion)), 200
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@licitaciones_bp.route('/<int:id>/completar-detalles', methods=['PUT'])
+def completar_detalles(id):
+    """
+    PUT /api/licitaciones/{id}/completar-detalles
+    Actualiza presupuesto_max, fecha_limite y documentos_requeridos
+    de una licitación en estado NUEVA.
+    
+    Body esperado:
+    {
+        "presupuesto_max": 50000.00,
+        "fecha_limite": "2025-01-15",
+        "documentos_requeridos": ["certificado-bancario", "experiencia-tecnica"]
+    }
+    """
+    try:
+        data = request.get_json()
+        licitacion_actualizada = service.actualizar_detalles(id, data)
+        return jsonify({
+            'mensaje': 'Detalles de licitación actualizados correctamente',
+            'licitacion': LicitacionResponseDTO.from_model(licitacion_actualizada)
+        }), 200
+    except ValueError as e:
+        return jsonify({'error': str(e)}), 400
     except Exception as e:
         return jsonify({'error': str(e)}), 500

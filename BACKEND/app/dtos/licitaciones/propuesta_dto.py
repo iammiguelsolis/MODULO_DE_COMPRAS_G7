@@ -22,7 +22,6 @@ class PropuestaResponseDTO:
     
     @staticmethod
     def from_model(propuesta):
-        # Determinar estados de evaluación para el frontend
         estado_tec = "PENDIENTE"
         if propuesta.aprobada_tecnicamente:
             estado_tec = "APROBADO"

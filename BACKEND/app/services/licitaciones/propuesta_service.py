@@ -39,7 +39,7 @@ class PropuestaService:
                     documento_requerido_id=doc_data.get('documento_requerido_id'),
                     nombre=doc_data.get('nombre'),
                     url_archivo=doc_data.get('url'),
-                    tipo=TipoDocumento(doc_data.get('tipo', 'TECNICO')), # Default a TECNICO
+                    tipo=TipoDocumento(doc_data.get('tipo', 'TECNICO')),
                     validado=False
                 )
                 db.session.add(documento)
