@@ -15,7 +15,7 @@ export default function SearchInput({ value, onChange }: SearchInputProps) {
                 <InputText
                     value={value}
                     onChange={onChange}
-                    placeholder="Nombre, RUC, rubro..."
+                    placeholder="Nombre, RUC..."
                     fullWidth
                 />
             </div>

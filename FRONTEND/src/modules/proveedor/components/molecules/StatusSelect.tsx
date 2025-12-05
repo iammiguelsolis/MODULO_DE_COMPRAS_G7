@@ -8,9 +8,9 @@ export default function StatusSelect({ value, onChange }: { value?: string; onCh
                 value={value}
                 onChange={onChange}
                 options={[
-                    { label: "Activo", value: "Activo" },
-                    { label: "Inactivo", value: "Inactivo" },
-                    { label: "Bloqueado", value: "Bloqueado" },
+                    { label: "Activo", value: "ACTIVO" },
+                    { label: "Inactivo", value: "INACTIVO" },
+                    { label: "Bloqueado", value: "BLOQUEADO" },
                 ]}
             />
         </div>
