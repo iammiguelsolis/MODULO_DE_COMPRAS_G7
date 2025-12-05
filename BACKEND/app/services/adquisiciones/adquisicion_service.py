@@ -6,6 +6,7 @@ from app.patrones.notificadores import WhatsappFactory, CorreoFactory
 from app.patrones.clasificadores import ClasificadorPorMonto
 from app.models.proveedor_inventario.dominio_proveedor import Proveedor 
 from app.services.licitaciones.licitacion_service import LicitacionService
+from app.models.OrdenCompra.oc_services import OrdenCompraService
 
 class AdquisicionService:
     
@@ -167,8 +168,12 @@ class AdquisicionService:
         db.session.commit()
 
         return oferta
-
     def elegir_ganador(self, id_compra, id_oferta_ganadora):
+        import traceback
+        # Importamos datetime para calcular una fecha por defecto
+        from datetime import datetime, timedelta
+
+        # 1. Validaciones iniciales
         compra = Compra.query.get(id_compra)
         if not compra:
             raise Exception("Proceso de compra no encontrado")
@@ -180,13 +185,71 @@ class AdquisicionService:
         if oferta.proceso_id != compra.id:
             raise Exception("La oferta seleccionada no pertenece a esta compra.")
             
-        # Al seleccionar ganador, el estado pasa a CERRADO
-        compra.seleccionar_ganador(oferta)
-        
-        db.session.commit()
-        
-        return compra
-      
+        try:
+            compra.seleccionar_ganador(oferta)
+            db.session.flush() 
+            print(f"--- [DEBUG] Iniciando integración OC para Compra #{id_compra} ---")
+
+            from app.models.OrdenCompra.oc_services import OrdenCompraService
+            from app.models.OrdenCompra.oc_enums import TipoOrigen, Moneda, TipoPago
+
+            items_payload = []
+            for item in oferta.items:
+                cantidad = 1
+                if hasattr(item, 'cantidad_disponible') and item.cantidad_disponible is not None:
+                    cantidad = item.cantidad_disponible
+                
+                desc = getattr(item, 'descripcion', 'Item sin descripción')
+
+                items_payload.append({
+                    "id_item": str(item.id), 
+                    "descripcion": desc,
+                    "cantidad": cantidad,
+                    "precio_unitario": float(item.precio_oferta)
+                })
+
+            tipo_origen_enum = TipoOrigen.RFQ
+            if getattr(compra, 'tipo_proceso', '') == 'LICITACION':
+                tipo_origen_enum = TipoOrigen.LICITACION
+
+            fecha_default = datetime.now().date() + timedelta(days=90)
+
+            payload_oc = {
+                "tipo_origen": tipo_origen_enum,
+                "id_origen": compra.id,
+                "id_solicitud": compra.solicitud_id,
+                "proveedor_id": oferta.proveedor_id,
+                "moneda": Moneda.PEN,
+                
+                "fecha_entrega_esperada": fecha_default, 
+                
+                "titulo": f"Orden de Compra - Ref. Solicitud #{compra.solicitud_id}",
+                "observaciones": f"Generado desde oferta #{oferta.id}",
+                "condiciones_pago": {
+                    "modalidad": TipoPago.CONTADO,
+                    "dias_plazo": 0
+                },
+                "items": items_payload,
+                "terminos_entrega": "A tratar",
+                "id_notificacion_inventario": None
+            }
+
+            oc_service = OrdenCompraService()
+            nueva_oc = oc_service._crear_oc_desde_payload(payload_oc)
+            
+            print(f"--- [DEBUG] OC Creada Exitosamente: {nueva_oc.numero_referencia} ---")
+
+            db.session.commit()
+            return compra
+
+        except Exception as e:
+            db.session.rollback()
+            print("\n" + "="*50)
+            print(" ERROR CRÍTICO AL INTEGRAR OC ")
+            traceback.print_exc()
+            print("="*50 + "\n")
+            raise Exception(f"Error interno: {str(e)}")
+          
     def listar_procesos(self):
 
         procesos = ProcesoAdquisicion.query.all()
