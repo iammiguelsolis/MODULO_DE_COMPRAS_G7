@@ -1,355 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { X, Plus, Edit2, Trash2, AlertTriangle } from "lucide-react";
+import { X, Plus, Edit2, Trash2 } from "lucide-react";
+import type { ProveedorDetalle, CuentaBancaria, ContactoProveedor } from "../../../../services/proveedor/types";
+import Button from "../atoms/ButtonDetail";
+import InfoField from "../atoms/InfoField";
+import { ProveedoresApi } from "../../../../services/proveedor/api";
+
+import BankAccountModal from "./BankAccountModal";
+import ContactModal from "./ContactModal";
+import ConfirmModal from "./ConfirmModal";
 
 // ==================== INTERFACES ====================
-interface Supplier {
-    id: number;
-    razonSocial: string;
-    ruc: string;
-    rubro: string;
-    pais: string;
-    direccion: string;
-    telefono: string;
-    email: string;
-    moneda: string;
-    estado: string;
-}
-
-interface CuentaBancaria {
-    id: number;
-    banco: string;
-    moneda: string;
-    numeroCuenta: string;
-    cci: string;
-    titular: string;
-}
-
-interface Contacto {
-    id: number;
-    nombre: string;
-    cargo: string;
-    email: string;
-    telefono: string;
-}
 
 interface SupplierDetailModalProps {
     supplierId: number;
     onClose: () => void;
     onDeactivate?: (id: number) => void;
 }
-
-// ==================== COMPONENTES AUXILIARES ====================
-
-// Botón reutilizable
-const Button: React.FC<{
-    children: React.ReactNode;
-    variant?: "primary" | "secondary" | "danger";
-    size?: "sm" | "md";
-    onClick?: () => void;
-    icon?: React.ReactNode;
-}> = ({ children, variant = "primary", size = "md", onClick, icon }) => {
-    const baseClasses = "rounded-lg font-medium transition-colors flex items-center gap-2";
-    const sizeClasses = size === "sm" ? "px-3 py-1.5 text-sm" : "px-4 py-2 text-base";
-    const variantClasses = {
-        primary: "bg-blue-600 text-white hover:bg-blue-700",
-        secondary: "bg-gray-200 text-gray-700 hover:bg-gray-300",
-        danger: "bg-red-600 text-white hover:bg-red-700"
-    };
-
-    return (
-        <button
-            onClick={onClick}
-            className={`${baseClasses} ${sizeClasses} ${variantClasses[variant]}`}
-        >
-            {icon}
-            {children}
-        </button>
-    );
-};
-
-// Campo de información (solo lectura)
-const InfoField: React.FC<{ label: string; value: string }> = ({ label, value }) => (
-    <div>
-        <label className="block text-xs font-medium text-gray-500 mb-1">{label}</label>
-        <div className="text-sm text-gray-700 font-medium">{value}</div>
-    </div>
-);
-
-// Input numérico para modales
-const NumericInputField: React.FC<{
-    label: string;
-    value: string;
-    onChange: (value: string) => void;
-    placeholder?: string;
-    allowedChars?: string;
-}> = ({ label, value, onChange, placeholder, allowedChars = "" }) => {
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const inputValue = e.target.value;
-        const pattern = new RegExp(`^[0-9${allowedChars.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, '\\$&')}]*$`);
-
-        if (inputValue === "" || pattern.test(inputValue)) {
-            onChange(inputValue);
-        }
-    };
-
-    return (
-        <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-            <input
-                type="text"
-                value={value}
-                onChange={handleChange}
-                placeholder={placeholder}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-        </div>
-    );
-};
-
-// Select para modales
-const SelectField: React.FC<{
-    label: string;
-    value: string;
-    onChange: (value: string) => void;
-    options: { value: string; label: string }[];
-    placeholder?: string;
-}> = ({ label, value, onChange, options, placeholder }) => (
-    <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-        <select
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
-        >
-            <option value="">{placeholder || "Seleccionar..."}</option>
-            {options.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                </option>
-            ))}
-        </select>
-    </div>
-);
-
-// Input para modales
-const InputField: React.FC<{
-    label: string;
-    value: string;
-    onChange: (value: string) => void;
-    placeholder?: string;
-    type?: string;
-}> = ({ label, value, onChange, placeholder, type = "text" }) => (
-    <div>
-        <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-        <input
-            type={type}
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-            placeholder={placeholder}
-            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-        />
-    </div>
-);
-
-// ==================== SUB-MODALES ====================
-
-// Modal para agregar/editar cuenta bancaria
-const BankAccountModal: React.FC<{
-    account: CuentaBancaria | null;
-    onClose: () => void;
-    onSave: (account: Omit<CuentaBancaria, "id">) => void;
-}> = ({ account, onClose, onSave }) => {
-    const [formData, setFormData] = useState<Omit<CuentaBancaria, "id">>({
-        banco: account?.banco || "",
-        moneda: account?.moneda || "",
-        numeroCuenta: account?.numeroCuenta || "",
-        cci: account?.cci || "",
-        titular: account?.titular || ""
-    });
-
-    const bancoOptions = [
-        { value: "BCP", label: "BCP - Banco de Crédito del Perú" },
-        { value: "BBVA", label: "BBVA Continental" },
-        { value: "Interbank", label: "Interbank" },
-        { value: "Scotiabank", label: "Scotiabank Perú" },
-        { value: "Banbif", label: "Banbif" },
-        { value: "Pichincha", label: "Banco Pichincha" },
-        { value: "GNB", label: "GNB Perú" },
-        { value: "Santander", label: "Santander Perú" },
-        { value: "Otro", label: "Otro" }
-    ];
-
-    const monedaOptions = [
-        { value: "PEN", label: "PEN - Soles" },
-        { value: "USD", label: "USD - Dólares" },
-        { value: "EUR", label: "EUR - Euros" }
-    ];
-
-    const handleSave = () => {
-        if (!formData.banco || !formData.moneda || !formData.numeroCuenta || !formData.titular) {
-            alert("Por favor completa todos los campos obligatorios (*)");
-            return;
-        }
-        onSave(formData);
-    };
-
-    return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60]">
-            <div className="bg-white rounded-xl p-6 w-full max-w-md">
-                <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-semibold">
-                        {account ? "Editar Cuenta Bancaria" : "Agregar Cuenta Bancaria"}
-                    </h3>
-                    <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-                        <X size={20} />
-                    </button>
-                </div>
-
-                <div className="space-y-4">
-                    <SelectField
-                        label="Banco *"
-                        value={formData.banco}
-                        onChange={(v) => setFormData({ ...formData, banco: v })}
-                        options={bancoOptions}
-                        placeholder="Seleccionar banco"
-                    />
-                    <div className="grid grid-cols-2 gap-4">
-                        <SelectField
-                            label="Moneda *"
-                            value={formData.moneda}
-                            onChange={(v) => setFormData({ ...formData, moneda: v })}
-                            options={monedaOptions}
-                            placeholder="Seleccionar"
-                        />
-                        <NumericInputField
-                            label="Número de Cuenta *"
-                            value={formData.numeroCuenta}
-                            onChange={(v) => setFormData({ ...formData, numeroCuenta: v })}
-                            placeholder="001122333444"
-                            allowedChars="-"
-                        />
-                    </div>
-                    <NumericInputField
-                        label="CCI"
-                        value={formData.cci}
-                        onChange={(v) => setFormData({ ...formData, cci: v })}
-                        placeholder="002-011-0222033344-55"
-                        allowedChars="-"
-                    />
-                    <InputField
-                        label="Titular *"
-                        value={formData.titular}
-                        onChange={(v) => setFormData({ ...formData, titular: v })}
-                        placeholder="Nombre del titular"
-                    />
-                </div>
-
-                <div className="flex gap-2 justify-end mt-6">
-                    <Button variant="secondary" onClick={onClose}>Cancelar</Button>
-                    <Button onClick={handleSave}>Guardar</Button>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-// Modal para agregar/editar contacto
-const ContactModal: React.FC<{
-    contact: Contacto | null;
-    onClose: () => void;
-    onSave: (contact: Omit<Contacto, "id">) => void;
-}> = ({ contact, onClose, onSave }) => {
-    const [formData, setFormData] = useState<Omit<Contacto, "id">>({
-        nombre: contact?.nombre || "",
-        cargo: contact?.cargo || "",
-        email: contact?.email || "",
-        telefono: contact?.telefono || ""
-    });
-
-    const handleSave = () => {
-        if (!formData.nombre || !formData.email) {
-            alert("Por favor completa los campos obligatorios");
-            return;
-        }
-        onSave(formData);
-    };
-
-    return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60]">
-            <div className="bg-white rounded-xl p-6 w-full max-w-md">
-                <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-semibold">
-                        {contact ? "Editar Contacto" : "Agregar Contacto"}
-                    </h3>
-                    <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
-                        <X size={20} />
-                    </button>
-                </div>
-
-                <div className="space-y-4">
-                    <InputField
-                        label="Nombre *"
-                        value={formData.nombre}
-                        onChange={(v) => setFormData({ ...formData, nombre: v })}
-                        placeholder="Juan Pérez"
-                    />
-                    <InputField
-                        label="Cargo"
-                        value={formData.cargo}
-                        onChange={(v) => setFormData({ ...formData, cargo: v })}
-                        placeholder="Gerente de Ventas"
-                    />
-                    <InputField
-                        label="Email *"
-                        value={formData.email}
-                        onChange={(v) => setFormData({ ...formData, email: v })}
-                        placeholder="contacto@empresa.com"
-                        type="email"
-                    />
-                    <NumericInputField
-                        label="Teléfono"
-                        value={formData.telefono}
-                        onChange={(v) => setFormData({ ...formData, telefono: v })}
-                        placeholder="+51999888777"
-                        allowedChars="+ "
-                    />
-                </div>
-
-                <div className="flex gap-2 justify-end mt-6">
-                    <Button variant="secondary" onClick={onClose}>Cancelar</Button>
-                    <Button onClick={handleSave}>Guardar</Button>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-// Modal de confirmación
-const ConfirmModal: React.FC<{
-    title: string;
-    message: string;
-    onConfirm: () => void;
-    onCancel: () => void;
-    type?: "danger" | "warning";
-}> = ({ title, message, onConfirm, onCancel, type = "warning" }) => (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60]">
-        <div className="bg-white rounded-xl p-6 w-full max-w-md">
-            <div className="flex items-start gap-4">
-                <div className={`p-2 rounded-full ${type === "danger" ? "bg-red-100" : "bg-yellow-100"}`}>
-                    <AlertTriangle size={24} className={type === "danger" ? "text-red-600" : "text-yellow-600"} />
-                </div>
-                <div className="flex-1">
-                    <h3 className="text-lg font-semibold mb-2">{title}</h3>
-                    <p className="text-sm text-gray-600">{message}</p>
-                </div>
-            </div>
-            <div className="flex gap-2 justify-end mt-6">
-                <Button variant="secondary" onClick={onCancel}>Cancelar</Button>
-                <Button variant="danger" onClick={onConfirm}>Confirmar</Button>
-            </div>
-        </div>
-    </div>
-);
 
 // ==================== COMPONENTE PRINCIPAL ====================
 
@@ -359,16 +25,17 @@ const SupplierDetailModal: React.FC<SupplierDetailModalProps> = ({
     onDeactivate
 }) => {
     // Estados
-    const [supplier, setSupplier] = useState<Supplier | null>(null);
+    const [supplier, setSupplier] = useState<ProveedorDetalle | null>(null);
     const [cuentasBancarias, setCuentasBancarias] = useState<CuentaBancaria[]>([]);
-    const [contactos, setContactos] = useState<Contacto[]>([]);
+    const [contactos, setContactos] = useState<ContactoProveedor[]>([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     // Estados para modales
     const [showBankModal, setShowBankModal] = useState(false);
     const [showContactModal, setShowContactModal] = useState(false);
     const [editingBank, setEditingBank] = useState<CuentaBancaria | null>(null);
-    const [editingContact, setEditingContact] = useState<Contacto | null>(null);
+    const [editingContact, setEditingContact] = useState<ContactoProveedor | null>(null);
     const [confirmAction, setConfirmAction] = useState<{
         type: "deactivate" | "deleteBank" | "deleteContact";
         id?: number;
@@ -381,40 +48,18 @@ const SupplierDetailModal: React.FC<SupplierDetailModalProps> = ({
 
     const fetchSupplierData = async () => {
         setLoading(true);
+        setError(null);
         try {
-            // SIMULACIÓN: Reemplazar con llamadas API reales
-            // const response = await fetch(`/api/proveedores/${supplierId}`);
-            // const data = await response.json();
 
-            // Datos de ejemplo
-            const mockSupplier: Supplier = {
-                id: supplierId,
-                razonSocial: "Tecnologías Andinas S.A.C.",
-                ruc: "20601234567",
-                rubro: "Tecnología",
-                pais: "Perú",
-                direccion: "Av. Principal 123, Lima",
-                telefono: "+51987654321",
-                email: "contacto@techandinas.com",
-                moneda: "PEN",
-                estado: "ACTIVO"
-            };
+            const supplierData = await ProveedoresApi.obtenerDetalle(supplierId);
+            setSupplier(supplierData);
+            setContactos(supplierData.contactos);
+            setCuentasBancarias(supplierData.cuentasBancarias);
 
-            const mockBanks: CuentaBancaria[] = [
-                { id: 1, banco: "BCP", moneda: "PEN", numeroCuenta: "0011-0222-0333", cci: "002-011-0222033344-55", titular: "Tecnologías Andinas S.A.C." },
-                { id: 2, banco: "BBVA", moneda: "USD", numeroCuenta: "0011-0444-0555", cci: "011-011-0444055566-77", titular: "Tecnologías Andinas S.A.C." }
-            ];
-
-            const mockContacts: Contacto[] = [
-                { id: 1, nombre: "Ana García", cargo: "Gerente de Ventas", email: "ana.garcia@techandinas.com", telefono: "+51999888777" },
-                { id: 2, nombre: "Luis Rojas", cargo: "Coordinador", email: "luis.rojas@techandinas.com", telefono: "+51988555777" }
-            ];
-
-            setSupplier(mockSupplier);
-            setCuentasBancarias(mockBanks);
-            setContactos(mockContacts);
-        } catch (error) {
-            console.error("Error al cargar proveedor:", error);
+        } catch (err) {
+            console.error("Error al cargar proveedor:", err);
+            const errorMessage = err instanceof Error ? err.message : "Error desconocido";
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -451,7 +96,7 @@ const SupplierDetailModal: React.FC<SupplierDetailModalProps> = ({
     };
 
     // Funciones para contactos
-    const handleSaveContact = async (contactData: Omit<Contacto, "id">) => {
+    const handleSaveContact = async (contactData: Omit<ContactoProveedor, "id">) => {
         try {
             if (editingContact) {
                 // EDITAR: PUT /api/proveedores/${supplierId}/contactos/${editingContact.id}
@@ -526,7 +171,6 @@ const SupplierDetailModal: React.FC<SupplierDetailModalProps> = ({
                                 <div className="grid grid-cols-2 gap-4">
                                     <InfoField label="Razón Social" value={supplier.razonSocial} />
                                     <InfoField label="RUC" value={supplier.ruc} />
-                                    <InfoField label="Rubro" value={supplier.rubro} />
                                     <InfoField label="País" value={supplier.pais} />
                                     <InfoField label="Teléfono" value={supplier.telefono} />
                                     <InfoField label="Email" value={supplier.email} />

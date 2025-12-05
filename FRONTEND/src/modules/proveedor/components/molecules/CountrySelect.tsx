@@ -1,7 +1,7 @@
 import Select from "../atoms/Select";
 
 const countries = [
-    { label: "Perú", value: "Perú" },
+    { label: "Perú", value: "Peru" },
     { label: "Chile", value: "Chile" },
     { label: "México", value: "México" },
     { label: "Argentina", value: "Argentina" },

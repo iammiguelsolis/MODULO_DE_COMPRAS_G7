@@ -3,19 +3,10 @@ import { Star } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import SupplierDetailModal from "../organisms/SupplierDetailModal";
-
-interface Supplier {
-    id: number;
-    razonSocial: string;
-    ruc: string;
-    rubro: string;
-    pais: string;
-    clasificacion: number;
-    estado: string;
-}
+import type { Proveedor } from "../../../../services/proveedor/types";
 
 interface SupplierTableProps {
-    suppliers: Supplier[];
+    suppliers: Proveedor[];
 }
 
 export default function SupplierTable({ suppliers }: SupplierTableProps) {
@@ -44,7 +35,6 @@ export default function SupplierTable({ suppliers }: SupplierTableProps) {
                     <tr className="bg-blue-500 text-white uppercase text-sm">
                         <th className="px-6 py-4">Proveedor</th>
                         <th className="px-6 py-4">RUC</th>
-                        <th className="px-6 py-4">Rubro</th>
                         <th className="px-6 py-4">País</th>
                         <th className="px-6 py-4">Clasificación</th>
                         <th className="px-6 py-4">Estado</th>
@@ -57,7 +47,6 @@ export default function SupplierTable({ suppliers }: SupplierTableProps) {
                         <tr key={s.id} className="border-b border-gray-200 hover:bg-gray-50">
                             <td className="px-6 py-4 text-sm font-medium text-gray-900">{s.razonSocial}</td>
                             <td className="px-6 py-4 text-sm">{s.ruc}</td>
-                            <td className="px-6 py-4 text-sm">{s.rubro}</td>
                             <td className="px-6 py-4 text-sm">{s.pais}</td>
                             <td className="px-6 py-4">{renderStars(s.clasificacion)}</td>
                             <td className="px-6 py-4 text-sm">{s.estado}</td>
