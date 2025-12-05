@@ -138,7 +138,7 @@ def parse_frontend_orden_payload(data: Dict[str, Any]) -> Dict[str, Any]:
 
     return {
         "tipo_origen": tipo,
-        "id_origen": data.get("solicitudId") or data.get("notificacionInventarioId") or 0,
+        "id_origen": data.get("idOrigen") or data.get("solicitudId") or data.get("notificacionInventarioId") or 0,
         "id_solicitud": data.get("solicitudId"),
         "proveedor_id": data["proveedorId"],
         "moneda": Moneda[data.get("moneda", "PEN")],

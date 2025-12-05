@@ -46,6 +46,7 @@ class OrdenCompraService:
             oc.lineas.append(linea)
 
         # Generar número referencia y guardar
+        # Generar número referencia y guardar
         oc.generar_numero_referencia()
         db.session.add(oc)
         db.session.commit()
