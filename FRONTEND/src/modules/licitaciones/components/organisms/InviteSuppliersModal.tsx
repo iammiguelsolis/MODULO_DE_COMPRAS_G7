@@ -7,17 +7,9 @@ import Label from '../atoms/Label';
 import Input from '../atoms/Input';
 import Textarea from '../atoms/Textarea';
 import Checkbox from '../atoms/Checkbox';
-import { doc_legales, doc_tec, doc_finan } from '../../lib/constants';
-import { getTemplatePathById, downloadMultipleFilesAsZip } from '../../lib/documentTemplateUtils';
+import { downloadMultipleFilesAsZip } from '../../lib/documentTemplateUtils';
+import type { ProveedorDTO, DocumentoRequeridoDTO } from '../../lib/types';
 import './InviteSuppliersModal.css';
-
-interface Supplier {
-    id: number;
-    name: string;
-    ruc: string;
-    email: string;
-    category: string;
-}
 
 interface InviteSuppliersModalProps {
     isOpen: boolean;
@@ -26,9 +18,11 @@ interface InviteSuppliersModalProps {
     licitacionTitle: string;
     estimatedAmount: number;
     maxBudget: number;
-    availableSuppliers: Supplier[];
-    requiredDocumentIds: string[];
+    // TODO: MOCK - Debe venir de proveedoresService.listar()
+    availableSuppliers: ProveedorDTO[];
+    requiredDocuments: DocumentoRequeridoDTO[];
     onSuppliersInvited?: (suppliers: string[]) => void;
+    onInvitarProveedores?: (proveedores: number[]) => void;
 }
 
 const InviteSuppliersModal: React.FC<InviteSuppliersModalProps> = ({
@@ -38,8 +32,9 @@ const InviteSuppliersModal: React.FC<InviteSuppliersModalProps> = ({
     licitacionTitle,
     maxBudget,
     availableSuppliers,
-    requiredDocumentIds,
-    onSuppliersInvited
+    requiredDocuments,
+    onSuppliersInvited,
+    onInvitarProveedores
 }) => {
     const [selectedSuppliers, setSelectedSuppliers] = useState<number[]>([]);
     const [isDownloading, setIsDownloading] = useState(false);
@@ -64,7 +59,7 @@ const InviteSuppliersModal: React.FC<InviteSuppliersModalProps> = ({
     const getSelectedSupplierNames = () => {
         return availableSuppliers
             .filter(s => selectedSuppliers.includes(s.id))
-            .map(s => s.name);
+            .map(s => s.razon_social);
     };
 
     const emailSubject = `Invitación a Licitación - ${licitacionTitle}`;
@@ -92,24 +87,25 @@ Juan Pérez - Módulo de Compras`;
         const mailto = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(emails)}&su=${encodeURIComponent(emailSubject)}&body=${encodeURIComponent(emailBody)}`;
         window.open(mailto, '_blank');
 
-        // Guardar proveedores invitados
+        // Guardar proveedores invitados en UI
         if (onSuppliersInvited) {
             onSuppliersInvited(getSelectedSupplierNames());
+        }
+
+        // Llamar a la API con los IDs de proveedores
+        if (onInvitarProveedores && selectedSuppliers.length > 0) {
+            onInvitarProveedores(selectedSuppliers);
         }
     };
 
     const handleDownloadTemplates = async () => {
         setIsDownloading(true);
         try {
-            const allDocs = [...doc_legales, ...doc_tec, ...doc_finan];
-
-            const files = requiredDocumentIds
-                .map(id => {
-                    const path = getTemplatePathById(id);
-                    const doc = allDocs.find(d => d.id === id);
-                    // Si no encontramos el documento por ID, intentamos buscar por nombre (fallback para compatibilidad)
-                    // o simplemente ignoramos si no hay path
-                    return path && doc ? { path, name: doc.nombre } : null;
+            const files = requiredDocuments
+                .map(doc => {
+                    // Usar ruta_plantilla del DTO si existe, o construirla/buscarla
+                    const path = doc.ruta_plantilla;
+                    return path ? { path, name: doc.nombre } : null;
                 })
                 .filter((f): f is { path: string; name: string } => f !== null);
 
@@ -126,12 +122,6 @@ Juan Pérez - Módulo de Compras`;
         } finally {
             setIsDownloading(false);
         }
-    };
-
-    const getDocumentName = (id: string) => {
-        const allDocs = [...doc_legales, ...doc_tec, ...doc_finan];
-        const doc = allDocs.find(d => d.id === id);
-        return doc ? doc.nombre : id;
     };
 
     const handleClose = () => {
@@ -173,12 +163,12 @@ Juan Pérez - Módulo de Compras`;
                                         className="supplier-checkbox"
                                     />
                                     <div className="supplier-info">
-                                        <div className="supplier-name">{supplier.name}</div>
+                                        <div className="supplier-name">{supplier.razon_social}</div>
                                         <div className="supplier-details">
                                             RUC: {supplier.ruc} | {supplier.email}
                                         </div>
                                     </div>
-                                    <Badge variant="info">{supplier.category}</Badge>
+                                    <Badge variant="info">Proveedor</Badge>
                                 </div>
                             ))}
                         </div>
@@ -223,8 +213,8 @@ Juan Pérez - Módulo de Compras`;
                                         <h4>Documentos Requeridos (Plantillas)</h4>
                                     </div>
                                     <ul className="documents-list">
-                                        {requiredDocumentIds.map((docId, index) => (
-                                            <li key={index}>{getDocumentName(docId)}</li>
+                                        {requiredDocuments.map((doc, index) => (
+                                            <li key={index}>{doc.nombre}</li>
                                         ))}
                                     </ul>
                                     <Button

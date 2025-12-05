@@ -34,7 +34,7 @@ class DocumentoRequerido(db.Model):
     obligatorio = db.Column(db.Boolean, default=True)
     
     # Información de la plantilla
-    ruta_plantilla = db.Column(db.String(500)) # ID de plantilla (ej: 'propuesta-economica') o URL externa
+    ruta_plantilla = db.Column(db.String(500))
     
     # Relación inversa
     licitacion = db.relationship('Licitacion', backref=db.backref('documentos_requeridos', lazy=True))

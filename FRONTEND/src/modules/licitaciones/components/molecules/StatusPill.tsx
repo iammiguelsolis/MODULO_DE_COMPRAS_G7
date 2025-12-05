@@ -18,11 +18,13 @@ interface StatusPillProps {
 const ICONS: { [key: string]: React.ReactElement } = {
   PENDIENTE: <Clock size={14} />,
   NUEVA: <AlertCircle size={14} />,
-  'EN INVITACION': <Send size={14} />,
-  'CON PROPUESTAS': <FileText size={14} />,
-  'EN EVALUACION': <Clock size={14} />,
+  EN_INVITACION: <Send size={14} />,
+  CON_PROPUESTAS: <FileText size={14} />,
+  EVALUACION_TECNICA: <Clock size={14} />,
+  EVALUACION_ECONOMIA: <Clock size={14} />,
+  EN_EVALUACION: <Clock size={14} />, // Fallback
   ADJUDICADA: <Award size={14} />,
-  'CON CONTRATO': <ClipboardCheck size={14} />,
+  CON_CONTRATO: <ClipboardCheck size={14} />,
   FINALIZADA: <CheckCircle2 size={14} />,
   CANCELADA: <XCircle size={14} />,
 };
@@ -30,17 +32,20 @@ const ICONS: { [key: string]: React.ReactElement } = {
 const STATUS_STYLES: { [key: string]: { text: string; className: string } } = {
   PENDIENTE: { text: 'Pendiente', className: 'status-gray' },
   NUEVA: { text: 'Nueva', className: 'status-blue' },
-  'EN INVITACION': { text: 'En invitación', className: 'status-blue' },
-  'CON PROPUESTAS': { text: 'Con propuestas', className: 'status-blue' },
-  'EN EVALUACION': { text: 'En evaluación', className: 'status-blue' },
+  EN_INVITACION: { text: 'En invitación', className: 'status-blue' },
+  CON_PROPUESTAS: { text: 'Con propuestas', className: 'status-blue' },
+  EVALUACION_TECNICA: { text: 'Evaluación', className: 'status-blue' },
+  EVALUACION_ECONOMIA: { text: 'Evaluación', className: 'status-blue' },
+  EN_EVALUACION: { text: 'En evaluación', className: 'status-blue' },
   ADJUDICADA: { text: 'Adjudicada', className: 'status-blue' },
-  'CON CONTRATO': { text: 'Con contrato', className: 'status-blue' },
+  CON_CONTRATO: { text: 'Con contrato', className: 'status-blue' },
   FINALIZADA: { text: 'Finalizada', className: 'status-green' },
   CANCELADA: { text: 'Cancelada', className: 'status-red' },
 };
 
 const StatusPill: React.FC<StatusPillProps> = ({ status }) => {
-  const normalizedStatus = status.toUpperCase().replace(/\s+/g, ' ');
+  // Normalizamos: mayúsculas y reemplazamos espacios por guiones bajos si vienen del backend
+  const normalizedStatus = status.toUpperCase().replace(/\s+/g, '_');
   const style = STATUS_STYLES[normalizedStatus] || { text: status, className: 'status-gray' };
   const icon = ICONS[normalizedStatus];
 

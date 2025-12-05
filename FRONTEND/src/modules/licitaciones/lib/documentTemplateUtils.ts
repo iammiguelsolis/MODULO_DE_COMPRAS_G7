@@ -47,7 +47,7 @@ const TEMPLATE_MAPPING: Record<string, string> = {
 
   // Financieros
   "propuesta-economica":
-    "documentos licitaciones/financieros/Plantilla - Propuesta Economica.docx",
+    "documentos licitaciones/financieros/Plantilla - Propuesta Económica.docx",
   "estados-financieros-auditados":
     "documentos licitaciones/financieros/Plantilla - Estados Financieros Auditados.xlsx",
   "linea-credito-aprobada":

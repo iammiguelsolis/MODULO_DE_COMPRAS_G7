@@ -150,12 +150,10 @@ const LicitacionTimeline: React.FC<LicitacionTimelineProps> = ({
                                 <PencilLine size={16} />
                                 Registrar propuesta
                             </Button>
-                            {propuestasRegistradas > 0 && (
-                                <Button variant="secondary" size="sm" onClick={onFinalizarRegistro}>
-                                    <ArrowRight size={16} />
-                                    Finalizar registro
-                                </Button>
-                            )}
+                            <Button variant="secondary" size="sm" onClick={onFinalizarRegistro}>
+                                <ArrowRight size={16} />
+                                Finalizar registro
+                            </Button>
                         </>
                     )}
                 </TimelineItem>

@@ -34,10 +34,13 @@ function App() {
           <Route path="/compras/:id" element={<CompraDetailPage />} />
 
           <Route path="/licitaciones" element={<LicitacionesListPage />} />
-          <Route path="/licitacion/detail" element={<LicitacionDetailPage />} />
+          <Route path="/licitacion/:id" element={<LicitacionDetailPage />} />
           <Route path="/licitaciones/crear" element={<LicitacionPage />} />
 
-          <Route path="/ordenes" element={<GenerarOrdenCompraPage />} />
+
+          <Route path="/ordenes" element={<GenerarOrdenCompra />} />
+          <Route path="/ordenes/historial" element={<HistorialOrdenes />} />
+
           <Route path="/facturacion" element={<FacturacionApp />} />
 
           <Route path="/comparacion" element={<ComparacionListPage />} />
