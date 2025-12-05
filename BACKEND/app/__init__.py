@@ -12,7 +12,7 @@ from app.BP.Inventario import inventario_bp
 from app.BP.solicitudes.solicitudes_controller import solicitudes_bp
 from app.BP.adquisiciones.adquisiciones_controller import adquisiciones_bp
 from app.BP.licitaciones import register_licitaciones_blueprints
-#from app.models.OrdenCompra.oc_routes import oc_bp
+from app.models.OrdenCompra.oc_routes import oc_bp
 
 bcrypt = Bcrypt()
 
