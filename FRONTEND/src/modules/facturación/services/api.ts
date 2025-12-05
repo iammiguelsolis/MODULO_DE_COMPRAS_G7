@@ -149,7 +149,7 @@ export const listarAdjuntos = async (id: string): Promise<Adjunto[]> => {
 // Subir adjunto adicional
 export const subirAdjunto = async (id: string, file: File): Promise<Adjunto> => {
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append('archivo', file);
   
   const response = await api.post(`/${id}/adjuntos`, formData, {
     headers: {
@@ -157,6 +157,11 @@ export const subirAdjunto = async (id: string, file: File): Promise<Adjunto> => 
     },
   });
   return response.data;
+};
+
+// Eliminar adjunto
+export const eliminarAdjunto = async (id: string, adjuntoId: string): Promise<void> => {
+  await api.delete(`/${id}/adjuntos/${adjuntoId}`);
 };
 
 // Ejecutar conciliación

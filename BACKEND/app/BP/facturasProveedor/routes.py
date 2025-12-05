@@ -285,16 +285,8 @@ def listar_adjuntos(id_factura):
     if not factura:
         return jsonify({"error": "Factura no encontrada"}), 404
 
-    # 2. Obtener los adjuntos relacionados
-    lista_adjuntos = []
-    for doc in factura.documentos_adjuntos:
-        lista_adjuntos.append({
-            "id": doc.id,
-            "nombre_archivo": doc.nombre_archivo,
-            "tipo": doc.tipo.name if doc.tipo else "DESCONOCIDO",
-            "url": doc.ruta,
-            "fecha_carga": doc.fecha_carga.isoformat() if doc.fecha_carga else None
-        })
+    # 2. Obtener los adjuntos relacionados usando to_dict()
+    lista_adjuntos = [doc.to_dict() for doc in factura.documentos_adjuntos]
 
     return jsonify(lista_adjuntos), 200
 
@@ -346,6 +338,50 @@ def subir_adjunto(id_factura):
     except Exception as e:
         db.session.rollback()
         print(f"Error en subida: {str(e)}")
+        return jsonify({"error": str(e)}), 500
+
+
+# ---------------- 4.1 Eliminar Adjunto (DELETE /facturas-proveedor/{id}/adjuntos/{id_adjunto}) ----------------
+@facturas_bp.route('/<int:id_factura>/adjuntos/<int:id_adjunto>', methods=['DELETE'])
+def eliminar_adjunto(id_factura, id_adjunto):
+    # 1. Buscar Factura
+    factura = FacturaProveedor.query.get(id_factura)
+    if not factura:
+        return jsonify({"error": "Factura no encontrada"}), 404
+    
+    # 2. Solo permitir eliminación en facturas BORRADOR
+    if factura.estado != EstadoFactura.BORRADOR:
+        return jsonify({"error": "Solo se pueden eliminar adjuntos de facturas en estado BORRADOR"}), 400
+    
+    # 3. Buscar el adjunto
+    adjunto = DocumentoAdjunto.query.get(id_adjunto)
+    if not adjunto:
+        return jsonify({"error": "Adjunto no encontrado"}), 404
+    
+    # 4. Verificar que el adjunto pertenece a esta factura
+    if adjunto.factura_id != id_factura:
+        return jsonify({"error": "El adjunto no pertenece a esta factura"}), 403
+    
+    try:
+        # 5. Eliminar de Supabase (si existe la URL)
+        if adjunto.ruta:
+            try:
+                adjuntador = AdjuntadorDocumento()
+                # TODO: Implementar método eliminar_documento en AdjuntadorDocumento
+                # Por ahora solo eliminamos de la BD
+                print(f"⚠️ Adjunto en Supabase no eliminado: {adjunto.ruta}")
+            except Exception as e:
+                print(f"⚠️ Error eliminando de Supabase: {str(e)}")
+        
+        # 6. Eliminar de la base de datos
+        db.session.delete(adjunto)
+        db.session.commit()
+        
+        return jsonify({"mensaje": "Adjunto eliminado exitosamente"}), 200
+    
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error eliminando adjunto: {str(e)}")
         return jsonify({"error": str(e)}), 500
 
 

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, FileText, Download } from 'lucide-react';
+import { X, FileText, Download, Upload, Trash2 } from 'lucide-react';
 import Input from '../atoms/Input';
 import Select from '../atoms/Select';
 import Button from '../atoms/Button';
@@ -20,7 +20,9 @@ import {
   actualizarFactura,
   ejecutarConciliacion,
   enviarACuentasPorPagar,
-  listarFacturas
+  listarFacturas,
+  subirAdjunto,
+  eliminarAdjunto
 } from '../../services/api';
 
 
@@ -347,6 +349,75 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
     });
   };
 
+  const handleUploadAttachment = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!factura || !e.target.files || e.target.files.length === 0) return;
+    
+    const file = e.target.files[0];
+    
+    try {
+      setLoading(true);
+      await subirAdjunto(factura.id, file);
+      setNotification({
+        isOpen: true,
+        type: 'success',
+        title: '✅ Adjunto Subido',
+        message: 'El archivo se ha subido correctamente.'
+      });
+      // Recargar adjuntos
+      const adjuntosData = await listarAdjuntos(factura.id);
+      setAdjuntos(adjuntosData);
+    } catch (error) {
+      console.error('Error subiendo adjunto:', error);
+      setNotification({
+        isOpen: true,
+        type: 'error',
+        title: '❌ Error',
+        message: 'No se pudo subir el archivo. Intente nuevamente.'
+      });
+    } finally {
+      setLoading(false);
+      // Reset input
+      e.target.value = '';
+    }
+  };
+
+  const handleDeleteAttachment = async (adjuntoId: string) => {
+    if (!factura) return;
+
+    setConfirmModal({
+      isOpen: true,
+      title: '🗑️ Eliminar Adjunto',
+      message: '¿Está seguro de eliminar este adjunto? Esta acción no se puede deshacer.',
+      onConfirm: async () => {
+        setConfirmModal({ ...confirmModal, isOpen: false });
+        
+        try {
+          setLoading(true);
+          await eliminarAdjunto(factura.id, adjuntoId);
+          setNotification({
+            isOpen: true,
+            type: 'success',
+            title: '✅ Adjunto Eliminado',
+            message: 'El adjunto ha sido eliminado correctamente.'
+          });
+          // Recargar adjuntos
+          const adjuntosData = await listarAdjuntos(factura.id);
+          setAdjuntos(adjuntosData);
+        } catch (error) {
+          console.error('Error eliminando adjunto:', error);
+          setNotification({
+            isOpen: true,
+            type: 'error',
+            title: '❌ Error',
+            message: 'No se pudo eliminar el adjunto. Intente nuevamente.'
+          });
+        } finally {
+          setLoading(false);
+        }
+      }
+    });
+  };
+
   const handleVersionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedId = e.target.value;
     setVersionSeleccionada(selectedId);
@@ -655,6 +726,22 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
 
               {activeTab === 'attachments' && (
                 <div className="space-y-3">
+                  {/* Upload button - only for draft invoices */}
+                  {puedeEditar && (
+                    <div className="mb-4">
+                      <label className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-50 border-2 border-dashed border-blue-300 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
+                        <Upload size={20} className="text-blue-600" />
+                        <span className="text-sm font-medium text-blue-600">Subir Adjunto</span>
+                        <input
+                          type="file"
+                          accept=".pdf,.xml"
+                          onChange={handleUploadAttachment}
+                          className="hidden"
+                        />
+                      </label>
+                      <p className="text-xs text-gray-500 mt-2 text-center">Formatos aceptados: PDF, XML</p>
+                    </div>
+                  )}
                   {adjuntos.length > 0 ? (
                     adjuntos.map((adj) => (
                       <div
@@ -672,13 +759,24 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
                             </p>
                           </div>
                         </div>
-                        <Button
-                          variant="ghost"
-                          icon={Download}
-                          onClick={() => window.open(adj.url_storage, '_blank')}
-                        >
-                          Ver
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            icon={Download}
+                            onClick={() => window.open(adj.url_storage, '_blank')}
+                          >
+                            Ver
+                          </Button>
+                          {puedeEditar && (
+                            <button
+                              onClick={() => handleDeleteAttachment(adj.id)}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Eliminar adjunto"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))
                   ) : (

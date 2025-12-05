@@ -59,6 +59,8 @@ class FacturaTrazabilidad(db.Model, FacturaObserver, metaclass=ModelABC):
         return {
             "id": self.id,
             "factura_id": self.factura_id,
-            "motivo": self.motivo.value,
-            "fecha_deteccion": self.fecha_deteccion_error.isoformat() if self.fecha_deteccion_error else None
+            "accion": self.motivo.value if self.motivo else "Sin motivo",
+            "usuario": "Sistema",  # TODO: Add user tracking
+            "timestamp": self.fecha_deteccion_error.isoformat() if self.fecha_deteccion_error else None,
+            "detalles": self.observacion_texto or "Sin detalles adicionales"
         }
