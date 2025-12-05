@@ -72,7 +72,7 @@ const HistorialOrdenes: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 p-8">
-      <div className="max-w-6xl mx-auto">
+      <div className="mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Historial de Órdenes de Compra</h1>
           <p className="text-gray-600 mt-1">
@@ -81,7 +81,7 @@ const HistorialOrdenes: React.FC = () => {
         </div>
 
         {/* Filtros */}
-        <div className="bg-white border rounded-lg p-4 mb-6 flex flex-wrap gap-4 items-end">
+        <div className="bg-white border border-gray-400 rounded-lg p-4 mb-6 flex flex-wrap gap-4 items-end">
           <div className="w-full md:w-1/3">
             <Input
               label="Buscar"
@@ -118,9 +118,9 @@ const HistorialOrdenes: React.FC = () => {
         </div>
 
         {/* Tabla */}
-        <div className="bg-white border rounded-lg overflow-hidden">
+        <div className="bg-white border border-gray-400 rounded-lg overflow-hidden">
           <table className="min-w-full text-sm">
-            <thead className="bg-gray-100 text-gray-700">
+            <thead className="bg-blue-500 text-white">
               <tr>
                 <th className="px-4 py-2 text-left">N° Orden</th>
                 <th className="px-4 py-2 text-left">Título</th>
