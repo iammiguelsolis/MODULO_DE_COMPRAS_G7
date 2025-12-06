@@ -13,7 +13,6 @@ class EstadoConContrato(EstadoLicitacionState):
         return EstadoFinalizada(self.licitacion)
         
     def cancelar(self):
-        # En esta etapa ya es difícil cancelar, pero por interfaz se mantiene
         from app.models.licitaciones.estados.estado_cancelada import EstadoCancelada
         self.licitacion.cambiar_estado(EstadoCancelada(self.licitacion))
         return self.licitacion.estado_actual
@@ -25,5 +24,4 @@ class EstadoConContrato(EstadoLicitacionState):
         """
         Acción específica: enviar datos al módulo de Orden de Compra.
         """
-        # Esta acción será ejecutada por OrdenCompraIntegrationService
         return True

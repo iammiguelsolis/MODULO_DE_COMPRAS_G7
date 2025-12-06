@@ -11,7 +11,7 @@ class EstadoEvaluacionEconomia(EstadoLicitacionState):
             from app.models.licitaciones.estados.estado_adjudicada import EstadoAdjudicada
             return EstadoAdjudicada(self.licitacion)
         else:
-            # Si no hay ganadora (Desierto) -> CANCELADA
+            # Si no hay ganadora-> CANCELADA
             return self.cancelar()
             
     def cancelar(self):

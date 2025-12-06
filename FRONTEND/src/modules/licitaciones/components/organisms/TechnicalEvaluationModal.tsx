@@ -6,37 +6,20 @@ import Alert from '../atoms/Alert';
 import EvaluationModalHeader from '../molecules/EvaluationModalHeader';
 import ProviderSelectorCard from '../molecules/ProviderSelectorCard';
 import RejectionJustification from '../molecules/RejectionJustification';
-import DocumentsChecklist from '../molecules/DocumentsChecklist';
 import EvaluableDocumentsList from './EvaluableDocumentsList';
 import EvaluatedProvidersList from './EvaluatedProvidersList';
-import type { DocumentEvaluation, ProviderEvaluation } from '../../lib/types';
+import type { DocumentEvaluation, PropuestaResponseDTO, DocumentoRequeridoDTO } from '../../lib/types';
 import type { EvaluationStatus } from '../atoms/EvaluationStatusButtons';
 import './TechnicalEvaluationModal.css';
-
-interface Supplier {
-    id: number;
-    name: string;
-    ruc: string;
-    email: string;
-}
-
-interface EvaluatedProvider {
-    id: number;
-    name: string;
-    status: 'approved' | 'rejected';
-}
 
 interface TechnicalEvaluationModalProps {
     isOpen: boolean;
     onClose: () => void;
     licitacionId: string;
     licitacionTitle: string;
-    presupuesto?: string;
-    solicitudOrigen?: string;
-    fechaLimite?: string;
-    comprador?: string;
-    suppliers: Supplier[];
-    onSaveEvaluation?: (evaluation: ProviderEvaluation) => void;
+    suppliers: PropuestaResponseDTO[];
+    requiredDocuments?: DocumentoRequeridoDTO[];
+    onSaveEvaluation?: (evaluation: any) => void;
     onFinishEvaluation?: () => void;
 }
 
@@ -46,150 +29,115 @@ const TechnicalEvaluationModal: React.FC<TechnicalEvaluationModalProps> = ({
     licitacionId,
     licitacionTitle,
     suppliers,
+    requiredDocuments = [],
     onSaveEvaluation,
     onFinishEvaluation
 }) => {
-    const [selectedSupplierId, setSelectedSupplierId] = useState<number | null>(null);
-    const [documentEvaluations, setDocumentEvaluations] = useState<Map<string, DocumentEvaluation>>(new Map());
-    const [missingDocuments, setMissingDocuments] = useState<Set<string>>(new Set());
+    const [selectedPropuestaId, setSelectedPropuestaId] = useState<number | null>(null);
+    const [documentEvaluations, setDocumentEvaluations] = useState<Map<number, { validado: boolean; observaciones: string }>>(new Map());
     const [rejectionJustification, setRejectionJustification] = useState('');
 
-    // Track evaluated providers
-    const [evaluatedProvidersList, setEvaluatedProvidersList] = useState<EvaluatedProvider[]>([]);
-    const [approvedCount, setApprovedCount] = useState(0);
-    const [rejectedCount, setRejectedCount] = useState(0);
+    // Track evaluated providers (local state for UI feedback)
+    const [evaluatedProvidersList, setEvaluatedProvidersList] = useState<{ id: number; name: string; status: 'approved' | 'rejected' }[]>([]);
 
-    // Total documents count (hardcoded: 3 legal + 3 technical + 3 financial = 9)
-    const totalDocuments = 9;
+    // Derived state
+    const selectedPropuesta = useMemo(() =>
+        suppliers.find(p => p.id_propuesta === selectedPropuestaId),
+        [suppliers, selectedPropuestaId]);
+
+    const totalDocuments = selectedPropuesta?.documentos.length || 0;
 
     // Calculate document stats for current provider
     const currentDocStats = useMemo(() => {
-        const evaluations = Array.from(documentEvaluations.values());
-        const evaluated = evaluations.filter(e => e.status !== null).length;
+        const evaluated = documentEvaluations.size;
         return { evaluated };
     }, [documentEvaluations]);
 
     // Calculate evaluation status
     const hasIncorrectDocs = useMemo(() => {
         return Array.from(documentEvaluations.values())
-            .some(doc => doc.status === 'incorrect');
+            .some(doc => !doc.validado);
     }, [documentEvaluations]);
 
     const allDocsCorrect = useMemo(() => {
         const evals = Array.from(documentEvaluations.values());
-        return evals.length === totalDocuments &&
-            evals.every(doc => doc.status === 'correct');
-    }, [documentEvaluations]);
-
-    const hasMissingDocs = useMemo(() => {
-        return missingDocuments.size > 0;
-    }, [missingDocuments]);
+        return evals.length === totalDocuments && totalDocuments > 0 &&
+            evals.every(doc => doc.validado);
+    }, [documentEvaluations, totalDocuments]);
 
     const shouldReject = useMemo(() => {
-        return hasIncorrectDocs || hasMissingDocs;
-    }, [hasIncorrectDocs, hasMissingDocs]);
+        return hasIncorrectDocs;
+    }, [hasIncorrectDocs]);
 
     const canSave = useMemo(() => {
-        if (!selectedSupplierId) return false;
+        if (!selectedPropuestaId) return false;
 
         // All documents must be evaluated
         if (currentDocStats.evaluated !== totalDocuments) return false;
 
-        // If rejecting (incorrect docs or missing docs), need justification
+        // If rejecting, need justification (either technical rejection or document rejection)
         if (shouldReject) {
             return rejectionJustification.trim().length > 0;
         }
 
         return allDocsCorrect;
-    }, [selectedSupplierId, shouldReject, allDocsCorrect, rejectionJustification, currentDocStats.evaluated, totalDocuments]);
-
-    const selectedSupplier = suppliers.find(s => s.id === selectedSupplierId);
+    }, [selectedPropuestaId, shouldReject, allDocsCorrect, rejectionJustification, currentDocStats.evaluated, totalDocuments]);
 
     const handleEvaluationChange = (documentId: string, status: EvaluationStatus) => {
+        // documentId comes as string from EvaluableDocumentsList, convert to number
+        const id = Number(documentId);
         setDocumentEvaluations(prev => {
             const newMap = new Map(prev);
-            const existingEval = prev.get(documentId);
-
-            if (existingEval) {
-                newMap.set(documentId, { ...existingEval, status });
-            } else {
-                newMap.set(documentId, {
-                    documentId,
-                    documentName: documentId,
-                    fileSize: '0 KB',
-                    status
-                });
-            }
-
+            newMap.set(id, {
+                validado: status === 'correct',
+                observaciones: status === 'incorrect' ? 'Documento rechazado' : ''
+            });
             return newMap;
         });
     };
 
-    const handleToggleMissingDocument = (documentId: string) => {
-        setMissingDocuments(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(documentId)) {
-                newSet.delete(documentId);
-            } else {
-                newSet.add(documentId);
-            }
-            return newSet;
-        });
-    };
-
-    const handleSelectSupplier = (supplierId: number) => {
-        setSelectedSupplierId(supplierId);
-        // Reset evaluations when changing supplier
+    const handleSelectSupplier = (propuestaId: number) => {
+        // Note: ProviderSelectorCard sends the ID. Here we assume it sends propuestaId because we map it below.
+        setSelectedPropuestaId(propuestaId);
         setDocumentEvaluations(new Map());
-        setMissingDocuments(new Set());
         setRejectionJustification('');
     };
 
     const handleSave = () => {
-        if (!selectedSupplier) return;
+        if (!selectedPropuesta) return;
 
-        const evaluationStatus: 'approved' | 'rejected' =
-            (allDocsCorrect && !hasMissingDocs) ? 'approved' : 'rejected';
+        const evaluationStatus = allDocsCorrect ? 'approved' : 'rejected';
 
-        const evaluation: ProviderEvaluation = {
-            providerId: selectedSupplier.id,
-            providerName: selectedSupplier.name,
-            providerRuc: selectedSupplier.ruc,
-            documentsEvaluation: Array.from(documentEvaluations.values()),
-            status: evaluationStatus,
-            rejectionReason: shouldReject ? rejectionJustification : undefined,
-            evaluatedCount: currentDocStats.evaluated,
-            approvedCount: 0,
-            rejectedCount: 0
+        // Prepare payload for backend
+        const payload = {
+            providerId: selectedPropuesta.proveedor.id, // For UI tracking
+            propuestaId: selectedPropuesta.id_propuesta,
+            aprobada_tecnicamente: evaluationStatus === 'approved',
+            motivo_rechazo_tecnico: evaluationStatus === 'rejected' ? rejectionJustification : undefined,
+            documentos: Array.from(documentEvaluations.entries()).map(([id, evalData]) => ({
+                id_documento: id,
+                validado: evalData.validado,
+                observaciones: evalData.observaciones
+            }))
         };
 
         if (onSaveEvaluation) {
-            onSaveEvaluation(evaluation);
-        } else {
-            console.log('[Mock] Guardar evaluación:', evaluation);
+            onSaveEvaluation(payload);
         }
 
-        // Add to evaluated providers list
+        // Add to evaluated providers list for UI
         setEvaluatedProvidersList(prev => [
             ...prev,
             {
-                id: selectedSupplier.id,
-                name: selectedSupplier.name,
+                id: selectedPropuesta.id_propuesta, // Use propuesta ID for tracking
+                name: selectedPropuesta.proveedor.razon_social,
                 status: evaluationStatus
             }
         ]);
 
-        // Update counters
-        if (evaluationStatus === 'approved') {
-            setApprovedCount(prev => prev + 1);
-        } else {
-            setRejectedCount(prev => prev + 1);
-        }
-
-        // Reset form for next provider
-        setSelectedSupplierId(null);
+        // Reset form
+        setSelectedPropuestaId(null);
         setDocumentEvaluations(new Map());
-        setMissingDocuments(new Set());
         setRejectionJustification('');
     };
 
@@ -197,75 +145,101 @@ const TechnicalEvaluationModal: React.FC<TechnicalEvaluationModalProps> = ({
         if (onFinishEvaluation) {
             onFinishEvaluation();
         }
-        handleClose();
-    };
-
-    const handleClose = () => {
-        setSelectedSupplierId(null);
-        setDocumentEvaluations(new Map());
-        setMissingDocuments(new Set());
-        setRejectionJustification('');
-        setEvaluatedProvidersList([]);
-        setApprovedCount(0);
-        setRejectedCount(0);
         onClose();
     };
 
+    // Map proposals to format expected by ProviderSelectorCard
+    const providerSelectorData = suppliers.map(p => ({
+        id: p.id_propuesta, // We use propuesta ID as the key selector
+        name: p.proveedor.razon_social,
+        ruc: p.proveedor.ruc,
+        email: p.proveedor.email
+    }));
+
+    // Map documents to format expected by EvaluableDocumentsList
+    const evaluableDocuments = useMemo(() => {
+        if (!selectedPropuesta) return new Map<string, DocumentEvaluation>();
+
+        const map = new Map<string, DocumentEvaluation>();
+        selectedPropuesta.documentos.forEach(doc => {
+            const evalState = documentEvaluations.get(doc.id_documento);
+            map.set(String(doc.id_documento), {
+                documentId: String(doc.id_documento),
+                documentName: doc.nombre,
+                fileSize: 'Unknown', // DTO doesn't have size
+                status: evalState ? (evalState.validado ? 'correct' : 'incorrect') : null,
+                url: doc.url_archivo // Pass URL if component supports it
+            });
+        });
+        return map;
+    }, [selectedPropuesta, documentEvaluations]);
+
     return (
-        <WideModal isOpen={isOpen} onClose={handleClose} width="wide" showCloseButton={false}>
+        <WideModal isOpen={isOpen} onClose={onClose} width="wide" showCloseButton={false}>
             <div className="technical-evaluation-modal">
                 <EvaluationModalHeader
                     licitacionId={licitacionId}
                     licitacionTitle={licitacionTitle}
                     totalProviders={suppliers.length}
                     evaluatedProviders={evaluatedProvidersList.length}
-                    approvedProviders={approvedCount}
-                    rejectedProviders={rejectedCount}
-                    onClose={handleClose}
+                    approvedProviders={evaluatedProvidersList.filter(p => p.status === 'approved').length}
+                    rejectedProviders={evaluatedProvidersList.filter(p => p.status === 'rejected').length}
+                    onClose={onClose}
                     onFinish={handleFinish}
                     canFinish={evaluatedProvidersList.length === suppliers.length}
                 />
 
                 <div className="evaluation-modal-body">
                     <div className="evaluation-left-column">
-                        <DocumentsChecklist
-                            checkedDocuments={missingDocuments}
-                            onToggleDocument={handleToggleMissingDocument}
-                            disabled={!selectedSupplierId}
-                            showCounter={true}
-                        />
+                        <div className="required-docs-reference">
+                            <h4>Documentos Requeridos</h4>
+                            {Object.entries(
+                                requiredDocuments.reduce((acc, doc) => {
+                                    if (!acc[doc.tipo]) acc[doc.tipo] = [];
+                                    acc[doc.tipo].push(doc);
+                                    return acc;
+                                }, {} as Record<string, DocumentoRequeridoDTO[]>)
+                            ).map(([type, docs]) => (
+                                <div key={type} className="mb-3">
+                                    <h5 className="text-sm font-semibold text-gray-700 mb-1">
+                                        {type === 'LEGAL' ? 'Legales' :
+                                            type === 'TECNICO' ? 'Técnicos' :
+                                                type === 'ECONOMICO' ? 'Financieros' : type}
+                                    </h5>
+                                    <ul className="pl-2">
+                                        {docs.map((doc) => (
+                                            <li key={doc.id_requerido} className="text-xs text-gray-600 mb-1">
+                                                • {doc.nombre} {doc.obligatorio && <span className="text-red-500" title="Obligatorio">*</span>}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            ))}
+                        </div>
 
                         <EvaluatedProvidersList evaluatedProviders={evaluatedProvidersList} />
                     </div>
 
                     <div className="evaluation-right-column">
                         <ProviderSelectorCard
-                            suppliers={suppliers}
-                            selectedSupplierId={selectedSupplierId}
+                            suppliers={providerSelectorData}
+                            selectedSupplierId={selectedPropuestaId}
                             onSelectSupplier={handleSelectSupplier}
                             totalFiles={totalDocuments}
                             evaluatedFiles={currentDocStats.evaluated}
                         />
 
                         <EvaluableDocumentsList
-                            evaluations={documentEvaluations}
+                            evaluations={evaluableDocuments}
                             onEvaluationChange={handleEvaluationChange}
-                            disabled={!selectedSupplierId}
+                            disabled={!selectedPropuestaId}
                         />
 
-                        {allDocsCorrect && !hasMissingDocs && (
+                        {allDocsCorrect && (
                             <Alert variant="success">
                                 <strong>Resultado: PROVEEDOR APROBADO</strong>
                                 <br />
                                 Este proveedor pasará a la evaluación económica.
-                            </Alert>
-                        )}
-
-                        {hasMissingDocs && (
-                            <Alert variant="error">
-                                <strong>Proveedor será RECHAZADO</strong>
-                                <br />
-                                • Faltan {missingDocuments.size} documento(s) requerido(s)
                             </Alert>
                         )}
 

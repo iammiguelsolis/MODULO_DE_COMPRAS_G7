@@ -21,6 +21,8 @@ class DocumentoAdjunto(db.Model):
         return {
             "id": self.id,
             "nombre_archivo": self.nombre_archivo,
-            "tipo": self.tipo.name if self.tipo else None,
-            "url": self.ruta
+            "tipo_archivo": self.tipo.name if self.tipo else "DESCONOCIDO",
+            "url_storage": self.ruta,
+            "tamano_bytes": self.tamano_bytes or 0,
+            "fecha_subida": self.fecha_carga.isoformat() if self.fecha_carga else None
         }

@@ -17,6 +17,9 @@ from app.models.facturasProveedor.resultado_conciliacion import ResultadoConcili
 from app.models.facturasProveedor.obligacion_pago import ObligacionPago
 from app.models.adquisiciones.proceso import ProcesoAdquisicion, Compra
 from app.models.adquisiciones.oferta import OfertaProveedor, ItemOfertado, MaterialOfertado, ServicioOfertado
+from app.models.OrdenCompra.orden_compra import OrdenCompra, LineaOC
+from app.models.proveedor_inventario.dominio_proveedor import Proveedor, DetallesProveedor, ContactoProveedor
+
 
 app = create_app()
 

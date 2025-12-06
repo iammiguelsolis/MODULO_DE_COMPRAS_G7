@@ -30,6 +30,7 @@ interface LicitacionTimelineProps {
     onReject?: () => void;
     isApproved?: boolean;
     supervisorName?: string;
+    onDownloadContract?: () => void;
 }
 
 // Mapeo del orden de los estados
@@ -64,7 +65,8 @@ const LicitacionTimeline: React.FC<LicitacionTimelineProps> = ({
     onEnviarOrdenCompra,
     isCancelledNoProposals = false,
     isCancelledNoApprovals = false,
-    isCancelledNoEconomicApprovals = false
+    isCancelledNoEconomicApprovals = false,
+    onDownloadContract
 }) => {
     // Determinar el índice del estado actual
     const currentIndex = statusOrder.indexOf(currentStatus);
@@ -150,12 +152,10 @@ const LicitacionTimeline: React.FC<LicitacionTimelineProps> = ({
                                 <PencilLine size={16} />
                                 Registrar propuesta
                             </Button>
-                            {propuestasRegistradas > 0 && (
-                                <Button variant="secondary" size="sm" onClick={onFinalizarRegistro}>
-                                    <ArrowRight size={16} />
-                                    Finalizar registro
-                                </Button>
-                            )}
+                            <Button variant="secondary" size="sm" onClick={onFinalizarRegistro}>
+                                <ArrowRight size={16} />
+                                Finalizar registro
+                            </Button>
                         </>
                     )}
                 </TimelineItem>
@@ -291,7 +291,14 @@ const LicitacionTimeline: React.FC<LicitacionTimelineProps> = ({
                 timestamp={timestamps['FINALIZADA']}
                 statusText={getStatusText('FINALIZADA')}
                 isFinalState={true}
-            />
+            >
+                {currentStatus === 'FINALIZADA' && onDownloadContract && (
+                    <Button variant="primary" size="sm" onClick={onDownloadContract}>
+                        <FileText size={16} />
+                        Descargar contrato
+                    </Button>
+                )}
+            </TimelineItem>
         </div>
     );
 };

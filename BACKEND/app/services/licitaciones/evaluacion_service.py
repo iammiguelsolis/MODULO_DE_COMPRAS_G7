@@ -16,7 +16,6 @@ class EvaluacionService:
         if not licitacion:
             raise ValueError("Licitación no encontrada")
         
-        # Aquí podrías usar tu DTO si prefieres, por simplicidad devolvemos dicts
         from app.dtos.licitaciones.propuesta_dto import PropuestaResponseDTO
         return [PropuestaResponseDTO.from_model(p) for p in licitacion.propuestas]
 
@@ -31,12 +30,8 @@ class EvaluacionService:
         # Validar estado actual
         nombre_estado = licitacion.estado_actual.get_nombre()
         if nombre_estado not in ["CON_PROPUESTAS", "EN_INVITACION"]:
-            # A veces se pasa directo de invitación si se cierra manual
             pass 
         
-        # Forzamos avance al siguiente estado (EVALUACION_TECNICA)
-        # Asumiendo que el estado actual tiene implementado siguiente() hacia allá
-        # O usamos la lógica de transición manual si el State Pattern lo requiere
         try:
             # Si estamos en CON_PROPUESTAS, siguiente() lleva a EVALUACION_TECNICA
             licitacion.siguiente_estado()
@@ -58,7 +53,6 @@ class EvaluacionService:
             propuesta.aprobada_tecnicamente = data.get('aprobada_tecnicamente', False)
             propuesta.motivo_rechazo_tecnico = data.get('motivo_rechazo_tecnico')
             
-            # (Opcional) Aquí podrías actualizar validación de documentos individuales
             
             db.session.commit()
             return {"mensaje": "Evaluación técnica guardada"}
@@ -78,7 +72,7 @@ class EvaluacionService:
         aprobadas = [p for p in licitacion.propuestas if p.aprobada_tecnicamente]
         
         if not aprobadas:
-            # Si todas fallaron, la licitación debería cancelarse o declararse desierta
+            # Si todas fallaron, la licitación debería cancelarse
             licitacion.cancelar()
             db.session.commit()
             return {"mensaje": "Ninguna propuesta aprobó la técnica. Licitación CANCELADA."}
@@ -140,7 +134,7 @@ class EvaluacionService:
             
             db.session.commit()
             return {
-                "mensaje": f"Licitación adjudicada al proveedor {ganador.proveedor.nombre}",
+                "mensaje": f"Licitación adjudicada al proveedor {ganador.proveedor.razon_social}",
                 "ganador_id": ganador.id_propuesta
             }
         except Exception as e:

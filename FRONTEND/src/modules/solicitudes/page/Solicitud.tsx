@@ -1,6 +1,6 @@
-
-import { PlusCircle } from 'lucide-react';
+import { PlusCircle, Loader2 } from 'lucide-react';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Input } from '../components/atoms/Input';
 import { TextArea } from '../components/atoms/TextArea';
 import { Button } from '../components/atoms/Button';
@@ -9,29 +9,40 @@ import { SummaryCard } from '../components/molecules/SummaryCard';
 import { Select } from '../components/atoms/Select';
 import { RequestModal } from '../components/molecules/RequestModal';
 
+// --- IMPORTANTE: Agregamos AdquisicionesApi ---
+import { SolicitudesApi, AdquisicionesApi } from '../../../services/solicitudYadquisicion/api';
+import type { SolicitudInput, ItemSolicitudInput, TipoItem } from '../../../services/solicitudYadquisicion/types';
+
 interface ItemType {
   id: string;
   name: string;
   quantity: number;
   price: string;
 }
+
 const Solicitud: React.FC = () => {
+  const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [notes, setNotes] = useState('');
-  const [requestType, setRequestType] = useState<'producto' | 'servicio'>('producto');
+  const [requestType, setRequestType] = useState<'material' | 'servicio'>('material');
+
+  const [isLoading, setIsLoading] = useState(false);
+
   const [items, setItems] = useState<ItemType[]>([
     { id: '1', name: '', quantity: 50, price: '$ 20.00' },
   ]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  const handleRequestTypeChange = (newType: 'producto' | 'servicio') => {
+  // --- LÓGICA DE INTERFAZ ---
+
+  const handleRequestTypeChange = (newType: 'material' | 'servicio') => {
     setRequestType(newType);
     setItems([
       {
         id: Date.now().toString(),
         name: '',
-        quantity: newType === 'producto' ? 50 : 0,
-        price: newType === 'producto' ? '$ 20.00' : '$ 0.00'
+        quantity: newType === 'material' ? 50 : 0,
+        price: newType === 'material' ? '$ 20.00' : '$ 0.00'
       }
     ]);
   };
@@ -52,25 +63,95 @@ const Solicitud: React.FC = () => {
     const newItem: ItemType = {
       id: Date.now().toString(),
       name: '',
-      quantity: requestType === 'producto' ? 50 : 0,
-      price: requestType === 'producto' ? '$ 20.00' : '$ 0.00',
+      quantity: requestType === 'material' ? 50 : 0,
+      price: requestType === 'material' ? '$ 20.00' : '$ 0.00',
     };
     setItems([...items, newItem]);
   };
 
+  const parsePrice = (priceStr: string): number => {
+    return parseFloat(priceStr.replace(/[$,\s]/g, '')) || 0;
+  };
+
   const calculateTotal = () => {
     return items.reduce((sum, item) => {
-      const price = parseFloat(item.price.replace(/[$,\s]/g, '')) || 0;
+      const price = parsePrice(item.price);
       return sum + (price * item.quantity);
     }, 0);
   };
 
+  // Cálculo visual para la UI (El backend tiene la palabra final)
   const getPurchaseType = (total: number) => {
-    return total >= 5000 ? 'LICITACIÓN' : 'COMPRA';
+    return total >= 10000 ? 'LICITACIÓN' : 'COMPRA';
   };
 
-  const handleCreateRequest = () => {
-    setIsModalOpen(true);
+  // --- INTEGRACIÓN Y REDIRECCIÓN ---
+
+  const handleSubmit = async () => {
+    if (!title.trim()) return alert("El título es obligatorio");
+    if (items.some(i => !i.name.trim())) return alert("Todos los ítems deben tener nombre");
+
+    setIsLoading(true);
+
+    try {
+      // 1. Preparar Payload
+      const tipoBackend: TipoItem = requestType === 'material' ? 'MATERIAL' : 'SERVICIO';
+      const itemsPayload: ItemSolicitudInput[] = items.map(item => {
+        const precio = parsePrice(item.price);
+        const baseItem = {
+          tipo: tipoBackend,
+          nombre: item.name,
+          cantidad: item.quantity,
+          comentario: ""
+        };
+        if (tipoBackend === 'MATERIAL') {
+          return { ...baseItem, precio_unitario: precio };
+        } else {
+          return { ...baseItem, tarifa_hora: precio, horas_estimadas: item.quantity };
+        }
+      });
+
+      const payload: SolicitudInput = {
+        titulo: title,
+        notas_adicionales: notes,
+        items: itemsPayload
+      };
+
+      // 2. CREAR SOLICITUD
+      const solicitudRes = await SolicitudesApi.crear(payload);
+      const idSolicitud = solicitudRes.id;
+      console.log("Solicitud creada:", idSolicitud);
+
+      await SolicitudesApi.aprobar(idSolicitud);
+      console.log("Solicitud aprobada automáticamente");
+
+      const procesoRes = await AdquisicionesApi.generar(idSolicitud);
+      console.log("Proceso generado:", procesoRes);
+
+      // 5. REDIRECCIÓN INTELIGENTE
+      setIsModalOpen(false);
+
+      if (procesoRes.tipo_proceso === 'LICITACION') {
+        navigate(`/licitaciones/completar/${procesoRes.proceso.id}`, {
+          state: {
+            licitacionId: procesoRes.proceso.id,
+            titulo: title,
+            notas: notes,
+            items: items,
+            montoTotal: calculateTotal(),
+            requestType: requestType
+          }
+        });
+      } else {
+        navigate('/compras', { state: { procesoId: procesoRes.proceso.id } });
+      }
+
+    } catch (error) {
+      console.error("Error en el flujo:", error);
+      alert("Ocurrió un error al procesar la solicitud.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const totalAmount = calculateTotal();
@@ -84,14 +165,12 @@ const Solicitud: React.FC = () => {
           <p className="text-gray-600 mt-1">Complete el formulario para generar una solicitud.</p>
         </div>
 
-        {/* Sección Superior: Detalles y Resumen */}
         <div className="grid grid-cols-3 gap-6 mb-6">
-          {/* Detalles de la Solicitud */}
           <div className="col-span-2">
             <div className="bg-white rounded-lg border border-gray-300 p-6">
               <h2 className="text-xl font-semibold text-gray-900 mb-2">Detalles de la Solicitud</h2>
               <p className="text-sm text-gray-600 mb-6">
-                Ingrese un título y las notas adicionales de manera opcional.
+                Ingrese un título y las notas adicionales.
               </p>
 
               <div className="space-y-4">
@@ -112,59 +191,53 @@ const Solicitud: React.FC = () => {
             </div>
           </div>
 
-          {/* Resumen */}
           <div className="col-span-1">
             <SummaryCard
               totalAmount={totalAmount}
-              processType={totalAmount >= 5000 ? 'Tipo de Proceso: Licitación' : 'Tipo de Proceso: Simple'}
-              processDescription={totalAmount >= 5000 ? 'Esta solicitud supera el límite y debeseguir un proceso de licitación formal.' : 'Compra simple, rápida de bajo monto.'}
+              processType={totalAmount >= 10000 ? 'Tipo de Proceso: Licitación' : 'Tipo de Proceso: Simple'}
+              processDescription={totalAmount >= 10000 ? 'Esta solicitud supera el límite. Se iniciará un proceso de licitación.' : 'Compra simple de bajo monto.'}
               purchaseType={purchaseType}
-              onCreateRequest={handleCreateRequest}
+              onCreateRequest={() => setIsModalOpen(true)}
             />
           </div>
         </div>
 
-        {/* Sección Inferior: Productos/Servicios - Full Width */}
         <div className="bg-white rounded-lg border border-gray-300 p-6">
           <div className="flex justify-between items-center mb-2">
             <h2 className="text-xl font-semibold text-gray-900">
-              {requestType === 'producto' ? 'Productos' : 'Servicios'}
+              {requestType === 'material' ? 'Materiales' : 'Servicios'}
             </h2>
             <Button variant="primary" icon={PlusCircle} onClick={handleAddItem}>
               Agregar Ítem
             </Button>
           </div>
-          <p className="text-sm text-gray-600 mb-6">
-            Agregue los ítems que desea solicitar
-          </p>
 
-          {/* Selector de Tipo */}
           <div className="mb-6 max-w-xs">
             <Select
               label="Tipo de Solicitud"
               options={[
-                { value: 'producto', label: 'Producto' },
+                { value: 'material', label: 'Material' },
                 { value: 'servicio', label: 'Servicio' },
               ]}
               value={requestType}
-              onChange={(e) => handleRequestTypeChange(e.target.value as 'producto' | 'servicio')}
+              onChange={(e) => handleRequestTypeChange(e.target.value as 'material' | 'servicio')}
             />
           </div>
 
           <div className="space-y-4">
-            {/* Encabezados */}
+            {/* Headers */}
             <div className="grid grid-cols-12 gap-4 text-sm font-medium text-gray-600 pb-2 border-b">
               <div className="col-span-6">Nombre</div>
               <div className="col-span-2">
-                {requestType === 'producto' ? 'Cantidad' : 'Horas est.'}
+                {requestType === 'material' ? 'Cantidad' : 'Horas est.'}
               </div>
               <div className="col-span-3">
-                {requestType === 'producto' ? 'Precio Unitario' : 'Tarifa hora'}
+                {requestType === 'material' ? 'Precio Unitario' : 'Tarifa hora'}
               </div>
               <div className="col-span-1"></div>
             </div>
 
-            {/* Filas de items */}
+            {/* Rows */}
             {items.map((item) => (
               <ProductRow
                 key={item.id}
@@ -178,7 +251,6 @@ const Solicitud: React.FC = () => {
         </div>
       </div>
 
-      {/* Modal */}
       <RequestModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
@@ -188,6 +260,8 @@ const Solicitud: React.FC = () => {
         items={items}
         totalAmount={totalAmount}
         purchaseType={purchaseType}
+        onConfirm={handleSubmit}
+        isLoading={isLoading}
       />
     </div>
   );

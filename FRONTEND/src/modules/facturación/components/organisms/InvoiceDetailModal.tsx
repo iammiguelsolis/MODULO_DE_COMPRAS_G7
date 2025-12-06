@@ -1,13 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { X, FileText, Download } from 'lucide-react';
+import { X, FileText, Download, Upload, Trash2 } from 'lucide-react';
 import Input from '../atoms/Input';
 import Select from '../atoms/Select';
 import Button from '../atoms/Button';
 import Badge from '../atoms/Badge';
 import Spinner from '../atoms/Spinner';
+import NotificationModal from '../molecules/NotificationModal';
 import {
   type FacturaDetalle,
   type FacturaProveedor,
+  type LineaDetalle,
   type Adjunto,
   type ResultadoConciliacion,
   type TrazabilidadLog,
@@ -18,8 +20,23 @@ import {
   actualizarFactura,
   ejecutarConciliacion,
   enviarACuentasPorPagar,
-  listarFacturas
+  listarFacturas,
+  subirAdjunto,
+  eliminarAdjunto,
+  obtenerProveedores
 } from '../../services/api';
+import type { Proveedor } from '../../../../services/proveedor/types';
+
+
+// Helper function para convertir fecha a formato yyyy-MM-dd
+const formatDateForInput = (dateString: string): string => {
+  if (!dateString) return '';
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
 
 interface InvoiceDetailModalProps {
   facturaId: string;
@@ -39,16 +56,76 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
   const [adjuntos, setAdjuntos] = useState<Adjunto[]>([]);
   const [conciliaciones, setConciliaciones] = useState<ResultadoConciliacion[]>([]);
   const [trazabilidad, setTrazabilidad] = useState<TrazabilidadLog[]>([]);
-  
+  const [proveedores, setProveedores] = useState<Proveedor[]>([]);
   const [activeTab, setActiveTab] = useState<'general' | 'items' | 'attachments' | 'conciliation'>('general');
   const [editMode, setEditMode] = useState(false);
   const [editData, setEditData] = useState({
-    orden_compra_id: ''
+    numeroFactura: '',
+    proveedorId: 0,
+    fechaEmision: '',
+    fechaVencimiento: '',
+    moneda: 'PEN',
+    ordenCompraId: '',
+    lineas: [] as LineaDetalle[],
+    proveedorNombre: '',
+    proveedorRuc: '',
   });
+
+  // Notification state
+  const [notification, setNotification] = useState<{
+    isOpen: boolean;
+    type: 'success' | 'error';
+    title: string;
+    message: string;
+    onCloseAction?: () => void;
+  }>({
+    isOpen: false,
+    type: 'success',
+    title: '',
+    message: '',
+  });
+
+  // Confirmation modal state
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    onConfirm: () => void;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    onConfirm: () => {}
+  });
+
+  const closeNotification = () => {
+    setNotification(prev => ({ ...prev, isOpen: false }));
+    if (notification.onCloseAction) {
+      notification.onCloseAction();
+    }
+  };
 
   useEffect(() => {
     loadData();
   }, [facturaId]);
+
+  useEffect(() => {
+    const cargarProveedores = async () => {
+      try {
+        const data = await obtenerProveedores();
+        setProveedores(data);
+      } catch (error) {
+        console.error('Error cargando proveedores:', error);
+        setNotification({
+          isOpen: true,
+          type: 'error',
+          title: 'Error',
+          message: 'No se pudieron cargar los proveedores.'
+        });
+      }
+    };
+    cargarProveedores();
+  }, []);
 
   useEffect(() => {
     // Cargar datos cuando cambia la versión seleccionada
@@ -61,7 +138,12 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
     try {
       setLoading(true);
       const facturaData = await obtenerFacturaDetalle(facturaId);
-      
+
+      const proveedor = proveedores.find(p => p.id === facturaData.proveedor_id);
+
+      console.log(proveedor?.razonSocial)
+      console.log(proveedor?.ruc)
+
       // Obtener todas las versiones de esta factura
       const todasFacturas = await listarFacturas();
       const versiones = todasFacturas
@@ -69,14 +151,37 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
         .sort((a, b) => b.version - a.version); // Ordenar de mayor a menor
 
       setTodasLasVersiones(versiones);
-      setFactura(facturaData);
-      setEditData({ orden_compra_id: facturaData.orden_compra_id || '' });
+
+      if (versiones.length > 0) {
+        setVersionSeleccionada(versiones[0].id);
+      }
+
+      setFactura({...facturaData,
+        proveedor_nombre: proveedor?.razonSocial || '',
+        proveedor_ruc: proveedor?.ruc || '',
+      });
+      setEditData({
+        numeroFactura: facturaData.numero_factura,
+        proveedorId: facturaData.proveedor_id || 0,
+        fechaEmision: formatDateForInput(facturaData.fecha_emision),
+        fechaVencimiento: formatDateForInput(facturaData.fecha_vencimiento || ''),
+        moneda: facturaData.moneda,
+        ordenCompraId: facturaData.orden_compra_id || '',
+        lineas: facturaData.lineas || [],
+        proveedorNombre: facturaData.proveedor_nombre || proveedor?.razonSocial || '',
+        proveedorRuc: facturaData.proveedor_ruc || proveedor?.ruc || '',
+      });
 
       // Cargar datos adicionales
-      await loadVersionData(facturaId);
+      await loadVersionData(versiones.length > 0 ? versiones[0].id : facturaId);
     } catch (error) {
       console.error('Error cargando datos:', error);
-      alert('Error al cargar los detalles de la factura');
+      setNotification({
+        isOpen: true,
+        type: 'error',
+        title: '❌ Error',
+        message: 'No se pudieron cargar los detalles de la factura.'
+      });
     } finally {
       setLoading(false);
     }
@@ -95,7 +200,17 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
       setAdjuntos(adjuntosData);
       setConciliaciones(conciliacionData);
       setTrazabilidad(trazabilidadData);
-      setEditData({ orden_compra_id: facturaData.orden_compra_id || '' });
+      setEditData({
+        numeroFactura: facturaData.numero_factura,
+        proveedorId: facturaData.proveedor_id || 0,
+        fechaEmision: formatDateForInput(facturaData.fecha_emision),
+        fechaVencimiento: formatDateForInput(facturaData.fecha_vencimiento || ''),
+        moneda: facturaData.moneda,
+        ordenCompraId: facturaData.orden_compra_id || '',
+        lineas: facturaData.lineas || [],
+        proveedorNombre: facturaData.proveedor_nombre || '',
+        proveedorRuc: facturaData.proveedor_ruc || '',
+      });
     } catch (error) {
       console.error('Error cargando versión:', error);
     }
@@ -107,94 +222,241 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
 
   const handleCancelEdit = () => {
     setEditMode(false);
-    setEditData({ orden_compra_id: factura?.orden_compra_id || '' });
+    if (factura) {
+      setEditData({
+        numeroFactura: factura.numero_factura,
+        proveedorId: factura.proveedor_id || 0,
+        fechaEmision: factura.fecha_emision,
+        fechaVencimiento: factura.fecha_vencimiento || '',
+        moneda: factura.moneda,
+        ordenCompraId: factura.orden_compra_id || '',
+        lineas: factura.lineas || [],
+        proveedorNombre: factura.proveedor_nombre || '',
+        proveedorRuc: factura.proveedor_ruc || '',
+      });
+    }
   };
 
   const handleSaveEdit = async () => {
     if (!factura) return;
     
     try {
-      await actualizarFactura(factura.id, editData);
-      alert('Factura actualizada exitosamente');
+      // Preparar datos para enviar
+      const dataToSend = {
+        numeroFactura: editData.numeroFactura,
+        proveedorId: editData.proveedorId,
+        fechaEmision: editData.fechaEmision,
+        fechaVencimiento: editData.fechaVencimiento,
+        moneda: editData.moneda,
+        ordenCompraId: editData.ordenCompraId,
+        lineas: editData.lineas.map(linea => ({
+          descripcion: linea.descripcion,
+          cantidad: linea.cantidad,
+          precioUnitario: linea.precio_unitario,
+          impuestosLinea: linea.impuestos_linea,
+          totalLinea: linea.total_linea
+        }))
+      };
+
+      await actualizarFactura(factura.id, dataToSend);
+      setNotification({
+        isOpen: true,
+        type: 'success',
+        title: '✅ Actualización Exitosa',
+        message: 'Los datos de la factura han sido actualizados correctamente.'
+      });
       setEditMode(false);
       loadData();
       onRefresh();
     } catch (error) {
       console.error('Error actualizando:', error);
-      alert('Error al actualizar la factura');
+      setNotification({
+        isOpen: true,
+        type: 'error',
+        title: '❌ Error',
+        message: 'No se pudo actualizar la factura. Intente nuevamente.'
+      });
     }
   };
 
   const handleConciliate = async () => {
     if (!factura) return;
 
-    if (!editData.orden_compra_id) {
-      alert('Por favor ingrese el ID de Orden de Compra antes de conciliar');
+    if (!editData.ordenCompraId) {
+      setNotification({
+        isOpen: true,
+        type: 'error',
+        title: '⚠️ OC Requerida',
+        message: 'Por favor ingrese el ID de Orden de Compra antes de conciliar. Use el botón Editar para agregar esta información.'
+      });
       setEditMode(true);
       return;
     }
 
-    const confirmacion = window.confirm(
-      '¿Está seguro de ejecutar la conciliación?\n\n' +
-      'Si la conciliación falla:\n' +
-      '- Esta factura pasará a estado EN_CONCILIACION\n' +
-      '- Se creará una nueva versión en estado BORRADOR'
-    );
-
-    if (!confirmacion) return;
-
-    try {
-      setLoading(true);
-      const result = await ejecutarConciliacion(factura.id, editData.orden_compra_id);
-      
-      if (result.estado === 'FALLIDA') {
-        alert(
-          `❌ Conciliación fallida\n\n` +
-          `Motivo: ${result.mensaje}\n\n` +
-          `Se ha creado una nueva versión (v${factura.version + 1}) en estado BORRADOR.\n` +
-          `La versión actual pasó a EN_CONCILIACION.`
-        );
-        onRefresh();
-        await loadData(); // Recargar para obtener la nueva versión
-      } else {
-        alert('✅ Conciliación exitosa! La factura ahora está APROBADA.');
-        await loadData();
-        onRefresh();
+    setConfirmModal({
+      isOpen: true,
+      title: '🔄 Confirmar Conciliación',
+      message: '¿Está seguro de ejecutar la conciliación?\n\nSi la conciliación falla:\n• Esta factura pasará a estado EN_CONCILIACION\n• Se creará una nueva versión en estado BORRADOR',
+      onConfirm: async () => {
+        setConfirmModal({ ...confirmModal, isOpen: false });
+        
+        try {
+          setLoading(true);
+          const result = await ejecutarConciliacion(factura.id, editData.ordenCompraId);
+          
+          if (result.resultado === 'CON_DISCREPANCIA' || result.resultado === 'ERROR_ESTADO') {
+            setNotification({
+              isOpen: true,
+              type: 'error',
+              title: '❌ Conciliación Fallida',
+              message: `Motivo: ${result.mensaje}\n\nSe ha creado una nueva versión (v${factura.version + 1}) en estado BORRADOR. La versión actual pasó a EN_CONCILIACION.`,
+              onCloseAction: () => {
+                onRefresh();
+                loadData();
+              }
+            });
+          } else {
+            setNotification({
+              isOpen: true,
+              type: 'success',
+              title: '✅ Conciliación Exitosa',
+              message: 'La factura ha sido conciliada correctamente y ahora está APROBADA.',
+              onCloseAction: () => {
+                loadData();
+                onRefresh();
+              }
+            });
+          }
+        } catch (error) {
+          console.error('Error en conciliación:', error);
+          setNotification({
+            isOpen: true,
+            type: 'error',
+            title: '❌ Error',
+            message: 'Ocurrió un error al ejecutar la conciliación.'
+          });
+        } finally {
+          setLoading(false);
+        }
       }
-    } catch (error) {
-      console.error('Error en conciliación:', error);
-      alert('Error al ejecutar la conciliación');
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
   const handleSendToCxP = async () => {
     if (!factura) return;
 
     if (factura.estado !== 'APROBADA') {
-      alert('⚠️ Solo se pueden enviar facturas APROBADAS a Cuentas por Pagar');
+      setNotification({
+        isOpen: true,
+        type: 'error',
+        title: '⚠️ Estado Inválido',
+        message: 'Solo se pueden enviar facturas APROBADAS a Cuentas por Pagar.'
+      });
       return;
     }
 
-    const confirmacion = window.confirm(
-      '¿Confirma el envío de esta factura a Cuentas por Pagar?'
-    );
+    setConfirmModal({
+      isOpen: true,
+      title: '📤 Enviar a CxP',
+      message: '¿Confirma el envío de esta factura a Cuentas por Pagar?',
+      onConfirm: async () => {
+        setConfirmModal({ ...confirmModal, isOpen: false });
+        
+        try {
+          setLoading(true);
+          await enviarACuentasPorPagar(factura.id);
+          setNotification({
+            isOpen: true,
+            type: 'success',
+            title: '✅ Enviado a CxP',
+            message: 'La factura ha sido enviada exitosamente a Cuentas por Pagar.',
+            onCloseAction: () => {
+              loadData();
+              onRefresh();
+            }
+          });
+        } catch (error) {
+          console.error('Error enviando a CxP:', error);
+          setNotification({
+            isOpen: true,
+            type: 'error',
+            title: '❌ Error',
+            message: 'Ocurrió un error al enviar la factura a Cuentas por Pagar.'
+          });
+        } finally {
+          setLoading(false);
+        }
+      }
+    });
+  };
 
-    if (!confirmacion) return;
-
+  const handleUploadAttachment = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!factura || !e.target.files || e.target.files.length === 0) return;
+    
+    const file = e.target.files[0];
+    
     try {
       setLoading(true);
-      await enviarACuentasPorPagar(factura.id);
-      alert('✅ Factura enviada a Cuentas por Pagar exitosamente');
-      await loadData();
-      onRefresh();
+      await subirAdjunto(factura.id, file);
+      setNotification({
+        isOpen: true,
+        type: 'success',
+        title: '✅ Adjunto Subido',
+        message: 'El archivo se ha subido correctamente.'
+      });
+      // Recargar adjuntos
+      const adjuntosData = await listarAdjuntos(factura.id);
+      setAdjuntos(adjuntosData);
     } catch (error) {
-      console.error('Error enviando a CxP:', error);
-      alert('Error al enviar a Cuentas por Pagar');
+      console.error('Error subiendo adjunto:', error);
+      setNotification({
+        isOpen: true,
+        type: 'error',
+        title: '❌ Error',
+        message: 'No se pudo subir el archivo. Intente nuevamente.'
+      });
     } finally {
       setLoading(false);
+      // Reset input
+      e.target.value = '';
     }
+  };
+
+  const handleDeleteAttachment = async (adjuntoId: string) => {
+    if (!factura) return;
+
+    setConfirmModal({
+      isOpen: true,
+      title: '🗑️ Eliminar Adjunto',
+      message: '¿Está seguro de eliminar este adjunto? Esta acción no se puede deshacer.',
+      onConfirm: async () => {
+        setConfirmModal({ ...confirmModal, isOpen: false });
+        
+        try {
+          setLoading(true);
+          await eliminarAdjunto(factura.id, adjuntoId);
+          setNotification({
+            isOpen: true,
+            type: 'success',
+            title: '✅ Adjunto Eliminado',
+            message: 'El adjunto ha sido eliminado correctamente.'
+          });
+          // Recargar adjuntos
+          const adjuntosData = await listarAdjuntos(factura.id);
+          setAdjuntos(adjuntosData);
+        } catch (error) {
+          console.error('Error eliminando adjunto:', error);
+          setNotification({
+            isOpen: true,
+            type: 'error',
+            title: '❌ Error',
+            message: 'No se pudo eliminar el adjunto. Intente nuevamente.'
+          });
+        } finally {
+          setLoading(false);
+        }
+      }
+    });
   };
 
   const handleVersionChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -293,34 +555,68 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
                 <div className="space-y-4">
                   <div className="grid grid-cols-2 gap-4">
                     <Input
+                      label="Número de Factura"
+                      value={editMode ? editData.numeroFactura : factura.numero_factura}
+                      onChange={(e) => setEditData({ ...editData, numeroFactura: e.target.value })}
+                      disabled={!editMode}
+                    />
+                    <Select
                       label="Proveedor"
-                      value={factura.proveedor_nombre}
+                      value={editMode ? editData.proveedorId.toString() : (factura.proveedor_id?.toString() || '0')}
+                      onChange={(e) => {
+                        const proveedorId = parseInt(e.target.value);
+                        const proveedorSeleccionado = proveedores.find(p => p.id === proveedorId);
+                        setEditData({ 
+                          ...editData, 
+                          proveedorId,
+                          proveedorNombre: proveedorSeleccionado?.razonSocial || '',  // ← AGREGAR
+                          proveedorRuc: proveedorSeleccionado?.ruc || ''              // ← AGREGAR
+                        });
+                      }}
+                      disabled={!editMode}
+                      options={[
+                        { value: '0', label: 'Seleccione un proveedor' },
+                        ...proveedores.map(p => ({
+                          value: p.id.toString(),
+                          label: `${p.id} - ${p.razonSocial}`
+                        }))
+                      ]}
+                      required
+                    />
+                    <Input
+                      label="Proveedor Nombre"
+                      value={editMode ? editData.proveedorNombre : factura.proveedor_nombre || ''}
                       onChange={() => {}}
                       disabled
                     />
                     <Input
                       label="RUC"
-                      value={factura.proveedor_ruc}
-                      onChange={() => {}}
-                      disabled
-                    />
-                    <Input
-                      label="Serie-Número"
-                      value={factura.numero_factura}
+                      value={editMode ? editData.proveedorRuc : factura.proveedor_ruc || ''}
                       onChange={() => {}}
                       disabled
                     />
                     <Input
                       label="Fecha Emisión"
-                      value={new Date(factura.fecha_emision).toLocaleDateString('es-PE')}
-                      onChange={() => {}}
-                      disabled
+                      type="date"
+                      value={editMode ? editData.fechaEmision : formatDateForInput(factura.fecha_emision)}
+                      onChange={(e) => setEditData({ ...editData, fechaEmision: e.target.value })}
+                      disabled={!editMode}
                     />
                     <Input
-                      label="Moneda"
-                      value={factura.moneda}
-                      onChange={() => {}}
-                      disabled
+                      label="Fecha Vencimiento"
+                      type="date"
+                      value={editMode ? editData.fechaVencimiento : formatDateForInput(factura.fecha_vencimiento || '')}
+                      onChange={(e) => setEditData({ ...editData, fechaVencimiento: e.target.value })}
+                      disabled={!editMode}
+                    />
+                    <Select
+                      value={editMode ? editData.moneda : factura.moneda}
+                      onChange={(e) => setEditData({ ...editData, moneda: e.target.value })}
+                      disabled={!editMode}
+                      options={[
+                        { value: 'PEN', label: 'PEN - Soles' },
+                        { value: 'USD', label: 'USD - Dólares' }
+                      ]}
                     />
                     <Input
                       label="Total"
@@ -331,8 +627,8 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
                     <div className="col-span-2">
                       <Input
                         label="OC Vinculada"
-                        value={editData.orden_compra_id}
-                        onChange={(e) => setEditData({ ...editData, orden_compra_id: e.target.value })}
+                        value={editMode ? editData.ordenCompraId : (factura.orden_compra_id || '')}
+                        onChange={(e) => setEditData({ ...editData, ordenCompraId: e.target.value })}
                         disabled={!editMode}
                         placeholder="Ingrese ID de OC para conciliar"
                       />
@@ -342,42 +638,167 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
               )}
 
               {activeTab === 'items' && (
-                <div className="overflow-x-auto">
-                  <table className="w-full">
-                    <thead className="bg-gray-50">
-                      <tr>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">Item</th>
-                        <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">Descripción</th>
-                        <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700">Cant.</th>
-                        <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700">Precio</th>
-                        <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700">Subtotal</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {factura.lineas_detalle && factura.lineas_detalle.length > 0 ? (
-                        factura.lineas_detalle.map((item) => (
-                          <tr key={item.id} className="border-t">
-                            <td className="px-4 py-3 text-sm">{item.item}</td>
-                            <td className="px-4 py-3 text-sm">{item.descripcion}</td>
-                            <td className="px-4 py-3 text-sm text-center">{item.cantidad}</td>
-                            <td className="px-4 py-3 text-sm text-right">{item.precio_unitario.toFixed(2)}</td>
-                            <td className="px-4 py-3 text-sm text-right">{item.subtotal.toFixed(2)}</td>
-                          </tr>
-                        ))
-                      ) : (
+                <div className="space-y-4">
+                  {editMode && (
+                    <Button
+                      variant="secondary"
+                      onClick={() => {
+                        const nuevaLinea: LineaDetalle = {
+                          descripcion: '',
+                          cantidad: 1,
+                          precio_unitario: 0,
+                          impuestos_linea: 0,
+                          total_linea: 0
+                        };
+                        setEditData({
+                          ...editData,
+                          lineas: [...editData.lineas, nuevaLinea]
+                        });
+                      }}
+                    >
+                      + Agregar Línea
+                    </Button>
+                  )}
+                  
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-gray-50">
                         <tr>
-                          <td colSpan={5} className="px-4 py-8 text-center text-gray-500">
-                            No hay líneas de detalle disponibles
-                          </td>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">Item</th>
+                          <th className="px-4 py-3 text-left text-xs font-semibold text-gray-700">Descripción</th>
+                          <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700">Cant.</th>
+                          <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700">Precio</th>
+                          <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700">Impuestos</th>
+                          <th className="px-4 py-3 text-right text-xs font-semibold text-gray-700">Total</th>
+                          {editMode && <th className="px-4 py-3 text-center text-xs font-semibold text-gray-700">Acciones</th>}
                         </tr>
-                      )}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {(editMode ? editData.lineas : factura.lineas || []).map((item: LineaDetalle, index: number) => (
+                          <tr key={item.id || index} className="border-t">
+                            <td className="px-4 py-3 text-sm">{index + 1}</td>
+                            <td className="px-4 py-3">
+                              {editMode ? (
+                                <input
+                                  type="text"
+                                  value={item.descripcion}
+                                  onChange={(e) => {
+                                    const newLineas = [...editData.lineas];
+                                    newLineas[index].descripcion = e.target.value;
+                                    setEditData({ ...editData, lineas: newLineas });
+                                  }}
+                                  className="w-full px-2 py-1 border rounded"
+                                />
+                              ) : (
+                                <span className="text-sm">{item.descripcion}</span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-center">
+                              {editMode ? (
+                                <input
+                                  type="number"
+                                  value={item.cantidad}
+                                  onChange={(e) => {
+                                    const newLineas = [...editData.lineas];
+                                    newLineas[index].cantidad = parseFloat(e.target.value) || 0;
+                                    newLineas[index].total_linea = 
+                                      newLineas[index].cantidad * newLineas[index].precio_unitario + 
+                                      newLineas[index].impuestos_linea;
+                                    setEditData({ ...editData, lineas: newLineas });
+                                  }}
+                                  className="w-20 px-2 py-1 border rounded text-center"
+                                />
+                              ) : (
+                                <span className="text-sm">{item.cantidad}</span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-right">
+                              {editMode ? (
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  value={item.precio_unitario}
+                                  onChange={(e) => {
+                                    const newLineas = [...editData.lineas];
+                                    newLineas[index].precio_unitario = parseFloat(e.target.value) || 0;
+                                    newLineas[index].total_linea = 
+                                      newLineas[index].cantidad * newLineas[index].precio_unitario + 
+                                      newLineas[index].impuestos_linea;
+                                    setEditData({ ...editData, lineas: newLineas });
+                                  }}
+                                  className="w-24 px-2 py-1 border rounded text-right"
+                                />
+                              ) : (
+                                <span className="text-sm">{item.precio_unitario.toFixed(2)}</span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-right">
+                              {editMode ? (
+                                <input
+                                  type="number"
+                                  step="0.01"
+                                  value={item.impuestos_linea}
+                                  onChange={(e) => {
+                                    const newLineas = [...editData.lineas];
+                                    newLineas[index].impuestos_linea = parseFloat(e.target.value) || 0;
+                                    newLineas[index].total_linea = 
+                                      newLineas[index].cantidad * newLineas[index].precio_unitario + 
+                                      newLineas[index].impuestos_linea;
+                                    setEditData({ ...editData, lineas: newLineas });
+                                  }}
+                                  className="w-24 px-2 py-1 border rounded text-right"
+                                />
+                              ) : (
+                                <span className="text-sm">{item.impuestos_linea.toFixed(2)}</span>
+                              )}
+                            </td>
+                            <td className="px-4 py-3 text-sm text-right">{item.total_linea.toFixed(2)}</td>
+                            {editMode && (
+                              <td className="px-4 py-3 text-center">
+                                <button
+                                  onClick={() => {
+                                    const newLineas = editData.lineas.filter((_, i) => i !== index);
+                                    setEditData({ ...editData, lineas: newLineas });
+                                  }}
+                                  className="text-red-600 hover:text-red-800"
+                                >
+                                  🗑️
+                                </button>
+                              </td>
+                            )}
+                          </tr>
+                        ))}
+                        {(editMode ? editData.lineas : factura.lineas || []).length === 0 && (
+                          <tr>
+                            <td colSpan={editMode ? 7 : 6} className="px-4 py-8 text-center text-gray-500">
+                              No hay líneas de detalle disponibles
+                            </td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
 
               {activeTab === 'attachments' && (
                 <div className="space-y-3">
+                  {/* Upload button - only for draft invoices */}
+                  {puedeEditar && (
+                    <div className="mb-4">
+                      <label className="flex items-center justify-center gap-2 px-4 py-3 bg-blue-50 border-2 border-dashed border-blue-300 rounded-lg cursor-pointer hover:bg-blue-100 transition-colors">
+                        <Upload size={20} className="text-blue-600" />
+                        <span className="text-sm font-medium text-blue-600">Subir Adjunto</span>
+                        <input
+                          type="file"
+                          accept=".pdf,.xml"
+                          onChange={handleUploadAttachment}
+                          className="hidden"
+                        />
+                      </label>
+                      <p className="text-xs text-gray-500 mt-2 text-center">Formatos aceptados: PDF, XML</p>
+                    </div>
+                  )}
                   {adjuntos.length > 0 ? (
                     adjuntos.map((adj) => (
                       <div
@@ -395,13 +816,24 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
                             </p>
                           </div>
                         </div>
-                        <Button
-                          variant="ghost"
-                          icon={Download}
-                          onClick={() => window.open(adj.url_storage, '_blank')}
-                        >
-                          Ver
-                        </Button>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="ghost"
+                            icon={Download}
+                            onClick={() => window.open(adj.url_storage, '_blank')}
+                          >
+                            Ver
+                          </Button>
+                          {puedeEditar && (
+                            <button
+                              onClick={() => handleDeleteAttachment(adj.id)}
+                              className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                              title="Eliminar adjunto"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          )}
+                        </div>
                       </div>
                     ))
                   ) : (
@@ -420,11 +852,11 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
                       <div
                         key={conc.id}
                         className={`p-4 rounded-lg ${
-                          conc.estado === 'EXITOSA' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
+                          conc.resultado === 'EXITOSA' ? 'bg-green-50 border border-green-200' : 'bg-red-50 border border-red-200'
                         }`}
                       >
                         <p className="text-sm font-medium">
-                          Estado: {conc.estado}
+                          Estado: {conc.resultado}
                         </p>
                         <p className="text-sm text-gray-600 mt-1">{conc.mensaje}</p>
                         {conc.discrepancias && conc.discrepancias.length > 0 && (
@@ -527,6 +959,38 @@ const InvoiceDetailModal: React.FC<InvoiceDetailModalProps> = ({
           </div>
         </div>
       </div>
+
+      {/* Notification Modal */}
+      <NotificationModal
+        isOpen={notification.isOpen}
+        onClose={closeNotification}
+        type={notification.type}
+        title={notification.title}
+        message={notification.message}
+      />
+
+      {/* Confirmation Modal */}
+      {confirmModal.isOpen && (
+        <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center p-6 z-[60]">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+            <div className="p-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-3">{confirmModal.title}</h3>
+              <p className="text-gray-600 whitespace-pre-line mb-6">{confirmModal.message}</p>
+              <div className="flex justify-end gap-3">
+                <Button
+                  variant="secondary"
+                  onClick={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+                >
+                  Cancelar
+                </Button>
+                <Button variant="primary" onClick={confirmModal.onConfirm}>
+                  Confirmar
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

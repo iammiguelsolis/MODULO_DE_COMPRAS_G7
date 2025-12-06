@@ -1,6 +1,6 @@
 import { PlusCircle, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { useLocation, useSearchParams } from "react-router-dom";
+import { useLocation, useSearchParams, useNavigate } from "react-router-dom";
 
 import { Input } from '../components/atoms/Input';
 import { TextArea } from '../components/atoms/TextArea';
@@ -13,11 +13,13 @@ import { ProveedorModal } from '../components/molecules/ProveedorModal';
 
 import type { ItemType, ProveedorType } from '../lib/types';
 import { ORDER_TYPES, CURRENCIES } from '../lib/constants';
+import { ordenCompraService } from '../lib/ordenCompraService';
 
 const GenerarOrdenCompra: React.FC = () => {
   // ROUTER
   const location = useLocation();
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
 
   // Tipo de origen que viene por query param
   const tipoRuta = searchParams.get("tipo")?.toUpperCase() as
@@ -45,6 +47,7 @@ const GenerarOrdenCompra: React.FC = () => {
   const [deliveryTerms, setDeliveryTerms] = useState<string>('');
 
   const [solicitudId, setSolicitudId] = useState<string>('');
+  const [origenId, setOrigenId] = useState<string | number>('');
   const [notificacionInventarioId, setNotificacionInventarioId] = useState<string>('');
 
   const [isOrdenModalOpen, setIsOrdenModalOpen] = useState(false);
@@ -55,21 +58,33 @@ const GenerarOrdenCompra: React.FC = () => {
   // CARGAR AUTOMÁTICAMENTE DATOS DESDE LICITACIÓN, RFQ O DIRECTA
   // --------------------------------------------------------------
   useEffect(() => {
-    if (!tipoRuta || !datosOrigen) return;
+    if (datosOrigen) {
+      if (datosOrigen.contrato || datosOrigen.id_solicitud) {
+        setOrderType("LICITACION");
+        setSelectedSupplier(datosOrigen.proveedor);
+        setItems(datosOrigen.items ?? []);
+        setSolicitudId(datosOrigen.id_solicitud);
+        setOrigenId(datosOrigen.idOrigen);
+        setExpectedDelivery(datosOrigen.contrato?.fecha_firmado || "");
+        setTitle(datosOrigen.titulo || "");
+        setNotes(datosOrigen.notas || "");
+        return;
+      }
+
+      // Otros casos (RFQ, Directa) podrían manejarse aquí si envían state
+    }
+
+    if (!tipoRuta) return;
 
     setOrderType(tipoRuta);
 
-    // LICITACIÓN
-    if (tipoRuta === "LICITACION") {
-      setSelectedSupplier(datosOrigen.proveedor);
-      setItems(datosOrigen.items ?? []);
-      setSolicitudId(datosOrigen.id_solicitud);
-      setExpectedDelivery(datosOrigen.contrato?.fecha_firmado || "");
-      return;
+    // LICITACIÓN (Legacy via query param)
+    if (tipoRuta === "LICITACION" && datosOrigen) {
+      // ... (ya manejado arriba, pero por si acaso)
     }
 
     // RFQ
-    if (tipoRuta === "RFQ") {
+    if (tipoRuta === "RFQ" && datosOrigen) {
       setSelectedSupplier(datosOrigen.proveedor || null);
       setItems(datosOrigen.items ?? []);
       setSolicitudId(datosOrigen.id_solicitud);
@@ -77,7 +92,7 @@ const GenerarOrdenCompra: React.FC = () => {
     }
 
     // DIRECTA (notificación inventario)
-    if (tipoRuta === "DIRECTA") {
+    if (tipoRuta === "DIRECTA" && datosOrigen) {
       setNotificacionInventarioId(datosOrigen.notificacionId);
 
       setItems([
@@ -142,6 +157,42 @@ const GenerarOrdenCompra: React.FC = () => {
     setIsOrdenModalOpen(true);
   };
 
+  const enviarOrden = async () => {
+    try {
+      if (!selectedSupplier) return;
+
+      const payload = {
+        tipoOrigen: orderType,
+        idOrigen: origenId,
+        proveedorId: selectedSupplier.id,
+        solicitudId: solicitudId || undefined,
+        notificacionInventarioId: notificacionInventarioId || undefined,
+
+        moneda: currency,
+        fechaEntregaEsperada: expectedDelivery,
+        condicionesPago: {
+          diasPlazo: paymentDays,
+          modalidad: paymentMode
+        },
+        terminosEntrega: deliveryTerms,
+        observaciones: notes,
+        titulo: title,
+
+        lineas: items
+      };
+
+      console.log("📤 Enviando al backend:", payload);
+
+      const response = await ordenCompraService.createOrden(payload);
+
+      alert("✔ Orden creada: " + response.data.numero_referencia);
+      setIsOrdenModalOpen(false);
+
+    } catch (error: any) {
+      console.error("❌ Error enviando orden:", error);
+      alert("❌ Error: " + (error.message || "Error desconocido"));
+    }
+  };
 
   const totalAmount = calculateTotal();
   const isReadOnly = orderType === "LICITACION";
@@ -154,6 +205,13 @@ const GenerarOrdenCompra: React.FC = () => {
           <h1 className="text-3xl font-bold text-gray-900">Generar Orden de Compra</h1>
           <p className="text-gray-600 mt-1">Complete el formulario para crear una nueva orden de compra.</p>
         </div>
+
+        <Button
+          variant="secondary"
+          onClick={() => navigate("/ordenes/historial")}
+        >
+          Ver historial de órdenes
+        </Button>
 
         {/* Superior */}
         <div className="grid grid-cols-3 gap-6 mb-6">
@@ -176,7 +234,7 @@ const GenerarOrdenCompra: React.FC = () => {
                     label="Tipo de Orden"
                     options={ORDER_TYPES}
                     value={orderType}
-                    onChange={() => {}}
+                    onChange={() => { }}
                     disabled
                   />
 
@@ -312,6 +370,7 @@ const GenerarOrdenCompra: React.FC = () => {
       <OrdenModal
         isOpen={isOrdenModalOpen}
         onClose={() => setIsOrdenModalOpen(false)}
+        onConfirm={enviarOrden}          // <-- AQUÍ LO PASAS
         title={title}
         notes={notes}
         orderType={orderType}

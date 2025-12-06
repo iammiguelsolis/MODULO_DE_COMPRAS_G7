@@ -30,7 +30,7 @@ class OrdenCompra(db.Model):
         nullable=False,
     )
     id_origen = db.Column(db.Integer, nullable=False)  # id de RFQ o Licitación o notificación
-    id_solicitud = db.Column(db.Integer, db.ForeignKey("solicitudes.id_solicitud"), nullable=True)
+    id_solicitud = db.Column(db.Integer, db.ForeignKey("solicitudes.id"), nullable=True)
     solicitud = relationship("Solicitud", backref="ordenes_compra")
 
     # Para orden directa desde inventario
@@ -140,7 +140,7 @@ class LineaOC(db.Model):
     # Estado logístico
     estado = db.Column(
         db.Enum(EstadoLineaOC, values_callable=lambda x: [e.value for e in x]),
-        default=EstadoLineaOC.TODAVIA_NO_CULMINA_PLAZO,
+        default=EstadoLineaOC.Todavia_no_cp,
         nullable=False,
     )
 

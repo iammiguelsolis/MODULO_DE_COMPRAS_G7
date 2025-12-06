@@ -3,35 +3,15 @@ from app.models.solicitudes.solicitud import Solicitud
 from app.models.adquisiciones.proceso import Compra, ProcesoAdquisicion, EstadoProceso
 from app.models.adquisiciones.oferta import OfertaProveedor, MaterialOfertado, ServicioOfertado
 from app.patrones.notificadores import WhatsappFactory, CorreoFactory
-from app.patrones.clasificadores import ClasificadorPorMonto
+from app.patrones.clasificadores import ClasificadorPor10000
+from app.models.proveedor_inventario.dominio_proveedor import Proveedor 
 from app.services.licitaciones.licitacion_service import LicitacionService
+from app.models.OrdenCompra.oc_services import OrdenCompraService
 
 class AdquisicionService:
     
     def __init__(self):
-        self.clasificador = ClasificadorPorMonto()
-        self.licitacion_service = LicitacionService()
-        
-    def generar_proceso_compra(self, id_solicitud):
-
-        solicitud = Solicitud.query.get(id_solicitud)
-        if not solicitud:
-            raise Exception("Solicitud no encontrada")
-
-        total = solicitud.calcular_total() 
-        
-from app.bdd import db
-from app.models.solicitudes.solicitud import Solicitud
-from app.models.adquisiciones.proceso import Compra, ProcesoAdquisicion, EstadoProceso
-from app.patrones.clasificadores import ClasificadorPorMonto
-
-# IMPORTAMOS EL NUEVO SERVICIO
-from app.services.licitaciones.licitacion_service import LicitacionService
-
-class AdquisicionService:
-    
-    def __init__(self):
-        self.clasificador = ClasificadorPorMonto()
+        self.clasificador = ClasificadorPor10000()
         # Instanciamos el servicio de licitaciones
         self.licitacion_service = LicitacionService() 
 
@@ -76,14 +56,37 @@ class AdquisicionService:
             
             return {
                 "tipo": "COMPRA",
-                "mensaje": "Proceso de Compra Directa iniciado exitosamente.",
+                "mensaje": "Proceso de Compra iniciado exitosamente.",
                 "data": nueva_compra
             }
 
-    def invitar_proveedores(self, id_compra, lista_proveedores, tipo_canal='EMAIL'):
-
+    def invitar_proveedores(self, id_compra, lista_ids_proveedores, tipo_canal='EMAIL'):
+        """
+        Recibe una lista de IDs de proveedores (integers), busca sus correos en la BD
+        y envía las invitaciones.
+        """
         compra = Compra.query.get(id_compra)
+        if not compra:
+            raise Exception("Proceso de compra no encontrado")
 
+        # 1. Resolver los IDs a Emails reales
+        lista_destinatarios = []
+        
+        for id_prov in lista_ids_proveedores:
+            proveedor = Proveedor.query.get(id_prov)
+            
+            if proveedor:
+                if proveedor.email:
+                    lista_destinatarios.append(proveedor.email)
+                else:
+                    print(f"Advertencia: El proveedor ID {id_prov} no tiene email registrado.")
+            else:
+                print(f"Advertencia: El proveedor ID {id_prov} no existe en la BD.")
+
+        if not lista_destinatarios:
+            raise Exception("No se encontraron destinatarios válidos (con email) para los IDs proporcionados.")
+
+        # 2. Configurar la factoría según el canal
         if tipo_canal == 'WHATSAPP':
             factory = WhatsappFactory()
         else:
@@ -91,29 +94,54 @@ class AdquisicionService:
             
         notificador = factory.crear_notificador()
 
-        compra.invitar_proveedores(lista_proveedores, notificador)
+        # 3. Delegar al modelo (que envía a la lista de strings/emails)
+        compra.invitar_proveedores(lista_destinatarios, notificador)
         db.session.commit()
         
         return compra
-
     def registrar_oferta(self, id_compra, data_json):
-
         compra = Compra.query.get(id_compra)
-        if compra.estado == EstadoProceso.CERRADO:
-            raise Exception("La compra está cerrada.")
+        if not compra:
+            raise Exception("Proceso de compra no encontrado")
 
+        if compra.estado == EstadoProceso.CERRADO:
+            raise Exception("La compra está cerrada. No se pueden registrar más ofertas.")
+
+        from app.models.proveedor_inventario.dominio_proveedor import Proveedor
+
+        id_proveedor = data_json.get('id_proveedor')
+        nombre_proveedor_texto = data_json.get('proveedor')
+
+        if not id_proveedor:
+            raise Exception("Debe enviarse el ID del proveedor")
+
+        proveedor_obj = Proveedor.query.get(id_proveedor)
+        if not proveedor_obj:
+            raise Exception(f"No existe un proveedor con el ID {id_proveedor}")
+
+        nombre_proveedor_texto = proveedor_obj.razon_social
+
+        oferta_existente = OfertaProveedor.query.filter_by(
+            proceso_id=compra.id,
+            proveedor_id=id_proveedor
+        ).first()
+
+        if oferta_existente:
+            raise Exception("Este proveedor ya registró una oferta en este proceso.")
 
         oferta = OfertaProveedor(
             proceso_id=compra.id,
-            nombre_proveedor=data_json['proveedor'],
+            proveedor_id=id_proveedor,
+            nombre_proveedor=nombre_proveedor_texto,
             monto_total=data_json['monto_total'],
             comentarios=data_json.get('comentarios', '')
         )
-        
+
         items_data = data_json.get('items', [])
+
         for item in items_data:
             tipo = item.get('tipo')
-            
+
             if tipo == 'MATERIAL':
                 nuevo_item = MaterialOfertado(
                     precio_oferta=item['precio'],
@@ -129,28 +157,99 @@ class AdquisicionService:
                     experiencia_tecnico=item.get('experiencia')
                 )
             else:
-                continue 
-            
+                continue
+
             oferta.items.append(nuevo_item)
 
-        compra.estado = EstadoProceso.EVALUANDO 
+        if compra.estado == EstadoProceso.INVITANDO:
+            compra.estado = EstadoProceso.EVALUANDO
+
         db.session.add(oferta)
         db.session.commit()
+
         return oferta
-
     def elegir_ganador(self, id_compra, id_oferta_ganadora):
+        import traceback
+        # Importamos datetime para calcular una fecha por defecto
+        from datetime import datetime, timedelta
 
+        # 1. Validaciones iniciales
         compra = Compra.query.get(id_compra)
+        if not compra:
+            raise Exception("Proceso de compra no encontrado")
+
         oferta = OfertaProveedor.query.get(id_oferta_ganadora)
+        if not oferta:
+            raise Exception("Oferta no encontrada")
         
         if oferta.proceso_id != compra.id:
-            raise Exception("La oferta no pertenece a esta compra.")
+            raise Exception("La oferta seleccionada no pertenece a esta compra.")
             
-        compra.seleccionar_ganador(oferta)
-        db.session.commit()
-        
-        return compra
-      
+        try:
+            compra.seleccionar_ganador(oferta)
+            db.session.flush() 
+            print(f"--- [DEBUG] Iniciando integración OC para Compra #{id_compra} ---")
+
+            from app.models.OrdenCompra.oc_services import OrdenCompraService
+            from app.models.OrdenCompra.oc_enums import TipoOrigen, Moneda, TipoPago
+
+            items_payload = []
+            for item in oferta.items:
+                cantidad = 1
+                if hasattr(item, 'cantidad_disponible') and item.cantidad_disponible is not None:
+                    cantidad = item.cantidad_disponible
+                
+                desc = getattr(item, 'descripcion', 'Item sin descripción')
+
+                items_payload.append({
+                    "id_item": str(item.id), 
+                    "descripcion": desc,
+                    "cantidad": cantidad,
+                    "precio_unitario": float(item.precio_oferta)
+                })
+
+            tipo_origen_enum = TipoOrigen.RFQ
+            if getattr(compra, 'tipo_proceso', '') == 'LICITACION':
+                tipo_origen_enum = TipoOrigen.LICITACION
+
+            fecha_default = datetime.now().date() + timedelta(days=90)
+
+            payload_oc = {
+                "tipo_origen": tipo_origen_enum,
+                "id_origen": compra.id,
+                "id_solicitud": compra.solicitud_id,
+                "proveedor_id": oferta.proveedor_id,
+                "moneda": Moneda.PEN,
+                
+                "fecha_entrega_esperada": fecha_default, 
+                
+                "titulo": f"Orden de Compra - Ref. Solicitud #{compra.solicitud_id}",
+                "observaciones": f"Generado desde oferta #{oferta.id}",
+                "condiciones_pago": {
+                    "modalidad": TipoPago.CONTADO,
+                    "dias_plazo": 0
+                },
+                "items": items_payload,
+                "terminos_entrega": "A tratar",
+                "id_notificacion_inventario": None
+            }
+
+            oc_service = OrdenCompraService()
+            nueva_oc = oc_service._crear_oc_desde_payload(payload_oc)
+            
+            print(f"--- [DEBUG] OC Creada Exitosamente: {nueva_oc.numero_referencia} ---")
+
+            db.session.commit()
+            return compra
+
+        except Exception as e:
+            db.session.rollback()
+            print("\n" + "="*50)
+            print(" ERROR CRÍTICO AL INTEGRAR OC ")
+            traceback.print_exc()
+            print("="*50 + "\n")
+            raise Exception(f"Error interno: {str(e)}")
+          
     def listar_procesos(self):
 
         procesos = ProcesoAdquisicion.query.all()
@@ -158,33 +257,7 @@ class AdquisicionService:
         resultado = []
         for p in procesos:
 
-
             ofertas = OfertaProveedor.query.filter_by(proceso_id=p.id).all()
-
-            ofertas_serializadas = []
-            for o in ofertas:
-                items = []
-                for item in o.items:
-                    items.append({
-                        "id": item.id,
-                        "tipo": item.__class__.__name__,
-                        "precio": item.precio_oferta,
-                        "descripcion": item.descripcion,
-                        "extra": {
-                            "marca": getattr(item, "marca", None),
-                            "cantidad_disponible": getattr(item, "cantidad_disponible", None),
-                            "dias_ejecucion": getattr(item, "dias_ejecucion", None),
-                            "experiencia_tecnico": getattr(item, "experiencia_tecnico", None),
-                        }
-                    })
-
-                ofertas_serializadas.append({
-                    "id": o.id,
-                    "proveedor": o.nombre_proveedor,
-                    "monto_total": o.monto_total,
-                    "comentarios": o.comentarios,
-                    "items": items
-                })
 
             resultado.append({
                 "id": p.id,
@@ -193,11 +266,10 @@ class AdquisicionService:
                 "estado": p.estado,
                 "fecha_creacion": p.fecha_creacion,
                 "ganador_id": p.oferta_ganadora_id,
-                "ofertas": ofertas_serializadas
+                "ofertas": [o.to_dict() for o in ofertas]
             })
 
         return resultado
-
 
     def obtener_proceso(self, id_proceso):
 
@@ -207,31 +279,6 @@ class AdquisicionService:
 
         ofertas = OfertaProveedor.query.filter_by(proceso_id=p.id).all()
 
-        ofertas_serializadas = []
-        for o in ofertas:
-            items = []
-            for item in o.items:
-                items.append({
-                    "id": item.id,
-                    "tipo": item.__class__.__name__,
-                    "precio": item.precio_oferta,
-                    "descripcion": item.descripcion,
-                    "extra": {
-                        "marca": getattr(item, "marca", None),
-                        "cantidad_disponible": getattr(item, "cantidad_disponible", None),
-                        "dias_ejecucion": getattr(item, "dias_ejecucion", None),
-                        "experiencia_tecnico": getattr(item, "experiencia_tecnico", None),
-                    }
-                })
-
-            ofertas_serializadas.append({
-                "id": o.id,
-                "proveedor": o.nombre_proveedor,
-                "monto_total": o.monto_total,
-                "comentarios": o.comentarios,
-                "items": items
-            })
-
         return {
             "id": p.id,
             "solicitud_id": p.solicitud_id,
@@ -239,5 +286,30 @@ class AdquisicionService:
             "estado": p.estado,
             "fecha_creacion": p.fecha_creacion,
             "ganador_id": p.oferta_ganadora_id,
-            "ofertas": ofertas_serializadas
+            "ofertas": [o.to_dict() for o in ofertas]   # ✅ USAMOS to_dict()
         }
+
+    def obtener_oferta_por_adquisicion(self, id_compra, id_oferta):
+        compra = Compra.query.get(id_compra)
+        if not compra:
+            raise Exception("Proceso de compra no encontrado")
+
+        oferta = OfertaProveedor.query.get(id_oferta)
+        if not oferta:
+            raise Exception("Oferta no encontrada")
+
+        # ✅ VALIDACIÓN DE SEGURIDAD: que pertenezca a la compra
+        if oferta.proceso_id != compra.id:
+            raise Exception("Esta oferta no pertenece a esta adquisición")
+
+        return oferta.to_dict()
+      
+    def obtener_ofertas_por_adquisicion(self, id_compra):
+        compra = Compra.query.get(id_compra)
+        if not compra:
+            raise Exception("Proceso de compra no encontrado")
+
+        ofertas = OfertaProveedor.query.filter_by(proceso_id=id_compra).all()
+
+        return [oferta.to_dict() for oferta in ofertas]
+

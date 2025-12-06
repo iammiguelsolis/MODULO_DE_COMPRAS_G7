@@ -39,7 +39,7 @@ class InvitacionService:
             
             if registros_creados > 0:
                 licitacion.invitaciones_enviadas = True
-                # Intentar avanzar estado (NUEVA -> EN_INVITACION)
+                # Avanzar estado automáticamente (NUEVA -> EN_INVITACION)
                 licitacion.siguiente_estado()
             
             db.session.commit()
@@ -51,7 +51,17 @@ class InvitacionService:
     
     def finalizar_periodo_invitacion(self, id_licitacion):
         """
-        Fuerza el cierre del periodo de invitación si es necesario.
+        Fuerza el cierre del periodo de invitación y avanza al siguiente estado.
         """
-        # En nuestro flujo actual, el envío de invitaciones ya transiciona el estado.
-        pass
+        licitacion = Licitacion.query.get(id_licitacion)
+        if not licitacion:
+            raise ValueError("Licitación no encontrada")
+
+        try:
+            # Avanzar estado: NUEVA -> EN_INVITACION
+            licitacion.siguiente_estado()
+            db.session.commit()
+            return {"success": True, "mensaje": "Periodo de invitación finalizado. Estado actualizado."}
+        except Exception as e:
+            db.session.rollback()
+            raise e

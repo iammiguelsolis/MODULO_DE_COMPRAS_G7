@@ -24,16 +24,14 @@ class Licitacion(ProcesoAdquisicion):
 
     # Relación con todas las propuestas
     propuestas = db.relationship('PropuestaProveedor', backref='licitacion', lazy=True)
-    
-    # --- AGREGA ESTO (NUEVO) ---
-    # Esta es la relación que faltaba y causaba el error.
-    # Filtra automáticamente la propuesta que tenga es_ganadora=True
+
     propuesta_ganadora = db.relationship(
         'PropuestaProveedor', 
         primaryjoin="and_(Licitacion.id==PropuestaProveedor.licitacion_id, PropuestaProveedor.es_ganadora==True)",
         uselist=False, 
         viewonly=True
     )
+    
     # ---------------------------
     
     def __init__(self, **kwargs):
@@ -52,8 +50,7 @@ class Licitacion(ProcesoAdquisicion):
         self._estado_nombre = nuevo_estado.get_nombre()
     
     def siguiente_estado(self):
-        # IMPORTANTE: Hacemos flush para que la BD sepa que 'es_ganadora' cambió 
-        # antes de que el Estado pregunte por 'propuesta_ganadora'
+        # Hacemos flush para que la BD sepa que 'es_ganadora' cambió 
         db.session.flush() 
         nuevo_estado = self.estado_actual.siguiente()
         self.cambiar_estado(nuevo_estado)
@@ -63,8 +60,7 @@ class Licitacion(ProcesoAdquisicion):
         self.cambiar_estado(EstadoCancelada(self))
         
     def _reconstruir_estado(self):
-        # ... (Tu código de reconstrucción de estados que ya tenías) ...
-        # (Cópialo del archivo anterior si lo tienes, o te lo paso si lo necesitas)
+
         nombre = self._estado_nombre
         
         # Imports locales para evitar ciclos

@@ -23,6 +23,8 @@ from typing import Optional
 # que pues representan basicamente lo que vendo, es como la carta de un restaurante, dice cual es mi pool de opciones
 
 class Material(db.Model):
+    __bind_key__ = 'desarrollo_db' 
+    __tablename__ = "material"
     id_item = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
     descripcion = db.Column(db.String(100), nullable=False)
@@ -39,11 +41,14 @@ class Material(db.Model):
             "unidad": self.unidad.value if self.unidad else None
         }
 class Almacen(db.Model):
+    __bind_key__ = 'desarrollo_db' 
+    __tablename__ = "almacen"
     id_almacen = db.Column(db.Integer, primary_key=True)
     nombre = db.Column(db.String(100), nullable=False)
     ubicacion = db.Column(db.String(100), nullable=False)
 
 class Entrega(db.Model):
+    __bind_key__ = 'desarrollo_db' 
     __tablename__ = "entrega"
     #OJO falta implementar la OC pero siguiendo mi nomenclatura
     #ya puedo ir poniendo las clases
@@ -57,6 +62,7 @@ class Entrega(db.Model):
 
 
 class DetalleEntrega(db.Model):
+    __bind_key__ = 'desarrollo_db' 
     __tablename__ = "detalle_entrega"
 
     id_detalle_entrega = db.Column(db.Integer, primary_key=True)

@@ -9,15 +9,8 @@ import EconomicCriteriaInfo from '../molecules/EconomicCriteriaInfo';
 import ScoreInput from '../molecules/ScoreInput';
 import EconomicDocumentsList from './EconomicDocumentsList';
 import EconomicEvaluationResults from './EconomicEvaluationResults';
-import type { EconomicEvaluation } from '../../lib/types';
+import type { EconomicEvaluation, PropuestaResponseDTO } from '../../lib/types';
 import './EconomicEvaluationModal.css';
-
-interface Supplier {
-    id: number;
-    name: string;
-    ruc: string;
-    email: string;
-}
 
 interface EconomicEvaluationModalProps {
     isOpen: boolean;
@@ -27,8 +20,8 @@ interface EconomicEvaluationModalProps {
     presupuesto?: string;
     solicitudOrigen?: string;
     proveedoresTecnicamenteAprobados?: number;
-    suppliers: Supplier[]; // Only technically approved suppliers
-    onSaveEvaluation?: (evaluation: EconomicEvaluation) => void;
+    suppliers: PropuestaResponseDTO[]; // Only technically approved suppliers
+    onSaveEvaluation?: (evaluation: any) => void;
     onFinishEvaluation?: (results: { evaluations: EconomicEvaluation[]; winnerId?: number }) => void;
 }
 
@@ -44,21 +37,21 @@ const EconomicEvaluationModal: React.FC<EconomicEvaluationModalProps> = ({
     onSaveEvaluation,
     onFinishEvaluation
 }) => {
-    const [selectedSupplierId, setSelectedSupplierId] = useState<number | null>(null);
+    const [selectedPropuestaId, setSelectedPropuestaId] = useState<number | null>(null);
     const [score, setScore] = useState<number | ''>('');
     const [justification, setJustification] = useState('');
     const [isRejected, setIsRejected] = useState(false);
 
     // Track evaluated providers
     const [evaluatedProvidersList, setEvaluatedProvidersList] = useState<EconomicEvaluation[]>([]);
-    const [approvedCount, setApprovedCount] = useState(0);
-    const [rejectedCount, setRejectedCount] = useState(0);
 
-    const selectedSupplier = suppliers.find(s => s.id === selectedSupplierId);
+    const selectedPropuesta = useMemo(() =>
+        suppliers.find(s => s.id_propuesta === selectedPropuestaId),
+        [suppliers, selectedPropuestaId]);
 
     // Validation
     const canSave = useMemo(() => {
-        if (!selectedSupplierId) return false;
+        if (!selectedPropuestaId) return false;
 
         // Justification is always required
         if (justification.trim().length === 0) return false;
@@ -69,10 +62,10 @@ const EconomicEvaluationModal: React.FC<EconomicEvaluationModalProps> = ({
         }
 
         return true;
-    }, [selectedSupplierId, score, justification, isRejected]);
+    }, [selectedPropuestaId, score, justification, isRejected]);
 
-    const handleSelectSupplier = (supplierId: number) => {
-        setSelectedSupplierId(supplierId || null);
+    const handleSelectSupplier = (propuestaId: number) => {
+        setSelectedPropuestaId(propuestaId || null);
         // Reset form when changing supplier
         setScore('');
         setJustification('');
@@ -88,38 +81,38 @@ const EconomicEvaluationModal: React.FC<EconomicEvaluationModalProps> = ({
     };
 
     const handleSave = () => {
-        if (!selectedSupplier) return;
+        if (!selectedPropuesta) return;
 
         const evaluationStatus: 'approved' | 'rejected' = isRejected ? 'rejected' : 'approved';
 
         const evaluation: EconomicEvaluation = {
-            providerId: selectedSupplier.id,
-            providerName: selectedSupplier.name,
-            providerRuc: selectedSupplier.ruc,
+            providerId: selectedPropuesta.proveedor.id,
+            providerName: selectedPropuesta.proveedor.razon_social,
+            providerRuc: selectedPropuesta.proveedor.ruc,
             score: !isRejected && score !== '' ? score : undefined,
             justification: justification,
             status: evaluationStatus,
             isRejected: isRejected
         };
 
+        // Payload for backend
+        const payload = {
+            propuestaId: selectedPropuesta.id_propuesta,
+            aprobada_economicamente: evaluationStatus === 'approved',
+            puntuacion_economica: !isRejected && score !== '' ? score : undefined,
+            justificacion_economica: justification,
+            motivo_rechazo_economico: isRejected ? justification : undefined
+        };
+
         if (onSaveEvaluation) {
-            onSaveEvaluation(evaluation);
-        } else {
-            console.log('[Mock] Guardar evaluación económica:', evaluation);
+            onSaveEvaluation(payload);
         }
 
         // Add to evaluated providers list
         setEvaluatedProvidersList(prev => [...prev, evaluation]);
 
-        // Update counters
-        if (evaluationStatus === 'approved') {
-            setApprovedCount(prev => prev + 1);
-        } else {
-            setRejectedCount(prev => prev + 1);
-        }
-
         // Reset form for next provider
-        setSelectedSupplierId(null);
+        setSelectedPropuestaId(null);
         setScore('');
         setJustification('');
         setIsRejected(false);
@@ -132,7 +125,6 @@ const EconomicEvaluationModal: React.FC<EconomicEvaluationModalProps> = ({
         let winnerId: number | undefined = undefined;
         if (approvedProviders.length > 0) {
             // Sort by score (descending) and take first (highest score)
-            // In case of tie, first evaluated wins (as per user requirement)
             const sortedApproved = [...approvedProviders].sort((a, b) => {
                 const scoreA = a.score || 0;
                 const scoreB = b.score || 0;
@@ -149,19 +141,25 @@ const EconomicEvaluationModal: React.FC<EconomicEvaluationModalProps> = ({
         if (onFinishEvaluation) {
             onFinishEvaluation(results);
         }
-        handleClose();
+        onClose();
     };
 
     const handleClose = () => {
-        setSelectedSupplierId(null);
+        setSelectedPropuestaId(null);
         setScore('');
         setJustification('');
         setIsRejected(false);
         setEvaluatedProvidersList([]);
-        setApprovedCount(0);
-        setRejectedCount(0);
         onClose();
     };
+
+    // Map proposals to format expected by ProviderSelectorCard
+    const providerSelectorData = suppliers.map(p => ({
+        id: p.id_propuesta, // We use propuesta ID as the key selector
+        name: p.proveedor.razon_social,
+        ruc: p.proveedor.ruc,
+        email: p.proveedor.email
+    }));
 
     return (
         <WideModal isOpen={isOpen} onClose={handleClose} width="wide" showCloseButton={false}>
@@ -171,8 +169,8 @@ const EconomicEvaluationModal: React.FC<EconomicEvaluationModalProps> = ({
                     licitacionTitle={licitacionTitle}
                     totalProviders={suppliers.length}
                     evaluatedProviders={evaluatedProvidersList.length}
-                    approvedProviders={approvedCount}
-                    rejectedProviders={rejectedCount}
+                    approvedProviders={evaluatedProvidersList.filter(p => p.status === 'approved').length}
+                    rejectedProviders={evaluatedProvidersList.filter(p => p.status === 'rejected').length}
                     onClose={handleClose}
                     onFinish={handleFinish}
                     canFinish={evaluatedProvidersList.length === suppliers.length}
@@ -212,14 +210,17 @@ const EconomicEvaluationModal: React.FC<EconomicEvaluationModalProps> = ({
 
                     <div className="evaluation-right-column">
                         <ProviderSelectorCard
-                            suppliers={suppliers}
-                            selectedSupplierId={selectedSupplierId}
+                            suppliers={providerSelectorData}
+                            selectedSupplierId={selectedPropuestaId}
                             onSelectSupplier={handleSelectSupplier}
                         />
 
-                        <EconomicDocumentsList disabled={!selectedSupplierId} />
+                        <EconomicDocumentsList
+                            disabled={!selectedPropuestaId}
+                            documents={selectedPropuesta?.documentos}
+                        />
 
-                        {selectedSupplierId && (
+                        {selectedPropuestaId && (
                             <>
                                 <div className="rejection-checkbox-container">
                                     <label className="rejection-checkbox-label">

@@ -11,15 +11,10 @@ def generar_plantilla(id):
     Genera la plantilla del contrato.
     """
     try:
-        # El API no especifica body requerido para generar, pero el servicio pide supervisorId
-        # Asumimos que el supervisor ya está asignado en la licitación o se pasa en body
         data = request.get_json() or {}
         supervisor_id = data.get('supervisorId')
         
-        # Si el servicio requiere supervisor_id y no viene, intentar usar un default o fallar
-        # Por ahora mantenemos la lógica del servicio
         if not supervisor_id:
-             # Podríamos intentar obtenerlo de la licitación si ya fue asignado
              pass
 
         result = service.generar_plantilla_contrato(id, supervisor_id)

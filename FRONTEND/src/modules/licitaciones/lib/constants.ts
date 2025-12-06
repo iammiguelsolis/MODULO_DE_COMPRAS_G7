@@ -1,6 +1,5 @@
 import type { Documento } from "./types";
 
-// Status options para filtros de licitaciones
 export const estados_li = [
   "NUEVA",
   "EN INVITACION",

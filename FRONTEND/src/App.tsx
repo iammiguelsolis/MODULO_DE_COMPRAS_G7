@@ -1,4 +1,4 @@
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import MainLayaout from "./global/layaouts/MainLayaout";
 import Solicitud from "./modules/solicitudes/page/Solicitud";
 import FacturacionApp from "./modules/facturación/page/FacturasProveedoresPage";
@@ -10,16 +10,20 @@ import ProveedorDetailPage from "./modules/proveedor/page/ProveedorDetailPage";
 import AnalisisProveedoresPage from "./modules/analisisProveedor/page/AnalisisProveedoresPage";
 import { ComparacionListPage } from "./modules/comparacion/pages/ComparacionListPage";
 import { ComparacionPage } from "./modules/comparacion/pages/ComparacionPage";
-import GenerarOrdenCompraPage from "./modules/ordenCompra/pages/GenerarOrdenCompra";
+import GenerarOrdenCompra from "./modules/ordenCompra/pages/GenerarOrdenCompra";
+import HistorialOrdenes from "./modules/ordenCompra/pages/HistorialOrdenes";
+import ComprasListPage from "./modules/compras/pages/ComprasListPage";
+import CompraDetailPage from "./modules/compras/pages/CompraDetailPage";
+import Login from "./modules/auth/pages/Login";
 
 function App() {
   return (
     <Router>
       <Routes>
+        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Navigate to="/login" replace />} />
 
         <Route element={<MainLayaout />}>
-
-          <Route path="/" element={<h1>Home</h1>} />
 
           <Route path="/solicitudes" element={<Solicitud />} />
 
@@ -27,19 +31,23 @@ function App() {
 
           <Route path="/proveedores" element={<ProveedorPage />} />
           <Route path="/proveedores/:id" element={<ProveedorDetailPage />} />
-          <Route path="/compras" element={<h1>compras</h1>} />
+          <Route path="/compras" element={<ComprasListPage />} />
+          <Route path="/compras/:id" element={<CompraDetailPage />} />
 
           <Route path="/licitaciones" element={<LicitacionesListPage />} />
-          <Route path="/licitacion/detail" element={<LicitacionDetailPage />} />
-          <Route path="/licitaciones/crear" element={<LicitacionPage />} />
+          <Route path="/licitacion/:id" element={<LicitacionDetailPage />} />
+          <Route path="/licitaciones/completar/:id" element={<LicitacionPage />} />
 
-          <Route path="/ordenes" element={<GenerarOrdenCompraPage/>} />
+
+          <Route path="/ordenes" element={<GenerarOrdenCompra />} />
+          <Route path="/ordenes/historial" element={<HistorialOrdenes />} />
+
           <Route path="/facturacion" element={<FacturacionApp />} />
 
           <Route path="/comparacion" element={<ComparacionListPage />} />
           <Route path="/comparacion/:id" element={<ComparacionPage />} />
 
-          <Route path="/analisis" element={<h1>analisis de Proveedores</h1>} />
+          <Route path="/analisis" element={<AnalisisProveedoresPage />} />
 
         </Route>
 

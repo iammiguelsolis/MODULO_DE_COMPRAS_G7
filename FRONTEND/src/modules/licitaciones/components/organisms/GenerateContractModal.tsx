@@ -4,22 +4,18 @@ import Modal from '../atoms/Modal';
 import Button from '../atoms/Button';
 import Alert from '../atoms/Alert';
 import { getContractTemplatePath, downloadFile } from '../../lib/documentTemplateUtils';
+import type { ProveedorDTO, DocumentoRequeridoDTO } from '../../lib/types';
 import './GenerateContractModal.css';
-
-interface WinnerProvider {
-    id: number;
-    name: string;
-    ruc: string;
-    email: string;
-}
 
 interface GenerateContractModalProps {
     isOpen: boolean;
     onClose: () => void;
     licitacionId: string;
     licitacionTitle: string;
-    winnerProvider?: WinnerProvider;
+    winnerProvider?: ProveedorDTO;
+    requiredDocuments?: DocumentoRequeridoDTO[];
     onSaveContract?: (file: File) => void;
+    onDownloadTemplate?: () => void;
 }
 
 const GenerateContractModal: React.FC<GenerateContractModalProps> = ({
@@ -28,7 +24,9 @@ const GenerateContractModal: React.FC<GenerateContractModalProps> = ({
     licitacionId,
     licitacionTitle,
     winnerProvider,
-    onSaveContract
+    requiredDocuments = [],
+    onSaveContract,
+    onDownloadTemplate
 }) => {
     const [contractFile, setContractFile] = useState<File | null>(null);
     const [isDragging, setIsDragging] = useState(false);
@@ -65,8 +63,13 @@ const GenerateContractModal: React.FC<GenerateContractModalProps> = ({
 
 
     const handleDownloadTemplate = () => {
-        const contractPath = getContractTemplatePath();
-        downloadFile(contractPath, 'Plantilla - Contrato Adjudicacion.docx');
+        if (onDownloadTemplate) {
+            onDownloadTemplate();
+        } else {
+            // Fallback legacy
+            const contractPath = getContractTemplatePath();
+            downloadFile(contractPath, 'Plantilla - Contrato Adjudicacion.docx');
+        }
     };
 
     if (!winnerProvider) return null;
@@ -94,7 +97,7 @@ const GenerateContractModal: React.FC<GenerateContractModalProps> = ({
                         </div>
                         <div className="winner-info-row">
                             <span className="winner-label">Proveedor:</span>
-                            <span className="winner-value">{winnerProvider.name}</span>
+                            <span className="winner-value">{winnerProvider.razon_social}</span>
                         </div>
                         <div className="winner-info-row">
                             <span className="winner-label">RUC:</span>
@@ -110,42 +113,19 @@ const GenerateContractModal: React.FC<GenerateContractModalProps> = ({
                     <div className="annex-docs-section">
                         <h4 className="annex-docs-title">Documentos Anexos al Contrato</h4>
                         <div className="annex-docs-grid">
-                            <div className="annex-doc-item">
-                                <CheckCircle size={16} className="annex-check" />
-                                RUC y Ficha RUC
-                            </div>
-                            <div className="annex-doc-item">
-                                <CheckCircle size={16} className="annex-check" />
-                                DNI del Representante Legal
-                            </div>
-                            <div className="annex-doc-item">
-                                <CheckCircle size={16} className="annex-check" />
-                                Acta de Constitución
-                            </div>
-                            <div className="annex-doc-item">
-                                <CheckCircle size={16} className="annex-check" />
-                                Ficha Técnica del Producto
-                            </div>
-                            <div className="annex-doc-item">
-                                <CheckCircle size={16} className="annex-check" />
-                                Certificaciones de Calidad (ISO)
-                            </div>
-                            <div className="annex-doc-item">
-                                <CheckCircle size={16} className="annex-check" />
-                                Catálogos y Brochures
-                            </div>
-                            <div className="annex-doc-item">
-                                <CheckCircle size={16} className="annex-check" />
-                                Propuesta Económica
-                            </div>
-                            <div className="annex-doc-item">
-                                <CheckCircle size={16} className="annex-check" />
-                                Estados Financieros Auditados
-                            </div>
-                            <div className="annex-doc-item">
-                                <CheckCircle size={16} className="annex-check" />
-                                Carta de Fianza
-                            </div>
+                            {requiredDocuments.length > 0 ? (
+                                requiredDocuments.map((doc, index) => (
+                                    <div key={index} className="annex-doc-item">
+                                        <CheckCircle size={16} className="annex-check" />
+                                        {doc.nombre}
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="annex-doc-item">
+                                    <CheckCircle size={16} className="annex-check" />
+                                    No hay documentos requeridos específicos
+                                </div>
+                            )}
                         </div>
                     </div>
 

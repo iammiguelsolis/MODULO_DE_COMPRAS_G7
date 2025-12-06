@@ -19,7 +19,10 @@ class LineaFactura(db.Model):
 
     def to_dict(self):
         return {
+            "id": self.id,
             "descripcion": self.descripcion,
             "cantidad": float(self.cantidad),
-            "total": self.total_linea
+            "precio_unitario": self.precio_unitario,
+            "impuestos_linea": self.impuestos_linea,
+            "total_linea": self.total_linea
         }

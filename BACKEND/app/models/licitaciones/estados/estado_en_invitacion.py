@@ -9,12 +9,11 @@ class EstadoEnInvitacion(EstadoLicitacionState):
     def siguiente(self):
         # EN_INVITACION -> CON_PROPUESTAS (Manual)
         # La validación de si hay propuestas se hace en el servicio antes de llamar a siguiente()
-        # O aquí mismo si queremos ser estrictos:
         if self.licitacion.propuestas:
              from app.models.licitaciones.estados.estado_con_propuestas import EstadoConPropuestas
              return EstadoConPropuestas(self.licitacion)
         
-        # Si fecha limite pasó y no hay propuestas -> CANCELADA (Timeout)
+        # Si fecha limite pasó y no hay propuestas -> CANCELADA
         if self.licitacion.fecha_limite and datetime.now() > self.licitacion.fecha_limite:
              if not self.licitacion.propuestas:
                  return self.cancelar()
