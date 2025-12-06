@@ -1,11 +1,9 @@
 from flask import Flask
-from app.bdd import db, coneccion
+from app.bdd import db, coneccion, coneccion_inventario
 from app.extensiones import bcrypt
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
-# Lo de abajo es un ejemplo de como importar una BP
-#from app.BP.Colaborador import colaborador_bp
-from sqlalchemy.sql import text #permite ejecutar consultas sql puras
+from sqlalchemy.sql import text 
 from app.BP.facturasProveedor.routes import facturas_bp 
 from app.BP.Proveedor import proveedor_bp
 from app.BP.Inventario import inventario_bp
@@ -29,7 +27,8 @@ def create_app():
     coneccion_solicitudes = coneccion.replace("modulo_de_compras", "miguelPruebas")
     app.config["SQLALCHEMY_BINDS"] = {
         'facturas_db': coneccion_facturas,
-        'solicitudes_db': coneccion_solicitudes
+        'solicitudes_db': coneccion_solicitudes,
+        'desarrollo_db': coneccion_desarrollo
     }
 
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -37,23 +36,8 @@ def create_app():
 
     db.init_app(app)
     bcrypt.init_app(app)
-    #añadido
-    # Registrar Blueprints
-    # ejemplo de restro, ahorita tira error si descomento
-    # app.register_blueprint(colaborador_bp, url_prefix='/colaborador')
 
     app.register_blueprint(facturas_bp, url_prefix='/facturas-proveedor')
-
-    # 🔴 Manejador de errores
-
-    #Eso de abajo es cuando se hace server side rendering todo en flask, ahorita se maneja por react
-    """
-    @app.errorhandler(404)
-    def pagina_no_encontrada(error):
-        from flask import render_template
-        return render_template("error/404.html"), 404
-    """
-    
     app.register_blueprint(proveedor_bp, url_prefix="/api/proveedores")
     app.register_blueprint(inventario_bp, url_prefix="/api/inventario")
     app.register_blueprint(solicitudes_bp) 
