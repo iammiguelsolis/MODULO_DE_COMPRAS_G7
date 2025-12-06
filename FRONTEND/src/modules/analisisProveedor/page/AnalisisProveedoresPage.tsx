@@ -1,18 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import LaborConditionsTable from "../components/organisms/LabelConditionsTable";
 import ColorLegend from "../components/molecules/ColorLegend";
 import IndexInterpretation from "../components/molecules/IndexInterpretation";
+import { AnalisisApi } from "../../../services/analisisProveedor/api";
+import type { LaborConditionsAnalysis } from "../../../services/analisisProveedor/types";
 
-export interface LaborConditionsAnalysis {
-    id: number;
-    proveedor: string;
-    numeroTrabajadores: number;
-    indiceDenuncias: number;
-    tieneProcesos: boolean;
-    haTomaRepresalias: boolean;
-}
-
-// Datos de ejemplo (20 proveedores para probar paginación)
+// Datos de ejemplo (fallback cuando no hay backend o error)
 const sampleData: LaborConditionsAnalysis[] = [
     { id: 1, proveedor: "Tecnologías Andinas S.A.C.", numeroTrabajadores: 19, indiceDenuncias: 0.6, tieneProcesos: false, haTomaRepresalias: false },
     { id: 2, proveedor: "Lógico S.A.C.", numeroTrabajadores: 20, indiceDenuncias: 0.4, tieneProcesos: true, haTomaRepresalias: false },
@@ -29,14 +22,47 @@ const sampleData: LaborConditionsAnalysis[] = [
 ];
 
 const AnalisisProveedoresPage = () => {
+    const [data, setData] = useState<LaborConditionsAnalysis[]>([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 8;
 
+    // Cargar datos del backend
+    useEffect(() => {
+        fetchAnalisisData();
+    }, []);
+
+    const fetchAnalisisData = async () => {
+        setLoading(true);
+        setError(null);
+
+        try {
+            const analisisData = await AnalisisApi.listarCondicionesLaborales();
+
+            if (analisisData.length === 0) {
+                // Si no hay datos en el backend, usar datos de ejemplo
+                setData(sampleData);
+                setError("No hay datos de análisis laboral en el backend. Mostrando datos de ejemplo.");
+            } else {
+                setData(analisisData);
+            }
+        } catch (err) {
+            console.error("Error al cargar análisis de proveedores:", err);
+            const errorMessage = err instanceof Error ? err.message : "Error desconocido";
+            setError(errorMessage);
+            // Fallback: usar datos de ejemplo si falla la API
+            setData(sampleData);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     // Calcular paginación
-    const totalPages = Math.ceil(sampleData.length / itemsPerPage);
+    const totalPages = Math.ceil(data.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
     const endIndex = startIndex + itemsPerPage;
-    const currentData = sampleData.slice(startIndex, endIndex);
+    const currentData = data.slice(startIndex, endIndex);
 
     const handlePreviousPage = () => {
         if (currentPage > 1) setCurrentPage(currentPage - 1);
@@ -57,6 +83,23 @@ const AnalisisProveedoresPage = () => {
                         Evaluación de condiciones laborales
                     </h2>
                 </div>
+
+                {/* Mensajes de estado */}
+                {loading && (
+                    <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                        <p className="text-sm text-blue-800">
+                            ⏳ Cargando datos de análisis...
+                        </p>
+                    </div>
+                )}
+
+                {error && (
+                    <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+                        <p className="text-sm text-yellow-800">
+                            ⚠️ {error}
+                        </p>
+                    </div>
+                )}
 
                 {/* Tabla de análisis */}
                 <LaborConditionsTable
