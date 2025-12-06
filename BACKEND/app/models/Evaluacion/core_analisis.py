@@ -31,43 +31,8 @@ class EvaluacionRendimiento(ABC):
         #necesito enviar proveedor o no
         pass
     
-#  Qué es cantidad calculo? Referirse al lucid de diseño
-
-# el promedio se halla como
-# (a1+ a2 + an)/n bueno cantidad calculo es n. Aunque un proveedor tenga solo 10 ordenes 
-# de compra debido a que consideramos las entregas de items podria facilmente tener un n
-# de 150 es decir que nos entrego 150 items (entre iguales y diferentes) en esas 10 ordenes 
-# de compra, recodardando que cada item tiene una cantidad pedida que definitivamente es mayor a 150
-
-
-class EvaluacionCumplimientoPlazoEntrega(EvaluacionRendimiento, db.Model):
-    __bind_key__ = 'desarrollo_db' 
-    
-    # Definición de columnas (atributos)
-    idProveedor = db.Column(db.Integer, primary_key=True)
-    idEvaluacionPlazo = db.Column(db.Integer, primary_key=True)
-    cantidadCalculo = db.Column(db.Integer)
-    promedioDiasRetraso = db.Column(db.Float)
-
-    # Métodos
-    def calcularCantidadPositivas(self):
-        pass
-
-    def calcularCantidadNegativas(self):
-        pass
-
-    def entregaParcialFueCompleta(self):
-        pass
-
-    def entregaFinalFueCompleta(self):
-        pass
-
-    def asignarCalificacion(self, p: Proveedor):
-        pass
-
-
 class EvaluacionCumplimientoCondicionesPago(EvaluacionRendimiento, db.Model):
-    __bind_key__ = 'desarrollo_db' 
+    
 
     id_proveedor = db.Column(db.Integer, primary_key=True)
     id_evaluacion_ccp = db.Column(db.Integer, primary_key=True)

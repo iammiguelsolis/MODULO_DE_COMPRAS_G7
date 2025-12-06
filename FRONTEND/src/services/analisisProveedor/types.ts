@@ -1,5 +1,5 @@
 // ==========================================
-// ANÁLISIS DE PROVEEDORES - TYPES
+// EVALUACIÓN DE PROVEEDORES - TYPES
 // ==========================================
 
 export interface ProveedorAnalisisAPI {
@@ -14,7 +14,7 @@ export interface ProveedorAnalisisAPI {
     esta_suspendido: boolean;
     confiabilidad_en_entregas: string | null;
     confiabilidad_en_condiciones_pago: string | null;
-    // Campos para análisis laboral
+    // Campos para evaluación laboral
     numero_trabajadores: number | null;
     tiene_sindicato: boolean;
     ha_tomado_represalias_contra_sindicato: string | null;

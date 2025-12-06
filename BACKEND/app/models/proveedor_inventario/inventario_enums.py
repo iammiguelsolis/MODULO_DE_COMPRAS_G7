@@ -14,7 +14,6 @@ class PosiblesValores(Enum):
 
 class UnidadMedidaAlmacen(Enum):
     # Unidades físicas
-    UNIDAD = "Unidad"          # Ej: 1 router, 1 teléfono
-    METRO = "Metro"            # Ej: cable de fibra óptica
-    KILOMETRO = "Kilómetro"    # Ej: tendido de red
-    # WATTS = "W"            # Ej: consumo de equipos, por ejemplo equipos de sonido
+    UNIDAD = "Unidad"         
+    METRO = "Metro"            
+    KILOMETRO = "Kilómetro"    

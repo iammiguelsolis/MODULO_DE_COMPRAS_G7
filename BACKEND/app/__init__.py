@@ -1,5 +1,8 @@
-from flask import Flask
-from app.bdd import db, coneccion, coneccion_inventario
+import os
+import logging
+from logging.handlers import RotatingFileHandler
+from flask import Flask, jsonify
+from app.bdd import db, coneccion
 from app.extensiones import bcrypt
 from flask_bcrypt import Bcrypt
 from flask_cors import CORS
@@ -8,14 +11,37 @@ from app.BP.facturasProveedor.routes import facturas_bp
 from app.BP.Proveedor import proveedor_bp
 from app.BP.Inventario import inventario_bp
 from app.BP.solicitudes.solicitudes_controller import solicitudes_bp
-from app.BP.adquisiciones.adquisiciones_controller import adquisiciones_bp
-from app.BP.licitaciones import register_licitaciones_blueprints
 from app.models.OrdenCompra.oc_routes import oc_bp
+from app.BP.debug.debug_crashes import debug_crashes_bp
 
 bcrypt = Bcrypt()
 
 def create_app():
     app = Flask(__name__)
+
+    # si no existe crea una carpeta de logs
+    if not os.path.exists("logs"):
+        os.mkdir("logs")
+
+    # Se crea un nuevo log si pesa más de 100MB
+    file_handler = RotatingFileHandler(
+        "logs/error.log",
+        maxBytes=10240,    
+        backupCount=5       
+    )
+    file_handler.setLevel(logging.ERROR)
+
+    formatter = logging.Formatter(
+        "%(asctime)s [%(levelname)s] in %(module)s: %(message)s\n"
+    )
+    file_handler.setFormatter(formatter)
+
+    app.logger.addHandler(file_handler)
+
+    @app.errorhandler(Exception)
+    def handle_unhandled_exception(e):
+        app.logger.error("Unhandled Exception", exc_info=e)
+        return jsonify({"error": "Internal server error"}), 500
 
     CORS(app, resources={r"/*": {"origins": "*"}})
     CORS(app)
@@ -28,7 +54,6 @@ def create_app():
     app.config["SQLALCHEMY_BINDS"] = {
         'facturas_db': coneccion_facturas,
         'solicitudes_db': coneccion_solicitudes,
-        'desarrollo_db': coneccion_desarrollo
     }
 
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -41,8 +66,7 @@ def create_app():
     app.register_blueprint(proveedor_bp, url_prefix="/api/proveedores")
     app.register_blueprint(inventario_bp, url_prefix="/api/inventario")
     app.register_blueprint(solicitudes_bp) 
-    app.register_blueprint(adquisiciones_bp)
-    register_licitaciones_blueprints(app)
     app.register_blueprint(oc_bp)
+    app.register_blueprint(debug_crashes_bp, url_prefix="/debug")
 
     return app

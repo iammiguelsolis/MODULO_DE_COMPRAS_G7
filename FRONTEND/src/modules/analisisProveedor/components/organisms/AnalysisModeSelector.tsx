@@ -15,7 +15,7 @@ const AnalysisModeSelector: React.FC<AnalysisModeSelectorProps> = ({ mode, onMod
                     : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
                     }`}
             >
-                Análisis de plazos de entrega
+                Evaluación de plazos de entrega
             </button>
             <button
                 onClick={() => onModeChange("facturas")}
@@ -24,7 +24,7 @@ const AnalysisModeSelector: React.FC<AnalysisModeSelectorProps> = ({ mode, onMod
                     : "bg-white text-gray-700 border border-gray-300 hover:bg-gray-50"
                     }`}
             >
-                Análisis de cumplimiento condiciones de pago
+                Evaluación de cumplimiento condiciones de pago
             </button>
         </div>
     );

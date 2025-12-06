@@ -60,12 +60,12 @@ const AnalisisProveedoresPage = () => {
     return (
         <div className="min-h-screen bg-gray-50 p-8">
             <div className="mx-auto px-4">
-                <h1 className="text-3xl font-bold text-gray-900 mb-6">Análisis de Proveedores</h1>
+                <h1 className="text-3xl font-bold text-gray-900 mb-6">Evaluación de Proveedores</h1>
 
                 {/* Selector de modo */}
                 <AnalysisModeSelector mode={mode} onModeChange={setMode} />
 
-                {/* Tabla de análisis */}
+                {/* Tabla de evaluación */}
                 <SupplierAnalysisTable
                     mode={mode}
                     suppliers={currentData}

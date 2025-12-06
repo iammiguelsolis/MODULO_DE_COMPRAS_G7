@@ -43,12 +43,12 @@ const AnalisisProveedoresPage = () => {
             if (analisisData.length === 0) {
                 // Si no hay datos en el backend, usar datos de ejemplo
                 setData(sampleData);
-                setError("No hay datos de análisis laboral en el backend. Mostrando datos de ejemplo.");
+                setError("No hay datos de evaluación laboral en el backend. Mostrando datos de ejemplo.");
             } else {
                 setData(analisisData);
             }
         } catch (err) {
-            console.error("Error al cargar análisis de proveedores:", err);
+            console.error("Error al cargar evaluación de proveedores:", err);
             const errorMessage = err instanceof Error ? err.message : "Error desconocido";
             setError(errorMessage);
             // Fallback: usar datos de ejemplo si falla la API
@@ -101,7 +101,7 @@ const AnalisisProveedoresPage = () => {
                     </div>
                 )}
 
-                {/* Tabla de análisis */}
+                {/* Tabla de evaluación */}
                 <LaborConditionsTable
                     suppliers={currentData}
                     currentPage={currentPage}

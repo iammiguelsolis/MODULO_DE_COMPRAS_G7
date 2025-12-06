@@ -12,21 +12,20 @@ from app.models.proveedor_inventario.conexion_alamacen import (
 # Agrega otros modelos si tienes...
 
 print("=" * 60)
-print("🚀 CREACIÓN DE TABLAS EN AWS RDS")
+print("🚀 CREACIÓN DE TABLAS EN LOCAL")
 print("=" * 60)
 
 app = create_app()
 
 with app.app_context():
     try:
-        print("\n🔄 Conectando a AWS RDS MySQL...")
+        print("\n🔄 Conectando a LOCAL MySQL...")
         print(f"📍 Base de datos: modulo_de_compras_test")
-        print(f"🌍 Región: us-east-2")
         
         print("\n🔄 Creando tablas basadas en modelos...")
         db.create_all()
         
-        print("\n✅ ¡Tablas creadas exitosamente en AWS!")
+        print("\n✅ ¡Tablas creadas exitosamente")
         
         # Opcional: listar tablas creadas
         inspector = db.inspect(db.engine)
@@ -36,9 +35,5 @@ with app.app_context():
             
     except Exception as e:
         print(f"\n❌ Error al crear tablas: {e}")
-        print("\n💡 Verifica:")
-        print("   - Credenciales de BD")
-        print("   - Security Group de RDS")
-        print("   - Tu IP tiene acceso")
 
 print("\n" + "=" * 60)

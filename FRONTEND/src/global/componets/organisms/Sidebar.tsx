@@ -5,7 +5,7 @@ import { MenuItem } from '../molecules/MenuItem';
 import Logo from '../../../assets/logo.svg';
 
 // La imagen se mantiene estática (hardcoded)
-const UserImage = "https://i.pinimg.com/236x/86/37/32/8637324331fea244495f9da93176a373.jpg";
+const UserImage = "/arjona.jpg";
 
 interface MenuItemType {
   id: string;
@@ -21,7 +21,7 @@ const menuItems: MenuItemType[] = [
   { id: 'ordenes', icon: ShoppingCart, label: 'Órdenes' },
   { id: 'facturacion', icon: DollarSign, label: 'Facturación' },
   { id: 'comparacion', icon: Scale, label: 'Comparación' },
-  { id: 'analisis', icon: BarChart2, label: 'Análisis de Proveedores' },
+  { id: 'analisis', icon: BarChart2, label: 'Evaluación de Proveedores' },
 ];
 
 const Sidebar: React.FC = () => {

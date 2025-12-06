@@ -23,7 +23,7 @@ export const AnalisisGapAlert: React.FC<AnalisisGapAlertProps> = ({ analisis }) 
                     </svg>
                 </div>
                 <div className="ml-3">
-                    <p className="font-bold">Alerta de Análisis Gap: Riesgo {analisis.nivelRiesgo}</p>
+                    <p className="font-bold">Alerta de Evaluación Gap: Riesgo {analisis.nivelRiesgo}</p>
                     <p className="text-sm">{analisis.detalles}</p>
                 </div>
             </div>

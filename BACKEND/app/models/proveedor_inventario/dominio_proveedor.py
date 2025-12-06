@@ -22,7 +22,7 @@ from datetime import date
 from typing import Optional
 
 class Proveedor(db.Model):
-    __bind_key__ = 'desarrollo_db' 
+    
     __tablename__ = "proveedor"
     id_proveedor = db.Column(db.Integer, primary_key=True)
     razon_social = db.Column(db.String(100), nullable = False)
@@ -124,7 +124,7 @@ class DetallesProveedor:
 
 
 class ContactoProveedor(db.Model):
-    __bind_key__ = 'desarrollo_db' 
+    
     __tablename__ = "contacto_proveedor"
     id_contacto_proveedor = db.Column(db.Integer, primary_key=True)
     id_proveedor = db.Column(db.Integer, db.ForeignKey("proveedor.id_proveedor"), nullable=False) 

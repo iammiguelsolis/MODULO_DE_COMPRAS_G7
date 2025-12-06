@@ -47,7 +47,7 @@ export const CompetitivenessScale = ({ price, large = false }: { price: number, 
         return (
             <div className="w-full mt-4 p-6 bg-gray-50 rounded-xl border border-gray-200">
                 <div className="flex justify-between mb-2">
-                    <span className="font-bold text-gray-700">Análisis de Competitividad de Precio</span>
+                    <span className="font-bold text-gray-700">Evaluación de Competitividad de Precio</span>
                     <span className={`font-bold ${scoreColor}`}>{label}</span>
                 </div>
                 <div className="h-6 w-full bg-gray-200 rounded-full overflow-hidden flex relative">
