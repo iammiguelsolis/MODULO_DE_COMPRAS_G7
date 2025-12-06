@@ -138,7 +138,7 @@ def parse_frontend_orden_payload(data: Dict[str, Any]) -> Dict[str, Any]:
 
     return {
         "tipo_origen": tipo,
-        "id_origen": data.get("solicitudId") or data.get("notificacionInventarioId") or 0,
+        "id_origen": data.get("idOrigen") or data.get("solicitudId") or data.get("notificacionInventarioId") or 0,
         "id_solicitud": data.get("solicitudId"),
         "proveedor_id": data["proveedorId"],
         "moneda": Moneda[data.get("moneda", "PEN")],
@@ -160,4 +160,41 @@ def parse_frontend_orden_payload(data: Dict[str, Any]) -> Dict[str, Any]:
         },
         "terminos_entrega": data.get("terminosEntrega", ""),
         "id_notificacion_inventario": data.get("notificacionInventarioId"),
+    }
+
+
+def parse_adquisicion_payload(compra, oferta_ganadora):
+
+    items_payload = []
+    
+    for item in oferta_ganadora.items:
+        descripcion = getattr(item, 'descripcion', 'Item sin descripción')
+        
+        items_payload.append({
+            "id_item": str(item.id), 
+            "descripcion": descripcion,
+            "cantidad": item.cantidad_disponible if hasattr(item, 'cantidad_disponible') else 1,
+            "precio_unitario": item.precio_oferta
+        })
+
+    tipo_origen = TipoOrigen.RFQ
+    if getattr(compra, 'tipo_proceso', '') == 'LICITACION':
+        tipo_origen = TipoOrigen.LICITACION
+
+    return {
+        "tipo_origen": tipo_origen,
+        "id_origen": compra.id,               # ID del proceso de compra
+        "id_solicitud": compra.solicitud_id,  # ID de la solicitud original
+        "proveedor_id": oferta_ganadora.proveedor_id,
+        "moneda": Moneda.PEN,                 # O determinar según oferta si tienes campo moneda
+        "fecha_entrega_esperada": None,       # Se definirá en la edición de la OC
+        "titulo": f"OC generada de Proceso #{compra.id}",
+        "observaciones": f"Generado automáticamente desde oferta #{oferta_ganadora.id}. Comentarios: {oferta_ganadora.comentarios}",
+        "condiciones_pago": {
+            "modalidad": TipoPago.CONTADO,    # Default, editable luego
+            "dias_plazo": 0
+        },
+        "items": items_payload,
+        "terminos_entrega": "",
+        "id_notificacion_inventario": None
     }

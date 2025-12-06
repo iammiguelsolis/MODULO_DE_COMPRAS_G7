@@ -3,12 +3,13 @@ from typing import Dict, Any, List
 from app.bdd import db
 
 from .orden_compra import OrdenCompra, LineaOC
-from .oc_enums import EstadoOC
+from .oc_enums import EstadoOC, TipoOrigen, Moneda, TipoPago
 from .schemas import (
     parse_rfq_payload,
     parse_licitacion_payload,
     parse_directa_notificacion_payload,
     parse_frontend_orden_payload,
+    parse_adquisicion_payload,
 )
 
 
@@ -44,6 +45,7 @@ class OrdenCompraService:
             )
             oc.lineas.append(linea)
 
+        # Generar número referencia y guardar
         # Generar número referencia y guardar
         oc.generar_numero_referencia()
         db.session.add(oc)
@@ -87,3 +89,8 @@ class OrdenCompraService:
         oc.cambiar_estado(EstadoOC.CERRADA)
         db.session.commit()
         return oc
+      
+    @staticmethod
+    def crear_desde_adjudicacion(compra_obj, oferta_obj) -> OrdenCompra:
+        payload = parse_adquisicion_payload(compra_obj, oferta_obj)
+        return OrdenCompraService._crear_oc_desde_payload(payload)

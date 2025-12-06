@@ -47,6 +47,7 @@ const GenerarOrdenCompra: React.FC = () => {
   const [deliveryTerms, setDeliveryTerms] = useState<string>('');
 
   const [solicitudId, setSolicitudId] = useState<string>('');
+  const [origenId, setOrigenId] = useState<string | number>('');
   const [notificacionInventarioId, setNotificacionInventarioId] = useState<string>('');
 
   const [isOrdenModalOpen, setIsOrdenModalOpen] = useState(false);
@@ -63,6 +64,7 @@ const GenerarOrdenCompra: React.FC = () => {
         setSelectedSupplier(datosOrigen.proveedor);
         setItems(datosOrigen.items ?? []);
         setSolicitudId(datosOrigen.id_solicitud);
+        setOrigenId(datosOrigen.idOrigen);
         setExpectedDelivery(datosOrigen.contrato?.fecha_firmado || "");
         setTitle(datosOrigen.titulo || "");
         setNotes(datosOrigen.notas || "");
@@ -161,6 +163,7 @@ const GenerarOrdenCompra: React.FC = () => {
 
       const payload = {
         tipoOrigen: orderType,
+        idOrigen: origenId,
         proveedorId: selectedSupplier.id,
         solicitudId: solicitudId || undefined,
         notificacionInventarioId: notificacionInventarioId || undefined,

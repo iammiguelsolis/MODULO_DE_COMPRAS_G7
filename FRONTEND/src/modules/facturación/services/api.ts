@@ -1,4 +1,5 @@
 import axios from 'axios';
+import { ProveedoresApi } from '../../../services/proveedor/api';
 
 const API_BASE_URL = 'http://127.0.0.1:5000/facturas-proveedor';
 
@@ -23,7 +24,7 @@ export interface FacturaProveedor {
   sub_total: number;
   igv: number;
   total: number;
-  estado: 'BORRADOR' | 'EN_CONCILIACION' | 'APROBADA';
+  estado: 'BORRADOR' | 'EN_CONCILIACION' | 'APROBADA' | 'ENVIADA_CXP';
   orden_compra_id?: string;
   origen: 'MANUAL' | 'AUTOMATICO';
   created_at: string;
@@ -109,7 +110,7 @@ export const crearFacturaManual = async (data: CreateFacturaManual): Promise<Fac
 // Crear factura con prellenado automático
 export const crearFacturaPrellenado = async (file: File): Promise<FacturaProveedor> => {
   const formData = new FormData();
-  formData.append('file', file);
+  formData.append('archivo', file);  // ✅ Cambiar 'file' a 'archivo' para coincidir con el backend
   
   const response = await api.post('/prellenado', formData, {
     headers: {
@@ -193,6 +194,11 @@ export const obtenerTrazabilidad = async (id: string): Promise<TrazabilidadLog[]
 export const enviarACuentasPorPagar = async (id: string): Promise<any> => {
   const response = await api.post(`/${id}/obligacion-pago`);
   return response.data;
+};
+
+// Obtener lista de proveedores
+export const obtenerProveedores = async () => {
+  return await ProveedoresApi.listar();
 };
 
 export default api;

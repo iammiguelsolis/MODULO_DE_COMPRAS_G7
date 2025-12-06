@@ -72,34 +72,71 @@ const AddSupplierModal: React.FC<AddSupplierModalProps> = ({ onClose, onSave }) 
         setError(null);
 
         try {
-            // IMPORTANTE: Reemplaza esta URL cuando tengas el backend
-            const API_BASE_URL = "http://localhost:8080/api"; // 👈 CAMBIA ESTO
+            const API_BASE_URL = "http://127.0.0.1:5000/api";
 
-            const response = await fetch(`${API_BASE_URL}/proveedores`, {
+            // 👇 CONSTRUCCIÓN DEL PAYLOAD CORRECTO
+ // 👇 CONSTRUCCIÓN DEL PAYLOAD CORRECTO (Híbrido)
+            const payload = {
+                // Campos principales
+                razon_social: supplierData.razonSocial,
+                ruc: supplierData.ruc,
+                pais: supplierData.pais,
+                email: supplierData.email,
+                telefono: supplierData.telefono,
+                domicilio_legal: supplierData.direccion,
+
+                fecha_registro: new Date().toISOString().split("T")[0],
+                esta_suspendido: false, // Booleano (Correcto)
+
+                // Enums de confiabilidad
+                confiabilidad_en_entregas: "MEDIANO",
+                confiabilidad_en_condiciones_pago: "MEDIANO",
+
+                detalles: {
+                    numero_trabajadores: 0,
+                    
+                    // 1. Probemos manteniendo este como BOOLEAN (suele ser el switch principal)
+                    tiene_sindicato: false, 
+
+                    // 2. Estos dos dieron error de Enum, así que los enviamos como TEXTO
+                    ha_tomado_represalias_contra_sindicato: "NO", 
+                    tiene_procesos_de_mejora_de_condiciones_laborales: false,
+                    
+                    denuncias_incumplimiento_contrato: 0,
+                    indice_denuncias: 0,
+                },
+            };
+
+            const response = await fetch(`${API_BASE_URL}/proveedores/crear`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify(supplierData),
+                body: JSON.stringify(payload),
             });
 
             if (!response.ok) {
-                throw new Error(`Error ${response.status}: ${response.statusText}`);
+                let msg = `Error ${response.status}: ${response.statusText}`;
+                try {
+                    const errJson = await response.json();
+                    if (errJson?.message) msg = `Error: ${errJson.message}`;
+                } catch (_) {}
+                throw new Error(msg);
             }
 
             const data = await response.json();
-            console.log("Proveedor creado:", data);
+            console.log("Proveedor creado exitosamente:", data);
 
-            // Llamar al callback de éxito
-            onSave();
+            onSave(); 
         } catch (err) {
             console.error("Error al guardar proveedor:", err);
             const errorMessage = err instanceof Error ? err.message : "Error desconocido";
-            setError(`Error al guardar: ${errorMessage}`);
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
     };
+
 
     return (
         <div className="fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center p-6 z-50">

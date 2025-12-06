@@ -248,6 +248,7 @@ const LicitacionDetailPage: React.FC = () => {
                 } : null,
                 items: orderItems,
                 id_solicitud: licitacion?.solicitudId ? String(licitacion.solicitudId) : '',
+                idOrigen: licitacion?.id, // ID de la licitación para id_origen
                 contrato: { fecha_firmado: "2025-12-27" },
                 titulo: licitacion?.nombre || '',
                 notas: `Generado desde Licitación #${id}`

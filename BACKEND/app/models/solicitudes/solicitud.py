@@ -1,7 +1,7 @@
 from app.bdd import db
 from app.models.solicitudes.items import ItemSolicitado
 from app.models.solicitudes.estados import Pendiente, Aprobada, Rechazada
-from app.patrones.clasificadores import ClasificadorPorMonto
+from app.patrones.clasificadores import ClasificadorPor10000
 
 class Solicitud(db.Model):
   __tablename__ = 'solicitudes'
@@ -52,7 +52,7 @@ class Solicitud(db.Model):
   
   def to_dict(self):
     
-    clasificador = ClasificadorPorMonto()
+    clasificador = ClasificadorPor10000()
     
     tipo_sugerido = clasificador.determinar_tipo(self)
     

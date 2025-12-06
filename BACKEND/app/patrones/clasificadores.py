@@ -6,7 +6,7 @@ class EstrategiaClasificacion(ABC):
     def determinar_tipo(self, solicitud) -> str:
         pass
 
-class ClasificadorPorMonto(EstrategiaClasificacion):
+class ClasificadorPor10000(EstrategiaClasificacion):
     
     UMBRAL_LICITACION = 10000.00 
 

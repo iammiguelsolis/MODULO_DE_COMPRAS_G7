@@ -441,8 +441,18 @@ def crear_obligacion(id_factura):
     if factura.estado.name != 'APROBADA':
          return jsonify({"error": "La factura no está aprobada"}), 400
 
-    integrador = IntegracionCxP()
-    obligacion = integrador.crear_obligacion_pago(factura)
-    integrador.enviar_obligacion_cxp(obligacion)
-
-    return jsonify(obligacion.to_dict()), 201
+    try:
+        integrador = IntegracionCxP()
+        obligacion = integrador.crear_obligacion_pago(factura)
+        integrador.enviar_obligacion_cxp(obligacion)
+        
+        # ✅ AGREGAR: Cambiar el estado de la factura a ENVIADA_CXP
+        factura.estado = EstadoFactura.ENVIADA_CXP
+        
+        # ✅ AGREGAR: Guardar el cambio en la base de datos
+        db.session.commit()
+        
+        return jsonify(obligacion.to_dict()), 201
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
