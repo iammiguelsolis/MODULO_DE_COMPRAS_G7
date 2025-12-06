@@ -7,7 +7,8 @@ Este proyecto consiste en el desarrollo de un **Módulo de Compras** que incluye
 - Comparación de ofertas y normalización de cotizaciones.  
 - Gestión de órdenes de compra con historial y cierre.  
 - Facturación de proveedores con validación y conciliación.
-- Análisis de Proveedor  
+- Evaluación de riesgo laboral → Revisa si el proveedor opera de forma segura y cumple con las exigencias internas.
+- Cumplimiento de condiciones de pago → Evalúa si el proveedor cumple con lo acordado: plazos, montos, términos y compromisos financieros.
 
 El desarrollo se realizará con un **enfoque ágil (Scrum)**, trabajando de manera iterativa e incremental en diferentes sprints.
 
