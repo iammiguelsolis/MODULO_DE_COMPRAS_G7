@@ -1,4 +1,4 @@
-import type { LaborConditionsAnalysis } from "../../page/AnalisisProveedoresPage";
+import type { LaborConditionsAnalysis } from "../../../../services/analisisProveedor/types";
 import TablePagination from "../molecules/TablePagination";
 
 interface LaborConditionsTableProps {
