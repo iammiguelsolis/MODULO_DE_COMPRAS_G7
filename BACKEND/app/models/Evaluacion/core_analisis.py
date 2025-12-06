@@ -41,6 +41,8 @@ class EvaluacionRendimiento(ABC):
 
 
 class EvaluacionCumplimientoPlazoEntrega(EvaluacionRendimiento, db.Model):
+    __bind_key__ = 'desarrollo_db' 
+    
     # Definición de columnas (atributos)
     idProveedor = db.Column(db.Integer, primary_key=True)
     idEvaluacionPlazo = db.Column(db.Integer, primary_key=True)
@@ -65,6 +67,8 @@ class EvaluacionCumplimientoPlazoEntrega(EvaluacionRendimiento, db.Model):
 
 
 class EvaluacionCumplimientoCondicionesPago(EvaluacionRendimiento, db.Model):
+    __bind_key__ = 'desarrollo_db' 
+
     id_proveedor = db.Column(db.Integer, primary_key=True)
     id_evaluacion_ccp = db.Column(db.Integer, primary_key=True)
     cantidad_calculo = db.Column(db.Integer)
